@@ -1,0 +1,30 @@
+syntax = "proto3";
+
+package netdisk.file;
+
+import "google/api/annotations.proto";
+
+service FileService {
+    rpc UploadFile(UploadFileReq) returns (CommmonRsp) {
+        option (google.api.http) = {
+            post: "/v1/file/upload"
+            body: "*"
+        };
+    }
+}
+
+message File{
+    string name = 1;
+    string size = 2;
+    string md5 = 3;
+    bytes data = 4;
+}
+
+message UploadFileReq {
+    string user = 1;
+    File file = 2;
+}
+
+message CommmonRsp {
+    string status = 1; // success & fail
+}
