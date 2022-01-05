@@ -2,6 +2,8 @@ syntax = "proto3";
 
 package netdisk.file;
 
+option go_package = "github.com/changpro/disk-service/resource/stub";
+
 import "google/api/annotations.proto";
 
 service FileService {
