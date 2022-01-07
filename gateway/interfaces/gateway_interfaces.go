@@ -3,37 +3,37 @@ package interfaces
 import (
 	"context"
 
-	gatewaypb "github.com/changpro/disk-service/resource/stub"
+	gatewaypb "github.com/changpro/disk-service/gateway/deps"
 )
 
-type gatewayServerImpl struct {
+type server struct {
 }
 
-func NewServer() *gatewayServerImpl {
-	return &gatewayServerImpl{}
+func NewServer() *server {
+	return &server{}
 }
 
-func (s *gatewayServerImpl) RegisterNewUser(ctx context.Context,
+func (s *server) RegisterNewUser(ctx context.Context,
 	req *gatewaypb.RegisterNewUserReq) (*gatewaypb.CommonHttpRsp, error) {
 	return &gatewaypb.CommonHttpRsp{}, nil
 }
 
-func (s *gatewayServerImpl) SignIn(ctx context.Context,
+func (s *server) SignIn(ctx context.Context,
 	req *gatewaypb.SignInReq) (*gatewaypb.CommonHttpRsp, error) {
 	return &gatewaypb.CommonHttpRsp{}, nil
 }
 
-func (s *gatewayServerImpl) SetIcon(ctx context.Context,
+func (s *server) SetIcon(ctx context.Context,
 	req *gatewaypb.SetIconReq) (*gatewaypb.CommonHttpRsp, error) {
 	return &gatewaypb.CommonHttpRsp{}, nil
 }
 
-func (s *gatewayServerImpl) ModifyPassword(ctx context.Context,
+func (s *server) ModifyPassword(ctx context.Context,
 	req *gatewaypb.ModifyPasswordReq) (*gatewaypb.CommonHttpRsp, error) {
 	return &gatewaypb.CommonHttpRsp{}, nil
 }
 
-func (s *gatewayServerImpl) GetUserProfile(ctx context.Context,
+func (s *server) GetUserProfile(ctx context.Context,
 	req *gatewaypb.GetUserProfileReq) (*gatewaypb.CommonHttpRsp, error) {
 	return &gatewaypb.CommonHttpRsp{}, nil
 }

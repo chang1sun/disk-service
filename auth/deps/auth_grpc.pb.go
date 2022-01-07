@@ -4,7 +4,7 @@
 // - protoc             (unknown)
 // source: auth.proto
 
-package stub
+package deps
 
 import (
 	context "context"
@@ -37,7 +37,7 @@ func NewAuthServiceClient(cc grpc.ClientConnInterface) AuthServiceClient {
 
 func (c *authServiceClient) RegisterNewUser(ctx context.Context, in *RegisterNewUserReq, opts ...grpc.CallOption) (*emptypb.Empty, error) {
 	out := new(emptypb.Empty)
-	err := c.cc.Invoke(ctx, "/disk.AuthService/RegisterNewUser", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/AuthService/RegisterNewUser", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -46,7 +46,7 @@ func (c *authServiceClient) RegisterNewUser(ctx context.Context, in *RegisterNew
 
 func (c *authServiceClient) SignIn(ctx context.Context, in *SignInReq, opts ...grpc.CallOption) (*emptypb.Empty, error) {
 	out := new(emptypb.Empty)
-	err := c.cc.Invoke(ctx, "/disk.AuthService/SignIn", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/AuthService/SignIn", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -93,7 +93,7 @@ func _AuthService_RegisterNewUser_Handler(srv interface{}, ctx context.Context, 
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/disk.AuthService/RegisterNewUser",
+		FullMethod: "/AuthService/RegisterNewUser",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(AuthServiceServer).RegisterNewUser(ctx, req.(*RegisterNewUserReq))
@@ -111,7 +111,7 @@ func _AuthService_SignIn_Handler(srv interface{}, ctx context.Context, dec func(
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/disk.AuthService/SignIn",
+		FullMethod: "/AuthService/SignIn",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(AuthServiceServer).SignIn(ctx, req.(*SignInReq))
@@ -123,7 +123,7 @@ func _AuthService_SignIn_Handler(srv interface{}, ctx context.Context, dec func(
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var AuthService_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "disk.AuthService",
+	ServiceName: "AuthService",
 	HandlerType: (*AuthServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{

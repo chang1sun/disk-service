@@ -1,8 +1,6 @@
 syntax = "proto3";
 
-package disk;
-
-option go_package = "github.com/changpro/disk-service/resource/stub";
+option go_package = "github.com/changpro/disk-service/auth/deps";
 
 import "google/protobuf/empty.proto";
 import "validate/validate.proto";

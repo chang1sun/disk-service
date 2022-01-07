@@ -2,7 +2,7 @@ package util
 
 import (
 	"github.com/changpro/disk-service/gateway/common"
-	gatewaypb "github.com/changpro/disk-service/resource/stub"
+	gatewaypb "github.com/changpro/disk-service/gateway/deps"
 	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/types/known/anypb"
 )

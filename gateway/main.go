@@ -6,8 +6,8 @@ import (
 	"net"
 	"net/http"
 
+	gatewaypb "github.com/changpro/disk-service/gateway/deps"
 	"github.com/changpro/disk-service/gateway/interfaces"
-	gatewaypb "github.com/changpro/disk-service/resource/stub"
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"

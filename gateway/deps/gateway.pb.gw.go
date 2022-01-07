@@ -2,11 +2,11 @@
 // source: gateway.proto
 
 /*
-Package stub is a reverse proxy.
+Package deps is a reverse proxy.
 
 It translates gRPC into RESTful JSON APIs.
 */
-package stub
+package deps
 
 import (
 	"context"
@@ -299,7 +299,7 @@ func RegisterGatewayServiceHandlerServer(ctx context.Context, mux *runtime.Serve
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/disk.GatewayService/RegisterNewUser", runtime.WithHTTPPathPattern("/v1/auth/sign-up"))
+		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/.GatewayService/RegisterNewUser", runtime.WithHTTPPathPattern("/v1/auth/sign-up"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -322,7 +322,7 @@ func RegisterGatewayServiceHandlerServer(ctx context.Context, mux *runtime.Serve
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/disk.GatewayService/SignIn", runtime.WithHTTPPathPattern("/v1/auth/sign-in"))
+		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/.GatewayService/SignIn", runtime.WithHTTPPathPattern("/v1/auth/sign-in"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -345,7 +345,7 @@ func RegisterGatewayServiceHandlerServer(ctx context.Context, mux *runtime.Serve
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/disk.GatewayService/SetIcon", runtime.WithHTTPPathPattern("/v1/{user_id}/profile/set-icon"))
+		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/.GatewayService/SetIcon", runtime.WithHTTPPathPattern("/v1/{user_id}/profile/set-icon"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -368,7 +368,7 @@ func RegisterGatewayServiceHandlerServer(ctx context.Context, mux *runtime.Serve
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/disk.GatewayService/ModifyPassword", runtime.WithHTTPPathPattern("/v1/{user_id}/profile/modify-pw"))
+		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/.GatewayService/ModifyPassword", runtime.WithHTTPPathPattern("/v1/{user_id}/profile/modify-pw"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -391,7 +391,7 @@ func RegisterGatewayServiceHandlerServer(ctx context.Context, mux *runtime.Serve
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/disk.GatewayService/GetUserProfile", runtime.WithHTTPPathPattern("/v1/{user_id}/profile"))
+		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/.GatewayService/GetUserProfile", runtime.WithHTTPPathPattern("/v1/{user_id}/profile"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -453,7 +453,7 @@ func RegisterGatewayServiceHandlerClient(ctx context.Context, mux *runtime.Serve
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/disk.GatewayService/RegisterNewUser", runtime.WithHTTPPathPattern("/v1/auth/sign-up"))
+		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/.GatewayService/RegisterNewUser", runtime.WithHTTPPathPattern("/v1/auth/sign-up"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -473,7 +473,7 @@ func RegisterGatewayServiceHandlerClient(ctx context.Context, mux *runtime.Serve
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/disk.GatewayService/SignIn", runtime.WithHTTPPathPattern("/v1/auth/sign-in"))
+		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/.GatewayService/SignIn", runtime.WithHTTPPathPattern("/v1/auth/sign-in"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -493,7 +493,7 @@ func RegisterGatewayServiceHandlerClient(ctx context.Context, mux *runtime.Serve
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/disk.GatewayService/SetIcon", runtime.WithHTTPPathPattern("/v1/{user_id}/profile/set-icon"))
+		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/.GatewayService/SetIcon", runtime.WithHTTPPathPattern("/v1/{user_id}/profile/set-icon"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -513,7 +513,7 @@ func RegisterGatewayServiceHandlerClient(ctx context.Context, mux *runtime.Serve
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/disk.GatewayService/ModifyPassword", runtime.WithHTTPPathPattern("/v1/{user_id}/profile/modify-pw"))
+		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/.GatewayService/ModifyPassword", runtime.WithHTTPPathPattern("/v1/{user_id}/profile/modify-pw"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -533,7 +533,7 @@ func RegisterGatewayServiceHandlerClient(ctx context.Context, mux *runtime.Serve
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/disk.GatewayService/GetUserProfile", runtime.WithHTTPPathPattern("/v1/{user_id}/profile"))
+		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/.GatewayService/GetUserProfile", runtime.WithHTTPPathPattern("/v1/{user_id}/profile"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
