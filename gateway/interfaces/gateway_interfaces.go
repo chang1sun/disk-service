@@ -3,7 +3,7 @@ package interfaces
 import (
 	"context"
 
-	gatewaypb "github.com/changpro/disk-service/gateway/resource/stub"
+	gatewaypb "github.com/changpro/disk-service/resource/stub"
 )
 
 type gatewayServerImpl struct {

@@ -39,7 +39,7 @@ func NewGatewayServiceClient(cc grpc.ClientConnInterface) GatewayServiceClient {
 
 func (c *gatewayServiceClient) RegisterNewUser(ctx context.Context, in *RegisterNewUserReq, opts ...grpc.CallOption) (*CommonHttpRsp, error) {
 	out := new(CommonHttpRsp)
-	err := c.cc.Invoke(ctx, "/disk.gateway.GatewayService/RegisterNewUser", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/disk.GatewayService/RegisterNewUser", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -48,7 +48,7 @@ func (c *gatewayServiceClient) RegisterNewUser(ctx context.Context, in *Register
 
 func (c *gatewayServiceClient) SignIn(ctx context.Context, in *SignInReq, opts ...grpc.CallOption) (*CommonHttpRsp, error) {
 	out := new(CommonHttpRsp)
-	err := c.cc.Invoke(ctx, "/disk.gateway.GatewayService/SignIn", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/disk.GatewayService/SignIn", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -57,7 +57,7 @@ func (c *gatewayServiceClient) SignIn(ctx context.Context, in *SignInReq, opts .
 
 func (c *gatewayServiceClient) SetIcon(ctx context.Context, in *SetIconReq, opts ...grpc.CallOption) (*CommonHttpRsp, error) {
 	out := new(CommonHttpRsp)
-	err := c.cc.Invoke(ctx, "/disk.gateway.GatewayService/SetIcon", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/disk.GatewayService/SetIcon", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -66,7 +66,7 @@ func (c *gatewayServiceClient) SetIcon(ctx context.Context, in *SetIconReq, opts
 
 func (c *gatewayServiceClient) ModifyPassword(ctx context.Context, in *ModifyPasswordReq, opts ...grpc.CallOption) (*CommonHttpRsp, error) {
 	out := new(CommonHttpRsp)
-	err := c.cc.Invoke(ctx, "/disk.gateway.GatewayService/ModifyPassword", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/disk.GatewayService/ModifyPassword", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -75,7 +75,7 @@ func (c *gatewayServiceClient) ModifyPassword(ctx context.Context, in *ModifyPas
 
 func (c *gatewayServiceClient) GetUserProfile(ctx context.Context, in *GetUserProfileReq, opts ...grpc.CallOption) (*CommonHttpRsp, error) {
 	out := new(CommonHttpRsp)
-	err := c.cc.Invoke(ctx, "/disk.gateway.GatewayService/GetUserProfile", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/disk.GatewayService/GetUserProfile", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -134,7 +134,7 @@ func _GatewayService_RegisterNewUser_Handler(srv interface{}, ctx context.Contex
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/disk.gateway.GatewayService/RegisterNewUser",
+		FullMethod: "/disk.GatewayService/RegisterNewUser",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(GatewayServiceServer).RegisterNewUser(ctx, req.(*RegisterNewUserReq))
@@ -152,7 +152,7 @@ func _GatewayService_SignIn_Handler(srv interface{}, ctx context.Context, dec fu
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/disk.gateway.GatewayService/SignIn",
+		FullMethod: "/disk.GatewayService/SignIn",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(GatewayServiceServer).SignIn(ctx, req.(*SignInReq))
@@ -170,7 +170,7 @@ func _GatewayService_SetIcon_Handler(srv interface{}, ctx context.Context, dec f
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/disk.gateway.GatewayService/SetIcon",
+		FullMethod: "/disk.GatewayService/SetIcon",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(GatewayServiceServer).SetIcon(ctx, req.(*SetIconReq))
@@ -188,7 +188,7 @@ func _GatewayService_ModifyPassword_Handler(srv interface{}, ctx context.Context
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/disk.gateway.GatewayService/ModifyPassword",
+		FullMethod: "/disk.GatewayService/ModifyPassword",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(GatewayServiceServer).ModifyPassword(ctx, req.(*ModifyPasswordReq))
@@ -206,7 +206,7 @@ func _GatewayService_GetUserProfile_Handler(srv interface{}, ctx context.Context
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/disk.gateway.GatewayService/GetUserProfile",
+		FullMethod: "/disk.GatewayService/GetUserProfile",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(GatewayServiceServer).GetUserProfile(ctx, req.(*GetUserProfileReq))
@@ -218,7 +218,7 @@ func _GatewayService_GetUserProfile_Handler(srv interface{}, ctx context.Context
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var GatewayService_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "disk.gateway.GatewayService",
+	ServiceName: "disk.GatewayService",
 	HandlerType: (*GatewayServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{

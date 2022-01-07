@@ -1,13 +1,14 @@
 syntax = "proto3";
 
-package disk.gateway;
+package disk;
 
-option go_package = "github.com/changpro/disk-service/gateway/resource/stub";
+option go_package = "github.com/changpro/disk-service/resource/stub";
 
 import "google/api/annotations.proto";
 import "google/protobuf/empty.proto";
 import "google/protobuf/any.proto";
 import "validate/validate.proto";
+import "auth.proto";
 
 service GatewayService {
     
@@ -46,37 +47,8 @@ service GatewayService {
     }
 }
 
-message RegisterNewUserReq {
-    string user_id = 1[(validate.rules).string = {min_len: 6, pattern: "^[0-9a-zA-Z]*$"}];
-    string auth_email = 2[(validate.rules).string = {min_len: 6, pattern: "^[A-Za-z0-9]+([_\\.][A-Za-z0-9]+)*@([A-Za-z0-9\\-]+\\.)+[A-Za-z]{2,6}$"}];
-    string pw = 3[(validate.rules).string.min_len = 6];
-}
-
-message SignInReq {
-    string user_id = 1[(validate.rules).string = {min_len: 6, pattern: "^[0-9a-zA-Z]*$"}];
-    string pw = 2[(validate.rules).string.min_len = 6];
-}
-
-message SetIconReq {
-    string user_id = 1[(validate.rules).string = {min_len: 6, pattern: "^[0-9a-zA-Z]*$"}];
-    string icon_url = 2[(validate.rules).string.min_len = 1];
-}
-
 message CommonHttpRsp {
     int32 code = 1;
     string msg = 2;
     google.protobuf.Any data = 3;
-}
-
-message ModifyPasswordReq {
-    string user_id = 1[(validate.rules).string = {min_len: 6, pattern: "^[0-9a-zA-Z]*$"}];
-    oneof auth_key{
-        string old_pw = 2;
-        string auth_email = 3;
-    }
-    string new_pw = 4[(validate.rules).string.min_len = 6];
-}
-
-message GetUserProfileReq {
-    string user_id = 1[(validate.rules).string = {min_len: 6, pattern: "^[0-9a-zA-Z]*$"}];
 }
