@@ -54,6 +54,6 @@ func main() {
 		Handler: gwmux,
 	}
 
-	log.Println("Serving gRPC-Gateway on http://localhost:8002")
-	log.Fatalln(gwServer.ListenAndServe())
+	log.Println("Serving gRPC-Gateway on localhost:8002")
+	log.Fatalln(gwServer.ListenAndServeTLS("crt/service.pem", "crt/service.key"))
 }
