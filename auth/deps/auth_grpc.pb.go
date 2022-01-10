@@ -25,6 +25,9 @@ const _ = grpc.SupportPackageIsVersion7
 type AuthServiceClient interface {
 	RegisterNewUser(ctx context.Context, in *RegisterNewUserReq, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	SignIn(ctx context.Context, in *SignInReq, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	ModifyPassword(ctx context.Context, in *ModifyPasswordReq, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	GetUserProfile(ctx context.Context, in *GetUserProfileReq, opts ...grpc.CallOption) (*GetUserProfileRsp, error)
+	ModifyUserProfile(ctx context.Context, in *ModifyUserProfileReq, opts ...grpc.CallOption) (*emptypb.Empty, error)
 }
 
 type authServiceClient struct {
@@ -53,12 +56,42 @@ func (c *authServiceClient) SignIn(ctx context.Context, in *SignInReq, opts ...g
 	return out, nil
 }
 
+func (c *authServiceClient) ModifyPassword(ctx context.Context, in *ModifyPasswordReq, opts ...grpc.CallOption) (*emptypb.Empty, error) {
+	out := new(emptypb.Empty)
+	err := c.cc.Invoke(ctx, "/AuthService/ModifyPassword", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *authServiceClient) GetUserProfile(ctx context.Context, in *GetUserProfileReq, opts ...grpc.CallOption) (*GetUserProfileRsp, error) {
+	out := new(GetUserProfileRsp)
+	err := c.cc.Invoke(ctx, "/AuthService/GetUserProfile", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *authServiceClient) ModifyUserProfile(ctx context.Context, in *ModifyUserProfileReq, opts ...grpc.CallOption) (*emptypb.Empty, error) {
+	out := new(emptypb.Empty)
+	err := c.cc.Invoke(ctx, "/AuthService/ModifyUserProfile", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // AuthServiceServer is the server API for AuthService service.
 // All implementations should embed UnimplementedAuthServiceServer
 // for forward compatibility
 type AuthServiceServer interface {
 	RegisterNewUser(context.Context, *RegisterNewUserReq) (*emptypb.Empty, error)
 	SignIn(context.Context, *SignInReq) (*emptypb.Empty, error)
+	ModifyPassword(context.Context, *ModifyPasswordReq) (*emptypb.Empty, error)
+	GetUserProfile(context.Context, *GetUserProfileReq) (*GetUserProfileRsp, error)
+	ModifyUserProfile(context.Context, *ModifyUserProfileReq) (*emptypb.Empty, error)
 }
 
 // UnimplementedAuthServiceServer should be embedded to have forward compatible implementations.
@@ -70,6 +103,15 @@ func (UnimplementedAuthServiceServer) RegisterNewUser(context.Context, *Register
 }
 func (UnimplementedAuthServiceServer) SignIn(context.Context, *SignInReq) (*emptypb.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method SignIn not implemented")
+}
+func (UnimplementedAuthServiceServer) ModifyPassword(context.Context, *ModifyPasswordReq) (*emptypb.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ModifyPassword not implemented")
+}
+func (UnimplementedAuthServiceServer) GetUserProfile(context.Context, *GetUserProfileReq) (*GetUserProfileRsp, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetUserProfile not implemented")
+}
+func (UnimplementedAuthServiceServer) ModifyUserProfile(context.Context, *ModifyUserProfileReq) (*emptypb.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ModifyUserProfile not implemented")
 }
 
 // UnsafeAuthServiceServer may be embedded to opt out of forward compatibility for this service.
@@ -119,6 +161,60 @@ func _AuthService_SignIn_Handler(srv interface{}, ctx context.Context, dec func(
 	return interceptor(ctx, in, info, handler)
 }
 
+func _AuthService_ModifyPassword_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ModifyPasswordReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AuthServiceServer).ModifyPassword(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/AuthService/ModifyPassword",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AuthServiceServer).ModifyPassword(ctx, req.(*ModifyPasswordReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _AuthService_GetUserProfile_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetUserProfileReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AuthServiceServer).GetUserProfile(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/AuthService/GetUserProfile",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AuthServiceServer).GetUserProfile(ctx, req.(*GetUserProfileReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _AuthService_ModifyUserProfile_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ModifyUserProfileReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AuthServiceServer).ModifyUserProfile(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/AuthService/ModifyUserProfile",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AuthServiceServer).ModifyUserProfile(ctx, req.(*ModifyUserProfileReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // AuthService_ServiceDesc is the grpc.ServiceDesc for AuthService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -133,6 +229,18 @@ var AuthService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "SignIn",
 			Handler:    _AuthService_SignIn_Handler,
+		},
+		{
+			MethodName: "ModifyPassword",
+			Handler:    _AuthService_ModifyPassword_Handler,
+		},
+		{
+			MethodName: "GetUserProfile",
+			Handler:    _AuthService_GetUserProfile_Handler,
+		},
+		{
+			MethodName: "ModifyUserProfile",
+			Handler:    _AuthService_ModifyUserProfile_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

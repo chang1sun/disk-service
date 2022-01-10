@@ -1,0 +1,83 @@
+syntax = "proto3";
+
+option go_package = "github.com/changpro/disk-service/auth/deps";
+
+import "google/api/annotations.proto";
+import "google/protobuf/empty.proto";
+import "google/protobuf/any.proto";
+import "validate/validate.proto";
+
+service AuthService {
+    
+    rpc RegisterNewUser(RegisterNewUserReq) returns (google.protobuf.Empty) {
+        option (google.api.http) = {
+            post: "/v1/auth/sign-up"
+            body: "*"
+        };
+    }
+
+    rpc SignIn(SignInReq) returns (google.protobuf.Empty) {
+        option (google.api.http) = {
+            post: "/v1/auth/sign-in"
+            body: "*"
+        };
+    }
+
+    rpc ModifyPassword(ModifyPasswordReq) returns (google.protobuf.Empty) {
+        option (google.api.http) = {
+            post: "/v1/{user_id}/profile/modify-pw"
+            body: "*"
+        };
+    }
+
+    rpc GetUserProfile(GetUserProfileReq) returns (GetUserProfileRsp) {
+        option (google.api.http) = {
+            get: "/v1/{user_id}/profile"
+        };
+    }
+
+    rpc ModifyUserProfile(ModifyUserProfileReq) returns (google.protobuf.Empty) {
+        option (google.api.http) = {
+            post: "/v1/{user_id}/profile/modify"
+            body: "*"
+        };
+    }
+}
+
+message RegisterNewUserReq {
+    string user_id = 1[(validate.rules).string = {min_len: 6, pattern: "^[0-9a-zA-Z]*$"}];
+    string auth_email = 2[(validate.rules).string = {min_len: 6, pattern: "^[A-Za-z0-9]+([_\\.][A-Za-z0-9]+)*@([A-Za-z0-9\\-]+\\.)+[A-Za-z]{2,6}$"}];
+    string pw = 3[(validate.rules).string.min_len = 6];
+}
+
+message SignInReq {
+    string user_id = 1[(validate.rules).string = {min_len: 6, pattern: "^[0-9a-zA-Z]*$"}];
+    string pw = 2[(validate.rules).string.min_len = 6];
+}
+
+message ModifyPasswordReq {
+    string user_id = 1[(validate.rules).string = {min_len: 6, pattern: "^[0-9a-zA-Z]*$"}];
+    string old_pw = 2; // need either old_pw or auth_email, not both
+    string auth_email = 3;
+    string new_pw = 4[(validate.rules).string.min_len = 6];
+}
+
+message GetUserProfileReq {
+    string user_id = 1[(validate.rules).string = {min_len: 6, pattern: "^[0-9a-zA-Z]*$"}];
+}
+
+message GetUserProfileRsp {
+    string icon = 1;
+    string register_time = 2;
+    int32 file_num = 3;
+    int32 file_upload_num = 4;
+    string auth_email = 5;
+    int64 used_size = 6;
+    int64 total_size = 7;
+}
+
+message ModifyUserProfileReq {
+    string user_id = 1[(validate.rules).string = {min_len: 6, pattern: "^[0-9a-zA-Z]*$"}];
+    string auth_email = 2[(validate.rules).string = {min_len: 6, pattern: "^[A-Za-z0-9]+([_\\.][A-Za-z0-9]+)*@([A-Za-z0-9\\-]+\\.)+[A-Za-z]{2,6}$"}];
+    string icon = 3;
+}
