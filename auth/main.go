@@ -6,10 +6,11 @@ import (
 	"net"
 	"net/http"
 
-	authpb "github.com/changpro/disk-service/auth/deps"
+	"github.com/changpro/disk-service/auth/config"
 	"github.com/changpro/disk-service/auth/interfaces"
 	"github.com/changpro/disk-service/auth/repo"
-	"github.com/changpro/disk-service/auth/util"
+	cutil "github.com/changpro/disk-service/common/util"
+	authpb "github.com/changpro/disk-service/pbdeps/auth"
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
@@ -21,7 +22,6 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	InitDaoImpl()
 
 	// Create a listener on TCP port
 	lis, err := net.Listen("tcp", ":8000")
@@ -54,7 +54,7 @@ func main() {
 		log.Fatalln("Failed to dial server:", err)
 	}
 	gwmux := runtime.NewServeMux(
-		runtime.WithErrorHandler(util.CustomErrorHandler),
+		runtime.WithErrorHandler(cutil.CustomErrorHandler),
 	)
 	// Register RESTful api gateway
 	err = authpb.RegisterAuthServiceHandler(context.Background(), gwmux, conn)
@@ -77,18 +77,16 @@ func main() {
 }
 
 func InitBase() error {
-	err := util.InitConfig()
+	err := config.InitConfig()
 	if err != nil {
 		return err
 	}
-	err = util.InitGormConn()
+	conn, err := cutil.GetGormConn(config.GetConfig().Mysql.User, config.GetConfig().Mysql.Password,
+		config.GetConfig().Mysql.Addr, config.GetConfig().Mysql.Database)
 	if err != nil {
 		return err
 	}
+	repo.SetUserDao(&repo.UserDao{Database: conn})
+	repo.SetUserAnalysisDao(&repo.UserAnalysisDao{Database: conn})
 	return nil
-}
-
-func InitDaoImpl() {
-	repo.SetUserDao(&repo.UserDao{Database: util.GetGormConn()})
-	repo.SetUserAnalysisDao(&repo.UserAnalysisDao{Database: util.GetGormConn()})
 }

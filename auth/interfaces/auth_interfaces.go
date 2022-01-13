@@ -4,9 +4,9 @@ import (
 	"context"
 	"log"
 
-	authpb "github.com/changpro/disk-service/auth/deps"
 	"github.com/changpro/disk-service/auth/interfaces/assembler"
 	"github.com/changpro/disk-service/auth/service"
+	"github.com/changpro/disk-service/pbdeps/auth"
 	emptypb "google.golang.org/protobuf/types/known/emptypb"
 )
 
@@ -18,7 +18,7 @@ func NewServer() *server {
 }
 
 func (*server) RegisterNewUser(ctx context.Context,
-	req *authpb.RegisterNewUserReq) (*emptypb.Empty, error) {
+	req *auth.RegisterNewUserReq) (*emptypb.Empty, error) {
 	rsp := &emptypb.Empty{}
 	err := service.RegisterNewUser(ctx, assembler.AssembleUserPO(req))
 	if err != nil {
@@ -29,7 +29,7 @@ func (*server) RegisterNewUser(ctx context.Context,
 }
 
 func (*server) SignIn(ctx context.Context,
-	req *authpb.SignInReq) (*emptypb.Empty, error) {
+	req *auth.SignInReq) (*emptypb.Empty, error) {
 	rsp := &emptypb.Empty{}
 	err := service.SignIn(ctx, req.UserId, req.Pw)
 	if err != nil {
@@ -40,8 +40,8 @@ func (*server) SignIn(ctx context.Context,
 }
 
 func (*server) GetUserProfile(ctx context.Context,
-	req *authpb.GetUserProfileReq) (*authpb.GetUserProfileRsp, error) {
-	rsp := &authpb.GetUserProfileRsp{}
+	req *auth.GetUserProfileReq) (*auth.GetUserProfileRsp, error) {
+	rsp := &auth.GetUserProfileRsp{}
 	profile, err := service.GetUserProfile(ctx, req.UserId)
 	if err != nil {
 		return rsp, err
@@ -50,7 +50,7 @@ func (*server) GetUserProfile(ctx context.Context,
 }
 
 func (*server) ModifyPassword(ctx context.Context,
-	req *authpb.ModifyPasswordReq) (*emptypb.Empty, error) {
+	req *auth.ModifyPasswordReq) (*emptypb.Empty, error) {
 	rsp := &emptypb.Empty{}
 	err := service.ModifyPassword(ctx, assembler.AssembleModifyPwDTO(req))
 	if err != nil {
@@ -60,7 +60,7 @@ func (*server) ModifyPassword(ctx context.Context,
 }
 
 func (*server) ModifyUserProfile(ctx context.Context,
-	req *authpb.ModifyUserProfileReq) (*emptypb.Empty, error) {
+	req *auth.ModifyUserProfileReq) (*emptypb.Empty, error) {
 	rsp := &emptypb.Empty{}
 	err := service.ModifyUserProfile(ctx, assembler.AssembleModifyUserProfileDTO(req))
 	if err != nil {

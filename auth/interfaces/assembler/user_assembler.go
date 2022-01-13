@@ -1,9 +1,9 @@
 package assembler
 
 import (
-	authpb "github.com/changpro/disk-service/auth/deps"
 	"github.com/changpro/disk-service/auth/repo"
 	"github.com/changpro/disk-service/auth/service"
+	authpb "github.com/changpro/disk-service/pbdeps/auth"
 )
 
 func AssembleUserPO(req *authpb.RegisterNewUserReq) *repo.UserPO {

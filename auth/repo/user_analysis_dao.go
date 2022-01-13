@@ -3,7 +3,7 @@ package repo
 import (
 	"context"
 
-	"github.com/changpro/disk-service/auth/common/constants"
+	"github.com/changpro/disk-service/common/constants"
 	"gorm.io/gorm"
 )
 

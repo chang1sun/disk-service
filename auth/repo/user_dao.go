@@ -4,8 +4,8 @@ import (
 	"context"
 	"time"
 
-	"github.com/changpro/disk-service/auth/common/constants"
-	"github.com/changpro/disk-service/auth/util"
+	"github.com/changpro/disk-service/auth/config"
+	"github.com/changpro/disk-service/common/constants"
 	"gorm.io/gorm"
 )
 
@@ -47,7 +47,7 @@ func (dao *UserDao) RegisterNewUser(ctx context.Context, userPO *UserPO) error {
 		// insert a record into table user_analysis
 		err = tx.WithContext(ctx).Create(&UserAnalysisPO{
 			UserID:        userPO.UserID,
-			TotalSize:     util.GetConfig().InitUserStorageSize,
+			TotalSize:     config.GetConfig().InitUserStorageSize,
 			UsedSize:      0,
 			FileNum:       0,
 			UploadFileNum: 0,

@@ -3,10 +3,10 @@ package service
 import (
 	"context"
 
-	"github.com/changpro/disk-service/auth/common/constants"
-	"github.com/changpro/disk-service/auth/common/errcode"
 	"github.com/changpro/disk-service/auth/repo"
 	"github.com/changpro/disk-service/auth/util"
+	"github.com/changpro/disk-service/common/constants"
+	"github.com/changpro/disk-service/common/errcode"
 	"google.golang.org/grpc/status"
 )
 

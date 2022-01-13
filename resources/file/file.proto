@@ -1,0 +1,80 @@
+syntax = "proto3";
+
+option go_package = "github.com/changpro/disk-service/pbdeps/file";
+
+import "google/api/annotations.proto";
+import "google/protobuf/empty.proto";
+import "validate/validate.proto";
+import "google/protobuf/struct.proto";
+
+service FileService {
+    
+    rpc UploadFile(UploadFileReq) returns (UploadFileRsp) {
+        option (google.api.http) = {
+            post: "/v1/{user_id}/files/upload"
+            body: "*"
+        };
+    }
+
+    rpc GetDirsAndFiles(GetDirsAndFilesReq) returns (GetDirsAndFilesRsp) {
+        option (google.api.http) = {
+            get: "/v1/{user_id}/files"
+        };
+    }
+
+    rpc GetFileDetail (GetFileDetailReq) returns (GetFileDetailRsp) {
+        option (google.api.http) = {
+            get: "/v1/{user_id}/files/{file_name}"
+        };
+    }
+   
+    rpc DownloadFile (DownloadFileReq) returns (DownloadFileRsp) {
+        option (google.api.http) = {
+            get: "/v1/{user_id}/files/download"
+        };
+    }
+}
+
+message UploadFileReq {
+    string file_name = 1;
+    string file_size = 2;
+    string file_md5 = 3;
+    string user_id = 4;
+}
+
+message UploadFileRsp {
+    string file_id = 1;
+}
+
+message GetDirsAndFilesReq {
+    string user_id = 1;
+}
+
+message GetDirsAndFilesRsp {
+    google.protobuf.Struct details = 1;
+}
+
+message GetFileDetailReq {
+    string user_id = 1;
+    string file_id = 2;
+    string file_name = 3;
+}
+
+message GetFileDetailRsp {
+    string file_id = 1;
+    string file_name = 2;
+    string file_size = 3;
+    string file_ext = 4;
+    string create_time = 5;
+    string update_time = 6;
+    string file_status = 7;
+}
+
+message DownloadFileReq {
+    string user_id = 1;
+    string file_id = 2;
+}
+
+message DownloadFileRsp {
+    string url = 1;
+}
