@@ -5,6 +5,10 @@ import (
 	"crypto/sha1"
 	"encoding/hex"
 	"io"
+	"log"
+
+	"github.com/fatih/structs"
+	"google.golang.org/protobuf/types/known/structpb"
 )
 
 func Sha1(data []byte) string {
@@ -19,4 +23,14 @@ func Sha1FromReader(r io.Reader) string {
 	buf.ReadFrom(r)
 	_sha1.Write(buf.Bytes())
 	return hex.EncodeToString(_sha1.Sum(nil))
+}
+
+func AnyToStructpb(i interface{}) *structpb.Struct {
+	s := structs.New(i)
+	s.TagName = "json"
+	pb, err := structpb.NewStruct(s.Map())
+	if err != nil {
+		log.Fatalf("cannot convert, err: %v", err)
+	}
+	return pb
 }

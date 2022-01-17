@@ -27,10 +27,66 @@ service FileService {
             get: "/v1/{user_id}/files/{file_name}"
         };
     }
-   
-    rpc DownloadFile (DownloadFileReq) returns (DownloadFileRsp) {
+
+    rpc MakeNewFolder (MakeNewFolderReq) returns (MakeNewFolderRsp) {
         option (google.api.http) = {
-            get: "/v1/{user_id}/files/download"
+            post: "/v1/{user_id}/files/makedir"
+            body: "*"
+        };
+    }
+
+    rpc SoftDelete (SoftDeleteReq) returns (google.protobuf.Empty) {
+        option (google.api.http) = {
+            post: "/v1/{user_id}/files/delete"
+            body: "*"
+        };
+    }
+
+    rpc HardDelete (HardDeleteReq) returns (google.protobuf.Empty) {
+        option (google.api.http) = {
+            post: "/v1/{user_id}/files/hard-delete"
+            body: "*"
+        };
+    }
+
+    rpc Rename (RenameReq) returns (google.protobuf.Empty) {
+        option (google.api.http) = {
+            post: "/v1/{user_id}/files/rename"
+            body: "*"
+        };
+    }
+
+    rpc MoveToPath (MoveToPathReq) returns (google.protobuf.Empty) {
+        option (google.api.http) = {
+            post: "/v1/{user_id}/files/move"
+            body: "*"
+        };
+    }
+
+    rpc CopyToPath (CopyToPathReq) returns (google.protobuf.Empty) {
+        option (google.api.http) = {
+            post: "/v1/{user_id}/files/copy"
+            body: "*"
+        };
+    }
+
+    rpc CreateShare (CreateShareReq) returns (CreateShareRsp) {
+        option (google.api.http) = {
+            post: "/v1/{user_id}/files/create-share"
+            body: "*"
+        };
+    }
+
+    rpc RetrieveShareToPath (RetrieveShareToPathReq) returns (google.protobuf.Empty) {
+        option (google.api.http) = {
+            post: "/v1/{user_id}/files/save-from-share"
+            body: "*"
+        };
+    }
+
+    rpc GetShareRecords (GetShareRecordsReq) returns (GetShareRecordsRsp) {
+        option (google.api.http) = {
+            get: "/v1/{user_id}/files/share-records"
         };
     }
 }
@@ -48,10 +104,12 @@ message UploadFileRsp {
 
 message GetDirsAndFilesReq {
     string user_id = 1;
+    string path = 2;
+    int32 show_hide = 3; // display(1) hidden dirs & files or not(2)
 }
 
 message GetDirsAndFilesRsp {
-    google.protobuf.Struct details = 1;
+    repeated google.protobuf.Struct details = 1;
 }
 
 message GetFileDetailReq {
@@ -61,20 +119,80 @@ message GetFileDetailReq {
 }
 
 message GetFileDetailRsp {
-    string file_id = 1;
-    string file_name = 2;
-    string file_size = 3;
-    string file_ext = 4;
-    string create_time = 5;
-    string update_time = 6;
-    string file_status = 7;
+    string id = 1;
+    string name = 2;
+    int64  size = 3;
+    string type = 4;
+    string md5 = 5;
+    string path = 6;
+    int32 status = 7;
+    string create_time = 8;
+    string update_time = 9;
 }
 
-message DownloadFileReq {
+message MakeNewFolderReq {
     string user_id = 1;
-    string file_id = 2;
+    string path = 2;
+    string dir_name = 4;
 }
 
-message DownloadFileRsp {
-    string url = 1;
+message MakeNewFolderRsp {
+    string id = 1;
+}
+
+message SoftDeleteReq {
+    string user_id = 1;
+    repeated string id = 2;
+}
+
+message HardDeleteReq {
+    string user_id = 1;
+    repeated string id = 2;
+}
+
+message RenameReq {
+    string user_id = 1;
+    string id = 2;
+}
+
+message MoveToPathReq {
+    string user_id = 1;
+    repeated string id = 2;
+    string path = 3;
+}
+
+message CopyToPathReq {
+    string user_id = 1;
+    repeated string id = 2;
+    string path = 3;
+}
+
+message CreateShareReq {
+    string user_id = 1;
+    string id = 3;
+    int32 expire_hour = 4;
+}
+
+message CreateShareRsp {
+    string token = 1;
+}
+
+message RetrieveShareToPathReq {
+    string user_id = 1;
+    string token = 2;
+    string path = 3;
+}
+
+message GetShareRecordsReq {
+    string user_id = 1;
+}
+
+message GetShareRecordsRsp {
+    repeated ShareRecord records = 1;
+}
+
+message ShareRecord {
+    string file_name = 1;
+    string message = 2;
+    string op_time = 3;
 }

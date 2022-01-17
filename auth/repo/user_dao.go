@@ -5,7 +5,6 @@ import (
 	"time"
 
 	"github.com/changpro/disk-service/auth/config"
-	"github.com/changpro/disk-service/common/constants"
 	"gorm.io/gorm"
 )
 
@@ -26,7 +25,7 @@ func SetUserDao(dao *UserDao) {
 func (dao *UserDao) QueryUserByID(ctx context.Context, userID string) (*UserPO, error) {
 	var po UserPO
 	err := dao.Database.WithContext(ctx).Where("user_id = ? and status != ?", userID,
-		constants.UserStatusCancelled).First(&po).Error
+		3).First(&po).Error
 	if err == gorm.ErrRecordNotFound {
 		return nil, nil
 	}
@@ -37,9 +36,13 @@ func (dao *UserDao) QueryUserByID(ctx context.Context, userID string) (*UserPO, 
 }
 
 func (dao *UserDao) RegisterNewUser(ctx context.Context, userPO *UserPO) error {
-	userPO.Status = constants.UserStatusEnable
+	userPO.Status = 1
 	userPO.CreateTime, userPO.UpdateTime = time.Now(), time.Now()
 	err := dao.Database.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
+		userPO.CreateTime = time.Now()
+		userPO.UpdateTime = time.Now()
+		userPO.LastLogin = time.Now()
+		userPO.Status = 1
 		err := tx.WithContext(ctx).Create(userPO).Error
 		if err != nil {
 			return err
@@ -70,7 +73,7 @@ func (dao *UserDao) SignIn(ctx context.Context, userID string, pwMask string) (*
 	err := dao.Database.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
 		// find user
 		err := tx.WithContext(ctx).Where("user_id = ? and user_pw = ? and status != ?", userID,
-			pwMask, constants.UserStatusCancelled).First(&po).Error
+			pwMask, 3).First(&po).Error
 		if err != nil {
 			return err
 		}
@@ -93,7 +96,7 @@ func (dao *UserDao) SignIn(ctx context.Context, userID string, pwMask string) (*
 func (dao *UserDao) UpdatePassword(ctx context.Context, dto *ModifyPwDTO) error {
 	if err := dao.Database.WithContext(ctx).
 		Where("user_id = ? and status != ? and (auth_email = ? or user_pw = ?)",
-			constants.UserStatusCancelled, dto.UserID, dto.AuthEmail, dto.OldPw).
+			3, dto.UserID, dto.AuthEmail, dto.OldPw).
 		Updates(&UserPO{UserPW: dto.NewPw, UpdateTime: time.Now()}).Error; err != nil {
 		return err
 	}
@@ -102,7 +105,7 @@ func (dao *UserDao) UpdatePassword(ctx context.Context, dto *ModifyPwDTO) error 
 
 func (dao *UserDao) UpdateUserProfile(ctx context.Context, dto *ModifyUserProfileDTO) error {
 	if err := dao.Database.WithContext(ctx).
-		Where("user_id = ? and status != ?", dto.UserID, constants.UserStatusCancelled).
+		Where("user_id = ? and status != ?", dto.UserID, 3).
 		Updates(&UserPO{AuthEmail: dto.AuthEmail, UserIcon: dto.Icon, UpdateTime: time.Now()}).Error; err != nil {
 		return err
 	}

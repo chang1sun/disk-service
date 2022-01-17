@@ -20,19 +20,19 @@ type UserProfile struct {
 	UsedSize      int64
 }
 
-func RegisterNewUser(ctx context.Context, user *repo.UserPO) error {
+func RegisterNewUser(ctx context.Context, userPO *repo.UserPO) error {
 	// check repeat
-	userPO, err := repo.GetUserDao().QueryUserByID(ctx, user.UserID)
+	user, err := repo.GetUserDao().QueryUserByID(ctx, userPO.UserID)
 	if err != nil {
 		return status.Errorf(errcode.DatabaseOperationErrCode, errcode.DatabaseOperationErrMsg, err)
 	}
-	if userPO != nil {
+	if user != nil {
 		return status.Error(errcode.DetectRepeatedUserIDCode, errcode.DetectRepeatedUserIDMsg)
 	}
 
 	// add salt and calculate sha
-	pwMask := util.GetStringWithSalt(user.UserID)
-	user.UserPW = pwMask
+	pwMask := util.GetStringWithSalt(userPO.UserPW)
+	userPO.UserPW = pwMask
 
 	// insert a record
 	err = repo.GetUserDao().RegisterNewUser(ctx, userPO)
@@ -90,6 +90,25 @@ func ModifyPassword(ctx context.Context, dto *repo.ModifyPwDTO) error {
 
 func ModifyUserProfile(ctx context.Context, dto *repo.ModifyUserProfileDTO) error {
 	if err := repo.GetUserDao().UpdateUserProfile(ctx, dto); err != nil {
+		return status.Errorf(errcode.DatabaseOperationErrCode, errcode.DatabaseOperationErrMsg, err)
+	}
+	return nil
+}
+
+func UpdateUserStorage(ctx context.Context, dto *repo.UpdateUserAnalysisDTO) error {
+	// cal left vol is enough or not
+	ana, err := repo.GetUserAnalysisDao().QueryUserAnalysisByUserID(ctx, dto.UserID)
+	if err != nil {
+		return status.Errorf(errcode.DatabaseOperationErrCode, errcode.DatabaseOperationErrMsg, err)
+	}
+	if ana == nil {
+		return status.Error(errcode.NoSuchUserCode, errcode.NoSuchUserMsg)
+	}
+	if ana.TotalSize-ana.UsedSize < dto.Size {
+		return status.Error(errcode.NoEnoughVolCode, errcode.NoEnoughVolMsg)
+	}
+	// do update
+	if err := repo.GetUserAnalysisDao().UpdateUserStorage(ctx, dto); err != nil {
 		return status.Errorf(errcode.DatabaseOperationErrCode, errcode.DatabaseOperationErrMsg, err)
 	}
 	return nil

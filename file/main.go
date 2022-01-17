@@ -10,6 +10,7 @@ import (
 	"github.com/changpro/disk-service/file/config"
 	"github.com/changpro/disk-service/file/interfaces"
 	"github.com/changpro/disk-service/file/repo"
+	"github.com/changpro/disk-service/file/rpc/auth"
 	"github.com/changpro/disk-service/file/service"
 	filepb "github.com/changpro/disk-service/pbdeps/file"
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
@@ -72,19 +73,29 @@ func main() {
 	}
 
 	log.Println("Serving gRPC-Gateway for file service on localhost:8003")
-	log.Fatalln(gwServer.ListenAndServeTLS("crt/service.pem", "crt/service.key"))
+	// log.Fatalln(gwServer.ListenAndServeTLS("crt/service.pem", "crt/service.key"))
+	log.Fatalln(gwServer.ListenAndServe())
 }
 
+// to handle file transfer request
 func AddCustomRoute(mux *runtime.ServeMux) error {
-	err := mux.HandlePath("POST", "/v1/files/upload", service.FileUploadHandler)
+	// single small file uplaod
+	err := mux.HandlePath("POST", "/v1/file/upload", service.FileUploadHandler)
 	if err != nil {
 		return err
 	}
-	err = mux.HandlePath("POST", "v1/files/mp/upload", service.MPFileUploadHandler)
+	// multipart uploader
+	err = mux.HandlePath("POST", "/v1/file/mp/upload", service.MPFileUploadHandler)
 	if err != nil {
 		return err
 	}
-	err = mux.HandlePath("POST", "v1/files/mp/upload-finish", service.FileMergeHandler)
+	// finish reminder
+	err = mux.HandlePath("POST", "/v1/file/mp/upload-finish", service.FileMergeHandler)
+	if err != nil {
+		return err
+	}
+	// download file
+	err = mux.HandlePath("GET", "/v1/file/download", service.FileMergeHandler)
 	if err != nil {
 		return err
 	}
@@ -104,6 +115,11 @@ func InitBase() error {
 	if err != nil {
 		return err
 	}
+	// set repo
 	repo.SetUniFileStoreDao(&repo.UniFileStoreDao{Database: mongoDB, Bucket: bucket})
+	repo.SetUserFileDao(&repo.UserFileDao{Database: mongoDB})
+
+	// set rpc
+	auth.SetAuthCaller()
 	return nil
 }

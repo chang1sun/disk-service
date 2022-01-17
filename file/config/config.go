@@ -22,6 +22,7 @@ type Config struct {
 		Database string `yaml:"db_name"`
 		Addr     string `yaml:"addr"`
 	} `yaml:"mongo"`
+	AuthAddr string `yaml:"auth_addr"`
 }
 
 func GetConfig() *Config {

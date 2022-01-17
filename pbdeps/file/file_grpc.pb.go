@@ -11,6 +11,7 @@ import (
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
+	emptypb "google.golang.org/protobuf/types/known/emptypb"
 )
 
 // This is a compile-time assertion to ensure that this generated file
@@ -25,7 +26,15 @@ type FileServiceClient interface {
 	UploadFile(ctx context.Context, in *UploadFileReq, opts ...grpc.CallOption) (*UploadFileRsp, error)
 	GetDirsAndFiles(ctx context.Context, in *GetDirsAndFilesReq, opts ...grpc.CallOption) (*GetDirsAndFilesRsp, error)
 	GetFileDetail(ctx context.Context, in *GetFileDetailReq, opts ...grpc.CallOption) (*GetFileDetailRsp, error)
-	DownloadFile(ctx context.Context, in *DownloadFileReq, opts ...grpc.CallOption) (*DownloadFileRsp, error)
+	MakeNewFolder(ctx context.Context, in *MakeNewFolderReq, opts ...grpc.CallOption) (*MakeNewFolderRsp, error)
+	SoftDelete(ctx context.Context, in *SoftDeleteReq, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	HardDelete(ctx context.Context, in *HardDeleteReq, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	Rename(ctx context.Context, in *RenameReq, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	MoveToPath(ctx context.Context, in *MoveToPathReq, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	CopyToPath(ctx context.Context, in *CopyToPathReq, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	CreateShare(ctx context.Context, in *CreateShareReq, opts ...grpc.CallOption) (*CreateShareRsp, error)
+	RetrieveShareToPath(ctx context.Context, in *RetrieveShareToPathReq, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	GetShareRecords(ctx context.Context, in *GetShareRecordsReq, opts ...grpc.CallOption) (*GetShareRecordsRsp, error)
 }
 
 type fileServiceClient struct {
@@ -63,9 +72,81 @@ func (c *fileServiceClient) GetFileDetail(ctx context.Context, in *GetFileDetail
 	return out, nil
 }
 
-func (c *fileServiceClient) DownloadFile(ctx context.Context, in *DownloadFileReq, opts ...grpc.CallOption) (*DownloadFileRsp, error) {
-	out := new(DownloadFileRsp)
-	err := c.cc.Invoke(ctx, "/FileService/DownloadFile", in, out, opts...)
+func (c *fileServiceClient) MakeNewFolder(ctx context.Context, in *MakeNewFolderReq, opts ...grpc.CallOption) (*MakeNewFolderRsp, error) {
+	out := new(MakeNewFolderRsp)
+	err := c.cc.Invoke(ctx, "/FileService/MakeNewFolder", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *fileServiceClient) SoftDelete(ctx context.Context, in *SoftDeleteReq, opts ...grpc.CallOption) (*emptypb.Empty, error) {
+	out := new(emptypb.Empty)
+	err := c.cc.Invoke(ctx, "/FileService/SoftDelete", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *fileServiceClient) HardDelete(ctx context.Context, in *HardDeleteReq, opts ...grpc.CallOption) (*emptypb.Empty, error) {
+	out := new(emptypb.Empty)
+	err := c.cc.Invoke(ctx, "/FileService/HardDelete", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *fileServiceClient) Rename(ctx context.Context, in *RenameReq, opts ...grpc.CallOption) (*emptypb.Empty, error) {
+	out := new(emptypb.Empty)
+	err := c.cc.Invoke(ctx, "/FileService/Rename", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *fileServiceClient) MoveToPath(ctx context.Context, in *MoveToPathReq, opts ...grpc.CallOption) (*emptypb.Empty, error) {
+	out := new(emptypb.Empty)
+	err := c.cc.Invoke(ctx, "/FileService/MoveToPath", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *fileServiceClient) CopyToPath(ctx context.Context, in *CopyToPathReq, opts ...grpc.CallOption) (*emptypb.Empty, error) {
+	out := new(emptypb.Empty)
+	err := c.cc.Invoke(ctx, "/FileService/CopyToPath", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *fileServiceClient) CreateShare(ctx context.Context, in *CreateShareReq, opts ...grpc.CallOption) (*CreateShareRsp, error) {
+	out := new(CreateShareRsp)
+	err := c.cc.Invoke(ctx, "/FileService/CreateShare", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *fileServiceClient) RetrieveShareToPath(ctx context.Context, in *RetrieveShareToPathReq, opts ...grpc.CallOption) (*emptypb.Empty, error) {
+	out := new(emptypb.Empty)
+	err := c.cc.Invoke(ctx, "/FileService/RetrieveShareToPath", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *fileServiceClient) GetShareRecords(ctx context.Context, in *GetShareRecordsReq, opts ...grpc.CallOption) (*GetShareRecordsRsp, error) {
+	out := new(GetShareRecordsRsp)
+	err := c.cc.Invoke(ctx, "/FileService/GetShareRecords", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -79,7 +160,15 @@ type FileServiceServer interface {
 	UploadFile(context.Context, *UploadFileReq) (*UploadFileRsp, error)
 	GetDirsAndFiles(context.Context, *GetDirsAndFilesReq) (*GetDirsAndFilesRsp, error)
 	GetFileDetail(context.Context, *GetFileDetailReq) (*GetFileDetailRsp, error)
-	DownloadFile(context.Context, *DownloadFileReq) (*DownloadFileRsp, error)
+	MakeNewFolder(context.Context, *MakeNewFolderReq) (*MakeNewFolderRsp, error)
+	SoftDelete(context.Context, *SoftDeleteReq) (*emptypb.Empty, error)
+	HardDelete(context.Context, *HardDeleteReq) (*emptypb.Empty, error)
+	Rename(context.Context, *RenameReq) (*emptypb.Empty, error)
+	MoveToPath(context.Context, *MoveToPathReq) (*emptypb.Empty, error)
+	CopyToPath(context.Context, *CopyToPathReq) (*emptypb.Empty, error)
+	CreateShare(context.Context, *CreateShareReq) (*CreateShareRsp, error)
+	RetrieveShareToPath(context.Context, *RetrieveShareToPathReq) (*emptypb.Empty, error)
+	GetShareRecords(context.Context, *GetShareRecordsReq) (*GetShareRecordsRsp, error)
 }
 
 // UnimplementedFileServiceServer should be embedded to have forward compatible implementations.
@@ -95,8 +184,32 @@ func (UnimplementedFileServiceServer) GetDirsAndFiles(context.Context, *GetDirsA
 func (UnimplementedFileServiceServer) GetFileDetail(context.Context, *GetFileDetailReq) (*GetFileDetailRsp, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetFileDetail not implemented")
 }
-func (UnimplementedFileServiceServer) DownloadFile(context.Context, *DownloadFileReq) (*DownloadFileRsp, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method DownloadFile not implemented")
+func (UnimplementedFileServiceServer) MakeNewFolder(context.Context, *MakeNewFolderReq) (*MakeNewFolderRsp, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method MakeNewFolder not implemented")
+}
+func (UnimplementedFileServiceServer) SoftDelete(context.Context, *SoftDeleteReq) (*emptypb.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SoftDelete not implemented")
+}
+func (UnimplementedFileServiceServer) HardDelete(context.Context, *HardDeleteReq) (*emptypb.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method HardDelete not implemented")
+}
+func (UnimplementedFileServiceServer) Rename(context.Context, *RenameReq) (*emptypb.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Rename not implemented")
+}
+func (UnimplementedFileServiceServer) MoveToPath(context.Context, *MoveToPathReq) (*emptypb.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method MoveToPath not implemented")
+}
+func (UnimplementedFileServiceServer) CopyToPath(context.Context, *CopyToPathReq) (*emptypb.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CopyToPath not implemented")
+}
+func (UnimplementedFileServiceServer) CreateShare(context.Context, *CreateShareReq) (*CreateShareRsp, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreateShare not implemented")
+}
+func (UnimplementedFileServiceServer) RetrieveShareToPath(context.Context, *RetrieveShareToPathReq) (*emptypb.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method RetrieveShareToPath not implemented")
+}
+func (UnimplementedFileServiceServer) GetShareRecords(context.Context, *GetShareRecordsReq) (*GetShareRecordsRsp, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetShareRecords not implemented")
 }
 
 // UnsafeFileServiceServer may be embedded to opt out of forward compatibility for this service.
@@ -164,20 +277,164 @@ func _FileService_GetFileDetail_Handler(srv interface{}, ctx context.Context, de
 	return interceptor(ctx, in, info, handler)
 }
 
-func _FileService_DownloadFile_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(DownloadFileReq)
+func _FileService_MakeNewFolder_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(MakeNewFolderReq)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(FileServiceServer).DownloadFile(ctx, in)
+		return srv.(FileServiceServer).MakeNewFolder(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/FileService/DownloadFile",
+		FullMethod: "/FileService/MakeNewFolder",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(FileServiceServer).DownloadFile(ctx, req.(*DownloadFileReq))
+		return srv.(FileServiceServer).MakeNewFolder(ctx, req.(*MakeNewFolderReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _FileService_SoftDelete_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SoftDeleteReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(FileServiceServer).SoftDelete(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/FileService/SoftDelete",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(FileServiceServer).SoftDelete(ctx, req.(*SoftDeleteReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _FileService_HardDelete_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(HardDeleteReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(FileServiceServer).HardDelete(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/FileService/HardDelete",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(FileServiceServer).HardDelete(ctx, req.(*HardDeleteReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _FileService_Rename_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(RenameReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(FileServiceServer).Rename(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/FileService/Rename",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(FileServiceServer).Rename(ctx, req.(*RenameReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _FileService_MoveToPath_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(MoveToPathReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(FileServiceServer).MoveToPath(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/FileService/MoveToPath",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(FileServiceServer).MoveToPath(ctx, req.(*MoveToPathReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _FileService_CopyToPath_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CopyToPathReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(FileServiceServer).CopyToPath(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/FileService/CopyToPath",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(FileServiceServer).CopyToPath(ctx, req.(*CopyToPathReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _FileService_CreateShare_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreateShareReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(FileServiceServer).CreateShare(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/FileService/CreateShare",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(FileServiceServer).CreateShare(ctx, req.(*CreateShareReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _FileService_RetrieveShareToPath_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(RetrieveShareToPathReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(FileServiceServer).RetrieveShareToPath(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/FileService/RetrieveShareToPath",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(FileServiceServer).RetrieveShareToPath(ctx, req.(*RetrieveShareToPathReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _FileService_GetShareRecords_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetShareRecordsReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(FileServiceServer).GetShareRecords(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/FileService/GetShareRecords",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(FileServiceServer).GetShareRecords(ctx, req.(*GetShareRecordsReq))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -202,8 +459,40 @@ var FileService_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _FileService_GetFileDetail_Handler,
 		},
 		{
-			MethodName: "DownloadFile",
-			Handler:    _FileService_DownloadFile_Handler,
+			MethodName: "MakeNewFolder",
+			Handler:    _FileService_MakeNewFolder_Handler,
+		},
+		{
+			MethodName: "SoftDelete",
+			Handler:    _FileService_SoftDelete_Handler,
+		},
+		{
+			MethodName: "HardDelete",
+			Handler:    _FileService_HardDelete_Handler,
+		},
+		{
+			MethodName: "Rename",
+			Handler:    _FileService_Rename_Handler,
+		},
+		{
+			MethodName: "MoveToPath",
+			Handler:    _FileService_MoveToPath_Handler,
+		},
+		{
+			MethodName: "CopyToPath",
+			Handler:    _FileService_CopyToPath_Handler,
+		},
+		{
+			MethodName: "CreateShare",
+			Handler:    _FileService_CreateShare_Handler,
+		},
+		{
+			MethodName: "RetrieveShareToPath",
+			Handler:    _FileService_RetrieveShareToPath_Handler,
+		},
+		{
+			MethodName: "GetShareRecords",
+			Handler:    _FileService_GetShareRecords_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

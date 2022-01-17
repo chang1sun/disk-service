@@ -42,3 +42,12 @@ func AssembleModifyUserProfileDTO(req *authpb.ModifyUserProfileReq) *repo.Modify
 		Icon:      req.Icon,
 	}
 }
+
+func AssembleUpdateUserAnalysisDTO(req *authpb.UpdateUserStorageReq) *repo.UpdateUserAnalysisDTO {
+	return &repo.UpdateUserAnalysisDTO{
+		UserID:        req.UserId,
+		FileNum:       req.FileNum,
+		Size:          req.Size,
+		UploadFileNum: req.UploadFileNum,
+	}
+}

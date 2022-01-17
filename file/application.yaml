@@ -9,3 +9,5 @@ mysql:
 mongo:
   addr: "mongodb://localhost:27017"
   db_name: "netdisk"
+
+auth_addr: "127.0.0.1:8000"

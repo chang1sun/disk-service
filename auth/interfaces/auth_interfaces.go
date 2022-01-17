@@ -68,3 +68,13 @@ func (*server) ModifyUserProfile(ctx context.Context,
 	}
 	return rsp, nil
 }
+
+func (*server) UpdateUserStorage(ctx context.Context,
+	req *auth.UpdateUserStorageReq) (*emptypb.Empty, error) {
+	rsp := &emptypb.Empty{}
+	err := service.UpdateUserStorage(ctx, assembler.AssembleUpdateUserAnalysisDTO(req))
+	if err != nil {
+		return rsp, err
+	}
+	return rsp, nil
+}

@@ -42,6 +42,8 @@ service AuthService {
             body: "*"
         };
     }
+
+    rpc UpdateUserStorage(UpdateUserStorageReq) returns (google.protobuf.Empty) {}
 }
 
 message RegisterNewUserReq {
@@ -80,4 +82,11 @@ message ModifyUserProfileReq {
     string user_id = 1[(validate.rules).string = {min_len: 6, pattern: "^[0-9a-zA-Z]*$"}];
     string auth_email = 2[(validate.rules).string = {min_len: 6, pattern: "^[A-Za-z0-9]+([_\\.][A-Za-z0-9]+)*@([A-Za-z0-9\\-]+\\.)+[A-Za-z]{2,6}$"}];
     string icon = 3;
+}
+
+message UpdateUserStorageReq {
+    string user_id = 1[(validate.rules).string = {min_len: 6, pattern: "^[0-9a-zA-Z]*$"}];
+    int32 file_num = 2[(validate.rules).int32.gt = 0];
+    int64 size = 3[(validate.rules).int64.gt = 0];
+    int32 upload_file_num = 4[(validate.rules).int32.gte = 0];
 }

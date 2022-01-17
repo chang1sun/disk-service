@@ -28,6 +28,7 @@ type AuthServiceClient interface {
 	ModifyPassword(ctx context.Context, in *ModifyPasswordReq, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	GetUserProfile(ctx context.Context, in *GetUserProfileReq, opts ...grpc.CallOption) (*GetUserProfileRsp, error)
 	ModifyUserProfile(ctx context.Context, in *ModifyUserProfileReq, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	UpdateUserStorage(ctx context.Context, in *UpdateUserStorageReq, opts ...grpc.CallOption) (*emptypb.Empty, error)
 }
 
 type authServiceClient struct {
@@ -83,6 +84,15 @@ func (c *authServiceClient) ModifyUserProfile(ctx context.Context, in *ModifyUse
 	return out, nil
 }
 
+func (c *authServiceClient) UpdateUserStorage(ctx context.Context, in *UpdateUserStorageReq, opts ...grpc.CallOption) (*emptypb.Empty, error) {
+	out := new(emptypb.Empty)
+	err := c.cc.Invoke(ctx, "/AuthService/UpdateUserStorage", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // AuthServiceServer is the server API for AuthService service.
 // All implementations should embed UnimplementedAuthServiceServer
 // for forward compatibility
@@ -92,6 +102,7 @@ type AuthServiceServer interface {
 	ModifyPassword(context.Context, *ModifyPasswordReq) (*emptypb.Empty, error)
 	GetUserProfile(context.Context, *GetUserProfileReq) (*GetUserProfileRsp, error)
 	ModifyUserProfile(context.Context, *ModifyUserProfileReq) (*emptypb.Empty, error)
+	UpdateUserStorage(context.Context, *UpdateUserStorageReq) (*emptypb.Empty, error)
 }
 
 // UnimplementedAuthServiceServer should be embedded to have forward compatible implementations.
@@ -112,6 +123,9 @@ func (UnimplementedAuthServiceServer) GetUserProfile(context.Context, *GetUserPr
 }
 func (UnimplementedAuthServiceServer) ModifyUserProfile(context.Context, *ModifyUserProfileReq) (*emptypb.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ModifyUserProfile not implemented")
+}
+func (UnimplementedAuthServiceServer) UpdateUserStorage(context.Context, *UpdateUserStorageReq) (*emptypb.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdateUserStorage not implemented")
 }
 
 // UnsafeAuthServiceServer may be embedded to opt out of forward compatibility for this service.
@@ -215,6 +229,24 @@ func _AuthService_ModifyUserProfile_Handler(srv interface{}, ctx context.Context
 	return interceptor(ctx, in, info, handler)
 }
 
+func _AuthService_UpdateUserStorage_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateUserStorageReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AuthServiceServer).UpdateUserStorage(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/AuthService/UpdateUserStorage",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AuthServiceServer).UpdateUserStorage(ctx, req.(*UpdateUserStorageReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // AuthService_ServiceDesc is the grpc.ServiceDesc for AuthService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -241,6 +273,10 @@ var AuthService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ModifyUserProfile",
 			Handler:    _AuthService_ModifyUserProfile_Handler,
+		},
+		{
+			MethodName: "UpdateUserStorage",
+			Handler:    _AuthService_UpdateUserStorage_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
