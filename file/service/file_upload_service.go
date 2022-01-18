@@ -72,7 +72,7 @@ func FileUploadHandler(w http.ResponseWriter, r *http.Request, pathParams map[st
 	}
 
 	// update user's level content
-	id, err := repo.GetUserFileDao().AddFile(r.Context(), userID, buildUploadUserFilePO(uId, fileName, userID, fileMeta))
+	id, err := repo.GetUserFileDao().AddFileOrDir(r.Context(), buildUploadUserFilePO(uId, fileName, userID, fileMeta))
 	if err != nil {
 		errorResp(errcode.DatabaseOperationErrCode, errcode.DatabaseOperationErrMsg, err, &w)
 		return
@@ -137,13 +137,14 @@ func buildUploadUserFilePO(uid string, name string, userID string, meta *repo.Un
 	return &repo.UserFilePO{
 		UserID:    userID,
 		UniFileID: uid,
-		FileName:  name,
+		Name:      name,
 		FileSize:  meta.Size,
 		FileMd5:   meta.Md5,
 		FileType:  meta.Type,
-		IsDir:     2,
-		IsHide:    2,
+		IsDir:     isFile,
+		IsHide:    notHide,
 		Path:      "/",
+		Status:    statusEnable,
 		CreateAt:  time.Now(),
 		UpdateAt:  time.Now(),
 	}

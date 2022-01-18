@@ -35,6 +35,19 @@ service FileService {
         };
     }
 
+    rpc MoveToRecycleBin (MoveToRecycleBinReq) returns (google.protobuf.Empty) {
+        option (google.api.http) = {
+            post: "/v1/{user_id}/files/recycle"
+            body: "*"
+        };
+    }
+
+    rpc GetRecycleBinList (GetRecycleBinListReq) returns (GetRecycleBinListRsp) {
+        option (google.api.http) = {
+            get: "/v1/{user_id}/files/recycle-bin"
+        };
+    }
+
     rpc SoftDelete (SoftDeleteReq) returns (google.protobuf.Empty) {
         option (google.api.http) = {
             post: "/v1/{user_id}/files/delete"
@@ -133,11 +146,17 @@ message GetFileDetailRsp {
 message MakeNewFolderReq {
     string user_id = 1;
     string path = 2;
-    string dir_name = 4;
+    string dir_name = 3;
+    int32 overwrite = 4; // overwrite(1) if already exist, or not(2)
 }
 
 message MakeNewFolderRsp {
     string id = 1;
+}
+
+message MoveToRecycleBinReq {
+    string user_id = 1;
+    repeated string id = 2;
 }
 
 message SoftDeleteReq {
@@ -147,30 +166,34 @@ message SoftDeleteReq {
 
 message HardDeleteReq {
     string user_id = 1;
-    repeated string id = 2;
+    string id = 2;
 }
 
 message RenameReq {
     string user_id = 1;
     string id = 2;
+    string new_name = 3;
+    int32 overwrite = 4; // overwrite(1) if already exist, or not(2)
 }
 
 message MoveToPathReq {
     string user_id = 1;
-    repeated string id = 2;
+    repeated string ids = 2;
     string path = 3;
+    int32 overwrite = 4; // overwrite(1) if already exist, or not(2)
 }
 
 message CopyToPathReq {
     string user_id = 1;
-    repeated string id = 2;
+    repeated string ids = 2;
     string path = 3;
+    int32 overwrite = 4; // overwrite(1) if already exist, or not(2)
 }
 
 message CreateShareReq {
     string user_id = 1;
-    string id = 3;
-    int32 expire_hour = 4;
+    string id = 2;
+    int32 expire_hour = 3;
 }
 
 message CreateShareRsp {
@@ -181,6 +204,10 @@ message RetrieveShareToPathReq {
     string user_id = 1;
     string token = 2;
     string path = 3;
+}
+
+message RetrieveShareToPathRsp {
+    repeated string id = 1;
 }
 
 message GetShareRecordsReq {
@@ -195,4 +222,18 @@ message ShareRecord {
     string file_name = 1;
     string message = 2;
     string op_time = 3;
+}
+
+message GetRecycleBinListReq {
+    string user_id = 1;
+}
+
+message RecycleDocInfo {
+    string id = 1;
+    string name = 2;
+    string delete_time = 3;
+}
+
+message GetRecycleBinListRsp {
+    repeated RecycleDocInfo list = 1;
 }

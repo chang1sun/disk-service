@@ -8,7 +8,7 @@ import (
 
 func AssembleFileDetail(po *repo.UserFilePO) *filepb.GetFileDetailRsp {
 	return &filepb.GetFileDetailRsp{
-		Name:       po.FileName,
+		Name:       po.Name,
 		Id:         po.ID,
 		Size:       po.FileSize,
 		Type:       po.FileType,

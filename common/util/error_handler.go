@@ -31,3 +31,11 @@ func CustomErrorHandler(c context.Context, sm *runtime.ServeMux, m runtime.Marsh
 		rw.Write([]byte("json marshal failed"))
 	}
 }
+
+func LogErr(err error, intName string) {
+	s, _ := status.FromError(err)
+	if uint32(s.Code()) < uint32(20000) {
+		return
+	}
+	log.Fatalf("[%v] request failed, err msg: %v", intName, err)
+}

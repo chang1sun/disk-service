@@ -27,6 +27,8 @@ type FileServiceClient interface {
 	GetDirsAndFiles(ctx context.Context, in *GetDirsAndFilesReq, opts ...grpc.CallOption) (*GetDirsAndFilesRsp, error)
 	GetFileDetail(ctx context.Context, in *GetFileDetailReq, opts ...grpc.CallOption) (*GetFileDetailRsp, error)
 	MakeNewFolder(ctx context.Context, in *MakeNewFolderReq, opts ...grpc.CallOption) (*MakeNewFolderRsp, error)
+	MoveToRecycleBin(ctx context.Context, in *MoveToRecycleBinReq, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	GetRecycleBinList(ctx context.Context, in *GetRecycleBinListReq, opts ...grpc.CallOption) (*GetRecycleBinListRsp, error)
 	SoftDelete(ctx context.Context, in *SoftDeleteReq, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	HardDelete(ctx context.Context, in *HardDeleteReq, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	Rename(ctx context.Context, in *RenameReq, opts ...grpc.CallOption) (*emptypb.Empty, error)
@@ -75,6 +77,24 @@ func (c *fileServiceClient) GetFileDetail(ctx context.Context, in *GetFileDetail
 func (c *fileServiceClient) MakeNewFolder(ctx context.Context, in *MakeNewFolderReq, opts ...grpc.CallOption) (*MakeNewFolderRsp, error) {
 	out := new(MakeNewFolderRsp)
 	err := c.cc.Invoke(ctx, "/FileService/MakeNewFolder", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *fileServiceClient) MoveToRecycleBin(ctx context.Context, in *MoveToRecycleBinReq, opts ...grpc.CallOption) (*emptypb.Empty, error) {
+	out := new(emptypb.Empty)
+	err := c.cc.Invoke(ctx, "/FileService/MoveToRecycleBin", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *fileServiceClient) GetRecycleBinList(ctx context.Context, in *GetRecycleBinListReq, opts ...grpc.CallOption) (*GetRecycleBinListRsp, error) {
+	out := new(GetRecycleBinListRsp)
+	err := c.cc.Invoke(ctx, "/FileService/GetRecycleBinList", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -161,6 +181,8 @@ type FileServiceServer interface {
 	GetDirsAndFiles(context.Context, *GetDirsAndFilesReq) (*GetDirsAndFilesRsp, error)
 	GetFileDetail(context.Context, *GetFileDetailReq) (*GetFileDetailRsp, error)
 	MakeNewFolder(context.Context, *MakeNewFolderReq) (*MakeNewFolderRsp, error)
+	MoveToRecycleBin(context.Context, *MoveToRecycleBinReq) (*emptypb.Empty, error)
+	GetRecycleBinList(context.Context, *GetRecycleBinListReq) (*GetRecycleBinListRsp, error)
 	SoftDelete(context.Context, *SoftDeleteReq) (*emptypb.Empty, error)
 	HardDelete(context.Context, *HardDeleteReq) (*emptypb.Empty, error)
 	Rename(context.Context, *RenameReq) (*emptypb.Empty, error)
@@ -186,6 +208,12 @@ func (UnimplementedFileServiceServer) GetFileDetail(context.Context, *GetFileDet
 }
 func (UnimplementedFileServiceServer) MakeNewFolder(context.Context, *MakeNewFolderReq) (*MakeNewFolderRsp, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method MakeNewFolder not implemented")
+}
+func (UnimplementedFileServiceServer) MoveToRecycleBin(context.Context, *MoveToRecycleBinReq) (*emptypb.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method MoveToRecycleBin not implemented")
+}
+func (UnimplementedFileServiceServer) GetRecycleBinList(context.Context, *GetRecycleBinListReq) (*GetRecycleBinListRsp, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetRecycleBinList not implemented")
 }
 func (UnimplementedFileServiceServer) SoftDelete(context.Context, *SoftDeleteReq) (*emptypb.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method SoftDelete not implemented")
@@ -291,6 +319,42 @@ func _FileService_MakeNewFolder_Handler(srv interface{}, ctx context.Context, de
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(FileServiceServer).MakeNewFolder(ctx, req.(*MakeNewFolderReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _FileService_MoveToRecycleBin_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(MoveToRecycleBinReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(FileServiceServer).MoveToRecycleBin(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/FileService/MoveToRecycleBin",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(FileServiceServer).MoveToRecycleBin(ctx, req.(*MoveToRecycleBinReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _FileService_GetRecycleBinList_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetRecycleBinListReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(FileServiceServer).GetRecycleBinList(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/FileService/GetRecycleBinList",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(FileServiceServer).GetRecycleBinList(ctx, req.(*GetRecycleBinListReq))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -461,6 +525,14 @@ var FileService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "MakeNewFolder",
 			Handler:    _FileService_MakeNewFolder_Handler,
+		},
+		{
+			MethodName: "MoveToRecycleBin",
+			Handler:    _FileService_MoveToRecycleBin_Handler,
+		},
+		{
+			MethodName: "GetRecycleBinList",
+			Handler:    _FileService_GetRecycleBinList_Handler,
 		},
 		{
 			MethodName: "SoftDelete",
