@@ -32,10 +32,11 @@ const (
 )
 
 const (
-	statusEnable     = 1
-	statusBlackList  = 2
-	statusRecycleBin = 3
-	statusDeleted    = 4
+	statusEnable      = 1
+	statusBlackList   = 2
+	statusRecycleBin  = 3
+	statusDeleted     = 4
+	statusPlaceHolder = 5
 )
 
 func QuickUpload(ctx context.Context, userID, fileName, md5 string) (string, error) {
@@ -95,14 +96,6 @@ func GetFileDetail(ctx context.Context, userID, fileID string) (*repo.UserFilePO
 }
 
 func MakeNewFolder(ctx context.Context, userID, dirName, path string, overwrite int32) (string, error) {
-	// replace the old one if it exist
-	if overwrite == doOverwrite {
-		id, err := repo.GetUserFileDao().ReplaceFileOrDir(ctx, buildNewFolderPO(userID, dirName, path))
-		if err != nil {
-			return "", status.Errorf(errcode.DatabaseOperationErrCode, errcode.DatabaseOperationErrMsg, err)
-		}
-		return id, err
-	}
 	// check path correctness
 	if err := checkPath(ctx, userID, path); err != nil {
 		return "", err
@@ -111,7 +104,7 @@ func MakeNewFolder(ctx context.Context, userID, dirName, path string, overwrite 
 	if err := checkRepeat(ctx, userID, dirName, path); err != nil {
 		return "", err
 	}
-	id, err := repo.GetUserFileDao().AddFileOrDir(ctx, buildNewFolderPO(userID, dirName, path))
+	id, err := repo.GetUserFileDao().MakeNewFolder(ctx, buildNewFolderPO(userID, dirName, path))
 	if err != nil {
 		return "", status.Errorf(errcode.DatabaseOperationErrCode, errcode.DatabaseOperationErrMsg, err)
 	}
@@ -217,20 +210,22 @@ func MoveToPath(ctx context.Context, ids []string, path string, overwrite int32)
 	if len(pos) != len(ids) {
 		return status.Error(errcode.FindCountNotMatchCode, errcode.FindCountNotMatchMsg)
 	}
+
+	// if it is a folder, then trigger recursively call
+	var subDirIDs []string
 	for _, po := range pos {
 		if po.IsDir == isDir {
-			if po.IsDirEmpty == isEmpty {
-				continue
-			}
 			for _, subID := range po.SubIDs {
-				err = MoveToPath(ctx, []string{subID}, path+po.Name, overwrite)
-				if err != nil {
-					return err
-				}
+				subDirIDs = append(subDirIDs, subID)
 			}
 		}
 	}
-	// if it is a folder, then trigger recursively call
+	if len(subDirIDs) > 0 {
+		err = MoveToPath(ctx, subDirIDs, path+po.Name, overwrite)
+		if err != nil {
+			return err
+		}
+	}
 
 	if overwrite == doOverwrite {
 		for _, po := range pos {
@@ -285,7 +280,7 @@ func HardDelete(ctx context.Context, id string) error {
 }
 
 func checkPath(ctx context.Context, userID, path string) error {
-	ok, err := repo.GetUserPathDao().IsPathExist(ctx, userID, path)
+	ok, err := repo.GetUserFileDao().IsPathExist(ctx, userID, path)
 	if err != nil {
 		return status.Errorf(errcode.DatabaseOperationErrCode, errcode.DatabaseOperationErrMsg, err)
 	}

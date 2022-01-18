@@ -2,6 +2,7 @@ package repo
 
 import (
 	"context"
+	"strings"
 
 	"github.com/changpro/disk-service/file/constants"
 	"go.mongodb.org/mongo-driver/bson"
@@ -25,7 +26,15 @@ func SetUserFileDao(dao *UserFileDao) {
 	userFileDao = dao
 }
 
-func (dao *UserFileDao) AddFileOrDir(ctx context.Context, po *UserFilePO) (string, error) {
+func (dao *UserFileDao) MakeNewFolder(ctx context.Context, po *UserFilePO) (string, error) {
+	// add a placeholder(fake file) to sync path if it is a folder
+	if po.IsDir == 1 {
+		fakeID, err := dao.addFakeFile(ctx, po.UserID, po.Path, po.Name)
+		if err != nil {
+			return "", err
+		}
+		po.SubIDs = []string{fakeID}
+	}
 	res, err := dao.Database.Collection(collUserFiles).InsertOne(ctx, po)
 	if err != nil {
 		return "", err
@@ -33,7 +42,53 @@ func (dao *UserFileDao) AddFileOrDir(ctx context.Context, po *UserFilePO) (strin
 	return res.InsertedID.(primitive.ObjectID).String(), nil
 }
 
-func isPathExist() {}
+func (dao *UserFileDao) AddFileOrDir(ctx context.Context, po *UserFilePO) (string, error) {
+	res, err := dao.Database.Collection(collUserFiles).InsertOne(ctx, po)
+	if err != nil {
+		return "", err
+	}
+
+	return res.InsertedID.(primitive.ObjectID).String(), nil
+}
+
+func (dao *UserFileDao) addToParentSubIDs(ctx context.Context, id string, po *UserFilePO) error {
+	if po.Path == "/" {
+		return nil
+	}
+	path, name := getParentPathAndName(po.Path)
+	filter := bson.D{
+		{"user_id", po.UserID},
+		{"path", path},
+		{"name", name},
+	}
+	update := bson.D{
+		{"$push", bson.E{"sub_ids", id}},
+	}
+	res := dao.Database.Collection(collUserFiles).FindOneAndUpdate(ctx, filter, update)
+	if res.Err() != nil {
+		return res.Err()
+	}
+	return nil
+}
+
+func (dao *UserFileDao) addFakeFile(ctx context.Context, userID, path, name string) (string, error) {
+	res, err := dao.Database.Collection(collUserFiles).InsertOne(ctx, &UserFilePO{Status: 5, Path: path + name + "/"})
+	if err != nil {
+		return "", err
+	}
+	return res.InsertedID.(primitive.ObjectID).String(), nil
+}
+
+func (dao *UserFileDao) IsPathExist(ctx context.Context, userID, path string) (bool, error) {
+	res := dao.Database.Collection(collUserFiles).FindOne(ctx, &UserFilePO{UserID: userID, Path: path})
+	if res.Err() == mongo.ErrNoDocuments {
+		return false, nil
+	}
+	if res.Err() != nil {
+		return false, res.Err()
+	}
+	return true, nil
+}
 
 func (dao *UserFileDao) QueryUserRoot(ctx context.Context, userID string, showHide bool) ([]*UserFilePO, error) {
 	var content []*UserFilePO
@@ -203,4 +258,15 @@ func (dao *UserFileDao) QueryDocByIDs(ctx context.Context, ids []string) ([]*Use
 		content = append(content, &f)
 	}
 	return content, nil
+}
+
+func getParentPathAndName(path string) (string, string) {
+	if path == "/" {
+		return "", ""
+	}
+	p := strings.Split(path, "/")
+	if len(p) == 0 {
+		return "", ""
+	}
+	return strings.Join(p[:len(p)-2], "/") + "/", p[len(p)-2]
 }
