@@ -146,6 +146,24 @@ func CopyToPath(ctx context.Context, ids []string, path string, overwrite int32)
 	if len(pos) != len(ids) {
 		return status.Error(errcode.FindCountNotMatchCode, errcode.FindCountNotMatchMsg)
 	}
+
+	// if it is a folder, then trigger recursively call
+	for _, po := range pos {
+		if po.IsDir == isDir {
+			// recursively look up sub folder or files and update them first
+			subPOs, err := repo.GetUserFileDao().QueryDirByPath(ctx, po.UserID, po.Path+po.Name+"/", true)
+			if err != nil {
+				return err
+			}
+			if len(subPOs) > 0 {
+				err = copyToPathByPOs(ctx, subPOs, path+po.Name+"/", overwrite)
+				if err != nil {
+					return err
+				}
+			}
+		}
+	}
+
 	for _, po := range pos {
 		po.Path = path
 		po.CreateAt = time.Now()
@@ -153,6 +171,37 @@ func CopyToPath(ctx context.Context, ids []string, path string, overwrite int32)
 		po.ID = ""
 	}
 	err = addDocsToPath(ctx, pos, overwrite)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func copyToPathByPOs(ctx context.Context, pos []*repo.UserFilePO, path string, overwrite int32) error {
+	// if it is a folder, then trigger recursively call
+	for _, po := range pos {
+		if po.IsDir == isDir {
+			// recursively look up sub folder or files and update them first
+			subPOs, err := repo.GetUserFileDao().QueryDirByPath(ctx, po.UserID, po.Path+po.Name+"/", true)
+			if err != nil {
+				return err
+			}
+			if len(subPOs) > 0 {
+				err = copyToPathByPOs(ctx, subPOs, path+po.Name+"/", overwrite)
+				if err != nil {
+					return err
+				}
+			}
+		}
+	}
+
+	for _, po := range pos {
+		po.Path = path
+		po.CreateAt = time.Now()
+		po.UpdateAt = time.Now()
+		po.ID = ""
+	}
+	err := addDocsToPath(ctx, pos, overwrite)
 	if err != nil {
 		return err
 	}
@@ -212,18 +261,19 @@ func MoveToPath(ctx context.Context, ids []string, path string, overwrite int32)
 	}
 
 	// if it is a folder, then trigger recursively call
-	var subDirIDs []string
 	for _, po := range pos {
 		if po.IsDir == isDir {
-			for _, subID := range po.SubIDs {
-				subDirIDs = append(subDirIDs, subID)
+			// recursively look up sub folder or files and update them first
+			subPOs, err := repo.GetUserFileDao().QueryDirByPath(ctx, po.UserID, po.Path+po.Name+"/", true)
+			if err != nil {
+				return err
 			}
-		}
-	}
-	if len(subDirIDs) > 0 {
-		err = MoveToPath(ctx, subDirIDs, path+po.Name, overwrite)
-		if err != nil {
-			return err
+			if len(subPOs) > 0 {
+				err = moveToPathByPOs(ctx, subPOs, path+po.Name+"/", overwrite)
+				if err != nil {
+					return err
+				}
+			}
 		}
 	}
 
@@ -238,7 +288,50 @@ func MoveToPath(ctx context.Context, ids []string, path string, overwrite int32)
 		}
 		return nil
 	}
-	count, err := repo.GetUserFileDao().UpdatesFileOrDir(ctx, ids, &repo.UserFilePO{Path: path, UpdateAt: time.Now()})
+	count, err := repo.GetUserFileDao().UpdateFileOrDirByIDs(ctx, ids, &repo.UserFilePO{Path: path, UpdateAt: time.Now()})
+	if err != nil {
+		return status.Errorf(errcode.DatabaseOperationErrCode, errcode.DatabaseOperationErrMsg, err)
+	}
+	if count != len(ids) {
+		return status.Error(errcode.UpdateCountNotMatchCode, errcode.UpdateCountNotMatchMsg)
+	}
+	return nil
+}
+
+func moveToPathByPOs(ctx context.Context, pos []*repo.UserFilePO, path string, overwrite int32) error {
+	// if it is a folder, then trigger recursively call
+	for _, po := range pos {
+		if po.IsDir == isDir {
+			// recursively look up sub folder or files and update them first
+			subPOs, err := repo.GetUserFileDao().QueryDirByPath(ctx, po.UserID, po.Path+po.Name+"/", true)
+			if err != nil {
+				return err
+			}
+			if len(subPOs) > 0 {
+				err = moveToPathByPOs(ctx, subPOs, path+po.Name+"/", overwrite)
+				if err != nil {
+					return err
+				}
+			}
+		}
+	}
+
+	if overwrite == doOverwrite {
+		for _, po := range pos {
+			po.Path = path
+			po.UpdateAt = time.Now()
+			_, err := replaceToPath(ctx, po)
+			if err != nil {
+				return err
+			}
+		}
+		return nil
+	}
+	var ids []string
+	for _, po := range pos {
+		ids = append(ids, po.ID)
+	}
+	count, err := repo.GetUserFileDao().UpdateFileOrDirByIDs(ctx, ids, &repo.UserFilePO{Path: path, UpdateAt: time.Now()})
 	if err != nil {
 		return status.Errorf(errcode.DatabaseOperationErrCode, errcode.DatabaseOperationErrMsg, err)
 	}
@@ -249,7 +342,7 @@ func MoveToPath(ctx context.Context, ids []string, path string, overwrite int32)
 }
 
 func MoveToRecycleBin(ctx context.Context, ids []string) error {
-	count, err := repo.GetUserFileDao().UpdatesFileOrDir(ctx, ids,
+	count, err := repo.GetUserFileDao().UpdateFileOrDirByIDs(ctx, ids,
 		&repo.UserFilePO{Status: statusRecycleBin, UpdateAt: time.Now()})
 	if err != nil {
 		return status.Errorf(errcode.DatabaseOperationErrCode, errcode.DatabaseOperationErrMsg, err)
@@ -261,7 +354,7 @@ func MoveToRecycleBin(ctx context.Context, ids []string) error {
 }
 
 func SoftDelete(ctx context.Context, ids []string) error {
-	count, err := repo.GetUserFileDao().UpdatesFileOrDir(ctx, ids,
+	count, err := repo.GetUserFileDao().UpdateFileOrDirByIDs(ctx, ids,
 		&repo.UserFilePO{Status: statusDeleted, UpdateAt: time.Now()})
 	if err != nil {
 		return status.Errorf(errcode.DatabaseOperationErrCode, errcode.DatabaseOperationErrMsg, err)
@@ -303,14 +396,13 @@ func checkRepeat(ctx context.Context, userID, name, path string) error {
 
 func buildNewFolderPO(userID, name, path string) *repo.UserFilePO {
 	return &repo.UserFilePO{
-		UserID:     userID,
-		Name:       name,
-		Path:       path,
-		IsDir:      isDir,
-		IsDirEmpty: isEmpty,
-		IsHide:     notHide,
-		Status:     statusEnable,
-		CreateAt:   time.Now(),
-		UpdateAt:   time.Now(),
+		UserID:   userID,
+		Name:     name,
+		Path:     path,
+		IsDir:    isDir,
+		IsHide:   notHide,
+		Status:   statusEnable,
+		CreateAt: time.Now(),
+		UpdateAt: time.Now(),
 	}
 }

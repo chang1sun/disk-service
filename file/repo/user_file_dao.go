@@ -2,7 +2,6 @@ package repo
 
 import (
 	"context"
-	"strings"
 
 	"github.com/changpro/disk-service/file/constants"
 	"go.mongodb.org/mongo-driver/bson"
@@ -29,11 +28,10 @@ func SetUserFileDao(dao *UserFileDao) {
 func (dao *UserFileDao) MakeNewFolder(ctx context.Context, po *UserFilePO) (string, error) {
 	// add a placeholder(fake file) to sync path if it is a folder
 	if po.IsDir == 1 {
-		fakeID, err := dao.addFakeFile(ctx, po.UserID, po.Path, po.Name)
+		_, err := dao.addFakeFile(ctx, po.UserID, po.Path, po.Name)
 		if err != nil {
 			return "", err
 		}
-		po.SubIDs = []string{fakeID}
 	}
 	res, err := dao.Database.Collection(collUserFiles).InsertOne(ctx, po)
 	if err != nil {
@@ -47,54 +45,51 @@ func (dao *UserFileDao) AddFileOrDir(ctx context.Context, po *UserFilePO) (strin
 	if err != nil {
 		return "", err
 	}
-	if err := dao.addToParentSubIDs(ctx, res.InsertedID.(primitive.ObjectID).String(), po); err != nil {
-		return "", err
-	}
 	return res.InsertedID.(primitive.ObjectID).String(), nil
 }
 
-func (dao *UserFileDao) removeFromParentSubIDs(ctx context.Context, id string, po *UserFilePO) error {
-	if po.Path == "/" {
-		return nil
-	}
-	path, name := getParentPathAndName(po.Path)
-	filter := bson.D{
-		{"user_id", po.UserID},
-		{"path", path},
-		{"name", name},
-	}
-	update := bson.D{
-		{"$pull", bson.E{"sub_ids", id}},
-	}
-	res := dao.Database.Collection(collUserFiles).FindOneAndUpdate(ctx, filter, update)
-	if res.Err() != nil {
-		return res.Err()
-	}
-	return nil
-}
+// func (dao *UserFileDao) removeFromParentSubIDs(ctx context.Context, id string, po *UserFilePO) error {
+// 	if po.Path == "/" {
+// 		return nil
+// 	}
+// 	path, name := getParentPathAndName(po.Path)
+// 	filter := bson.D{
+// 		{"user_id", po.UserID},
+// 		{"path", path},
+// 		{"name", name},
+// 	}
+// 	update := bson.D{
+// 		{"$pull", bson.E{"sub_ids", id}},
+// 	}
+// 	res := dao.Database.Collection(collUserFiles).FindOneAndUpdate(ctx, filter, update)
+// 	if res.Err() != nil {
+// 		return res.Err()
+// 	}
+// 	return nil
+// }
 
-func (dao *UserFileDao) addToParentSubIDs(ctx context.Context, id string, po *UserFilePO) error {
-	if po.Path == "/" {
-		return nil
-	}
-	path, name := getParentPathAndName(po.Path)
-	filter := bson.D{
-		{"user_id", po.UserID},
-		{"path", path},
-		{"name", name},
-	}
-	update := bson.D{
-		{"$push", bson.E{"sub_ids", id}},
-	}
-	res := dao.Database.Collection(collUserFiles).FindOneAndUpdate(ctx, filter, update)
-	if res.Err() != nil {
-		return res.Err()
-	}
-	return nil
-}
+// func (dao *UserFileDao) addToParentSubIDs(ctx context.Context, id string, po *UserFilePO) error {
+// 	if po.Path == "/" {
+// 		return nil
+// 	}
+// 	path, name := getParentPathAndName(po.Path)
+// 	filter := bson.D{
+// 		{"user_id", po.UserID},
+// 		{"path", path},
+// 		{"name", name},
+// 	}
+// 	update := bson.D{
+// 		{"$push", bson.E{"sub_ids", id}},
+// 	}
+// 	res := dao.Database.Collection(collUserFiles).FindOneAndUpdate(ctx, filter, update)
+// 	if res.Err() != nil {
+// 		return res.Err()
+// 	}
+// 	return nil
+// }
 
 func (dao *UserFileDao) addFakeFile(ctx context.Context, userID, path, name string) (string, error) {
-	res, err := dao.Database.Collection(collUserFiles).InsertOne(ctx, &UserFilePO{Status: 5, Path: path + name + "/"})
+	res, err := dao.Database.Collection(collUserFiles).InsertOne(ctx, &UserFilePO{Status: 5, Path: path + name + "/", IsDir: 2})
 	if err != nil {
 		return "", err
 	}
@@ -102,7 +97,12 @@ func (dao *UserFileDao) addFakeFile(ctx context.Context, userID, path, name stri
 }
 
 func (dao *UserFileDao) IsPathExist(ctx context.Context, userID, path string) (bool, error) {
-	res := dao.Database.Collection(collUserFiles).FindOne(ctx, &UserFilePO{UserID: userID, Path: path})
+	filter := bson.D{
+		{"user_id", userID},
+		{"path", path},
+		{"status", bson.E{"$in", []int32{1, 5}}}, // 1: enable, 5: placeholder used to check path
+	}
+	res := dao.Database.Collection(collUserFiles).FindOne(ctx, filter)
 	if res.Err() == mongo.ErrNoDocuments {
 		return false, nil
 	}
@@ -224,7 +224,7 @@ func (dao *UserFileDao) UpdateFileOrDir(ctx context.Context, id string, updatePO
 	return nil
 }
 
-func (dao *UserFileDao) UpdatesFileOrDir(ctx context.Context, ids []string, updatePO *UserFilePO) (int, error) {
+func (dao *UserFileDao) UpdateFileOrDirByIDs(ctx context.Context, ids []string, updatePO *UserFilePO) (int, error) {
 	var oids []primitive.ObjectID
 	for _, id := range ids {
 		oid, err := primitive.ObjectIDFromHex(id)
@@ -247,19 +247,8 @@ func (dao *UserFileDao) UpdatesFileOrDir(ctx context.Context, ids []string, upda
 }
 
 func (dao *UserFileDao) DeleteFileOrDir(ctx context.Context, id string) error {
-	var po UserFilePO
-	res := dao.Database.Collection(collUserFiles).FindOne(ctx, bson.D{{"_id", id}})
-	if res.Err() != nil {
-		return res.Err()
-	}
-	if err := res.Decode(&po); err != nil {
-		return err
-	}
 	_, err := dao.Database.Collection(collUserFiles).DeleteOne(ctx, bson.D{{"_id", id}})
 	if err != nil {
-		return err
-	}
-	if err := dao.removeFromParentSubIDs(ctx, id, &po); err != nil {
 		return err
 	}
 	return nil
@@ -293,13 +282,13 @@ func (dao *UserFileDao) QueryDocByIDs(ctx context.Context, ids []string) ([]*Use
 	return content, nil
 }
 
-func getParentPathAndName(path string) (string, string) {
-	if path == "/" {
-		return "", ""
-	}
-	p := strings.Split(path, "/")
-	if len(p) == 0 {
-		return "", ""
-	}
-	return strings.Join(p[:len(p)-2], "/") + "/", p[len(p)-2]
-}
+// func getParentPathAndName(path string) (string, string) {
+// 	if path == "/" {
+// 		return "", ""
+// 	}
+// 	p := strings.Split(path, "/")
+// 	if len(p) == 0 {
+// 		return "", ""
+// 	}
+// 	return strings.Join(p[:len(p)-2], "/") + "/", p[len(p)-2]
+// }
