@@ -47,8 +47,30 @@ func (dao *UserFileDao) AddFileOrDir(ctx context.Context, po *UserFilePO) (strin
 	if err != nil {
 		return "", err
 	}
-
+	if err := dao.addToParentSubIDs(ctx, res.InsertedID.(primitive.ObjectID).String(), po); err != nil {
+		return "", err
+	}
 	return res.InsertedID.(primitive.ObjectID).String(), nil
+}
+
+func (dao *UserFileDao) removeFromParentSubIDs(ctx context.Context, id string, po *UserFilePO) error {
+	if po.Path == "/" {
+		return nil
+	}
+	path, name := getParentPathAndName(po.Path)
+	filter := bson.D{
+		{"user_id", po.UserID},
+		{"path", path},
+		{"name", name},
+	}
+	update := bson.D{
+		{"$pull", bson.E{"sub_ids", id}},
+	}
+	res := dao.Database.Collection(collUserFiles).FindOneAndUpdate(ctx, filter, update)
+	if res.Err() != nil {
+		return res.Err()
+	}
+	return nil
 }
 
 func (dao *UserFileDao) addToParentSubIDs(ctx context.Context, id string, po *UserFilePO) error {
@@ -225,8 +247,19 @@ func (dao *UserFileDao) UpdatesFileOrDir(ctx context.Context, ids []string, upda
 }
 
 func (dao *UserFileDao) DeleteFileOrDir(ctx context.Context, id string) error {
+	var po UserFilePO
+	res := dao.Database.Collection(collUserFiles).FindOne(ctx, bson.D{{"_id", id}})
+	if res.Err() != nil {
+		return res.Err()
+	}
+	if err := res.Decode(&po); err != nil {
+		return err
+	}
 	_, err := dao.Database.Collection(collUserFiles).DeleteOne(ctx, bson.D{{"_id", id}})
 	if err != nil {
+		return err
+	}
+	if err := dao.removeFromParentSubIDs(ctx, id, &po); err != nil {
 		return err
 	}
 	return nil
