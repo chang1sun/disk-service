@@ -39,6 +39,11 @@ const (
 	statusPlaceHolder = 5
 )
 
+const (
+	displayHidden    = 1
+	notDisplayHidden = 2
+)
+
 func QuickUpload(ctx context.Context, userID, fileName, md5 string) (string, error) {
 	id, err := tryQuickUpload(ctx, userID, fileName, md5)
 	if err != nil {
@@ -81,6 +86,14 @@ func tryQuickUpload(ctx context.Context, userID, fileName, md5 string) (string, 
 
 func GetUserRoot(ctx context.Context, userID string) ([]*repo.UserFilePO, error) {
 	content, err := repo.GetUserFileDao().QueryUserRoot(ctx, userID, false)
+	if err != nil {
+		return nil, status.Errorf(errcode.DatabaseOperationErrCode, errcode.DatabaseOperationErrMsg, err)
+	}
+	return content, nil
+}
+
+func GetDirByPath(ctx context.Context, userID, path string, showHide bool) ([]*repo.UserFilePO, error) {
+	content, err := repo.GetUserFileDao().QueryDirByPath(ctx, userID, path, showHide)
 	if err != nil {
 		return nil, status.Errorf(errcode.DatabaseOperationErrCode, errcode.DatabaseOperationErrMsg, err)
 	}
@@ -342,6 +355,62 @@ func moveToPathByPOs(ctx context.Context, pos []*repo.UserFilePO, path string, o
 }
 
 func MoveToRecycleBin(ctx context.Context, ids []string) error {
+	if len(ids) == 0 {
+		return nil
+	}
+	// recursive call
+	pos, err := repo.GetUserFileDao().QueryDocByIDs(ctx, ids)
+	if err != nil {
+		return status.Errorf(errcode.DatabaseOperationErrCode, errcode.DatabaseOperationErrMsg, err)
+	}
+	if len(pos) != len(ids) {
+		return status.Error(errcode.FindCountNotMatchCode, errcode.FindCountNotMatchMsg)
+	}
+	for _, po := range pos {
+		if po.IsDir == isDir {
+			subPOs, err := repo.GetUserFileDao().QueryDirByPath(ctx, po.UserID, po.Path+po.Name+"/", true)
+			if err != nil {
+				return status.Errorf(errcode.DatabaseOperationErrCode, errcode.DatabaseOperationErrMsg, err)
+			}
+			if len(subPOs) > 0 {
+				err = moveToRecycleBinByPOs(ctx, subPOs)
+				if err != nil {
+					return err
+				}
+			}
+		}
+	}
+
+	count, err := repo.GetUserFileDao().UpdateFileOrDirByIDs(ctx, ids,
+		&repo.UserFilePO{Status: statusRecycleBin, UpdateAt: time.Now()})
+	if err != nil {
+		return status.Errorf(errcode.DatabaseOperationErrCode, errcode.DatabaseOperationErrMsg, err)
+	}
+	if count != len(ids) {
+		return status.Error(errcode.UpdateCountNotMatchCode, errcode.UpdateCountNotMatchMsg)
+	}
+	return nil
+}
+
+func moveToRecycleBinByPOs(ctx context.Context, pos []*repo.UserFilePO) error {
+	for _, po := range pos {
+		if po.IsDir == isDir {
+			subPOs, err := repo.GetUserFileDao().QueryDirByPath(ctx, po.UserID, po.Path+po.Name+"/", true)
+			if err != nil {
+				return status.Errorf(errcode.DatabaseOperationErrCode, errcode.DatabaseOperationErrMsg, err)
+			}
+			if len(subPOs) > 0 {
+				err = moveToRecycleBinByPOs(ctx, subPOs)
+				if err != nil {
+					return err
+				}
+			}
+		}
+	}
+	var ids []string
+	for _, po := range pos {
+		ids = append(ids, po.ID)
+	}
 	count, err := repo.GetUserFileDao().UpdateFileOrDirByIDs(ctx, ids,
 		&repo.UserFilePO{Status: statusRecycleBin, UpdateAt: time.Now()})
 	if err != nil {
@@ -354,6 +423,61 @@ func MoveToRecycleBin(ctx context.Context, ids []string) error {
 }
 
 func SoftDelete(ctx context.Context, ids []string) error {
+	if len(ids) == 0 {
+		return nil
+	}
+	// recursive call
+	pos, err := repo.GetUserFileDao().QueryDocByIDs(ctx, ids)
+	if err != nil {
+		return status.Errorf(errcode.DatabaseOperationErrCode, errcode.DatabaseOperationErrMsg, err)
+	}
+	if len(pos) != len(ids) {
+		return status.Error(errcode.FindCountNotMatchCode, errcode.FindCountNotMatchMsg)
+	}
+	for _, po := range pos {
+		if po.IsDir == isDir {
+			subPOs, err := repo.GetUserFileDao().QueryDirByPath(ctx, po.UserID, po.Path+po.Name+"/", true)
+			if err != nil {
+				return status.Errorf(errcode.DatabaseOperationErrCode, errcode.DatabaseOperationErrMsg, err)
+			}
+			if len(subPOs) > 0 {
+				err = softDeleteByPOs(ctx, subPOs)
+				if err != nil {
+					return err
+				}
+			}
+		}
+	}
+	count, err := repo.GetUserFileDao().UpdateFileOrDirByIDs(ctx, ids,
+		&repo.UserFilePO{Status: statusDeleted, UpdateAt: time.Now()})
+	if err != nil {
+		return status.Errorf(errcode.DatabaseOperationErrCode, errcode.DatabaseOperationErrMsg, err)
+	}
+	if count != len(ids) {
+		return status.Error(errcode.UpdateCountNotMatchCode, errcode.UpdateCountNotMatchMsg)
+	}
+	return nil
+}
+
+func softDeleteByPOs(ctx context.Context, pos []*repo.UserFilePO) error {
+	for _, po := range pos {
+		if po.IsDir == isDir {
+			subPOs, err := repo.GetUserFileDao().QueryDirByPath(ctx, po.UserID, po.Path+po.Name+"/", true)
+			if err != nil {
+				return status.Errorf(errcode.DatabaseOperationErrCode, errcode.DatabaseOperationErrMsg, err)
+			}
+			if len(subPOs) > 0 {
+				err = softDeleteByPOs(ctx, subPOs)
+				if err != nil {
+					return err
+				}
+			}
+		}
+	}
+	var ids []string
+	for _, po := range pos {
+		ids = append(ids, po.ID)
+	}
 	count, err := repo.GetUserFileDao().UpdateFileOrDirByIDs(ctx, ids,
 		&repo.UserFilePO{Status: statusDeleted, UpdateAt: time.Now()})
 	if err != nil {
@@ -366,6 +490,13 @@ func SoftDelete(ctx context.Context, ids []string) error {
 }
 
 func HardDelete(ctx context.Context, id string) error {
+	po, err := repo.GetUserFileDao().QueryDetail(ctx, id)
+	if err != nil {
+		return status.Errorf(errcode.DatabaseOperationErrCode, errcode.DatabaseOperationErrMsg, err)
+	}
+	if po.IsDir == 1 {
+		return status.Error(errcode.ForbidHardDeleteFolderCode, errcode.ForbidHardDeleteFolderMsg)
+	}
 	if err := repo.GetUserFileDao().DeleteFileOrDir(ctx, id); err != nil {
 		return status.Errorf(errcode.DatabaseOperationErrCode, errcode.DatabaseOperationErrMsg, err)
 	}

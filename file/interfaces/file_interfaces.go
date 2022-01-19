@@ -32,7 +32,7 @@ func (s *server) UploadFile(ctx context.Context,
 func (s *server) GetDirsAndFiles(ctx context.Context,
 	req *filepb.GetDirsAndFilesReq) (*filepb.GetDirsAndFilesRsp, error) {
 	rsp := &filepb.GetDirsAndFilesRsp{}
-	content, err := service.GetUserRoot(ctx, req.UserId)
+	content, err := service.GetDirByPath(ctx, req.UserId, req.Path, req.ShowHide)
 	if err != nil {
 		cutil.LogErr(err, "GetDirsAndFiles")
 		return rsp, err
@@ -136,8 +136,22 @@ func (s *server) CreateShare(ctx context.Context,
 }
 
 func (s *server) RetrieveShareToPath(ctx context.Context,
-	req *filepb.RetrieveShareToPathReq) (*filepb.RetrieveShareToPathRsp, error) {
-	rsp := &filepb.RetrieveShareToPathRsp{}
+	req *filepb.RetrieveShareToPathReq) (*emptypb.Empty, error) {
+	rsp := &emptypb.Empty{}
+	// TODO
+	return rsp, nil
+}
+
+func (s *server) GetRecycleBinList(ctx context.Context,
+	req *filepb.GetRecycleBinListReq) (*filepb.GetRecycleBinListRsp, error) {
+	rsp := &filepb.GetRecycleBinListRsp{}
+	// TODO
+	return rsp, nil
+}
+
+func (s *server) GetShareRecords(ctx context.Context,
+	req *filepb.GetShareRecordsReq) (*filepb.GetShareRecordsRsp, error) {
+	rsp := &filepb.GetShareRecordsRsp{}
 	// TODO
 	return rsp, nil
 }

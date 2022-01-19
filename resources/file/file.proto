@@ -118,7 +118,7 @@ message UploadFileRsp {
 message GetDirsAndFilesReq {
     string user_id = 1;
     string path = 2;
-    int32 show_hide = 3; // display(1) hidden dirs & files or not(2)
+    bool show_hide = 3; // display(true) hidden dirs & files or not(false)
 }
 
 message GetDirsAndFilesRsp {
@@ -204,10 +204,6 @@ message RetrieveShareToPathReq {
     string user_id = 1;
     string token = 2;
     string path = 3;
-}
-
-message RetrieveShareToPathRsp {
-    repeated string id = 1;
 }
 
 message GetShareRecordsReq {
