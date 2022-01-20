@@ -1,6 +1,11 @@
 package repo
 
-import "time"
+import (
+	"encoding/json"
+	"time"
+
+	"github.com/changpro/disk-service/common/constants"
+)
 
 type UserFilePO struct {
 	ID        string `bson:"_id,omitempty" json:"id,omitempty"`
@@ -16,6 +21,19 @@ type UserFilePO struct {
 	FileType string    `bson:"file_type,omitempty" json:"fileType,omitempty"`
 	IsHide   int32     `bson:"is_hide,omitempty" json:"isHide,omitempty"` // hide(1) or not(2)
 	Status   int32     `bson:"status,omitempty" json:"status,omitempty"`  // enable(1), blacklist(2), recycle bin(3), deleted (4)
-	CreateAt time.Time `bson:"create_at,omitempty" json:"createAt,omitempty"`
-	UpdateAt time.Time `bson:"update_at,omitempty" json:"updateAt,omitempty"`
+	CreateAt time.Time `bson:"create_at,omitempty" json:"-"`
+	UpdateAt time.Time `bson:"update_at,omitempty" json:"-"`
+}
+
+func (p *UserFilePO) MarshalJSON() ([]byte, error) {
+	type Alias UserFilePO
+	return json.Marshal(&struct {
+		*Alias
+		CreateAt string `json:"createAt"`
+		UpdateAt string `json:"updateAt"`
+	}{
+		Alias:    (*Alias)(p),
+		CreateAt: p.CreateAt.Format(constants.StandardTimeFormat),
+		UpdateAt: p.UpdateAt.Format(constants.StandardTimeFormat),
+	})
 }

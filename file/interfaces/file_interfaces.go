@@ -2,6 +2,7 @@ package interfaces
 
 import (
 	"context"
+	"log"
 
 	cutil "github.com/changpro/disk-service/common/util"
 	"github.com/changpro/disk-service/file/interfaces/assembler"
@@ -32,14 +33,18 @@ func (s *server) UploadFile(ctx context.Context,
 func (s *server) GetDirsAndFiles(ctx context.Context,
 	req *filepb.GetDirsAndFilesReq) (*filepb.GetDirsAndFilesRsp, error) {
 	rsp := &filepb.GetDirsAndFilesRsp{}
+	log.Println(req.UserId, req.Path, req.ShowHide)
 	content, err := service.GetDirByPath(ctx, req.UserId, req.Path, req.ShowHide)
 	if err != nil {
 		cutil.LogErr(err, "GetDirsAndFiles")
 		return rsp, err
 	}
-	for _, d := range content {
-		rsp.Details = append(rsp.Details, cutil.AnyToStructpb(d))
+	detail, err := assembler.AssembleDirsAndFilesList(content)
+	if err != nil {
+		cutil.LogErr(err, "GetDirsAndFiles")
+		return rsp, err
 	}
+	rsp.Details = detail
 	return rsp, nil
 }
 
@@ -152,6 +157,13 @@ func (s *server) GetRecycleBinList(ctx context.Context,
 func (s *server) GetShareRecords(ctx context.Context,
 	req *filepb.GetShareRecordsReq) (*filepb.GetShareRecordsRsp, error) {
 	rsp := &filepb.GetShareRecordsRsp{}
+	// TODO
+	return rsp, nil
+}
+
+func (s *server) GetShareDetail(ctx context.Context,
+	req *filepb.GetShareDetailReq) (*filepb.GetShareDetailRsp, error) {
+	rsp := &filepb.GetShareDetailRsp{}
 	// TODO
 	return rsp, nil
 }

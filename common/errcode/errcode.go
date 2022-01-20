@@ -44,6 +44,8 @@ const (
 	ParseHTTPRequestFormFileErrCode = 50101
 	OsOperationErrCode              = 50102
 	RPCCallErrCode                  = 50103
+	JsonMarshalErrCode              = 50104
+	StructpbConvertErrCode          = 50105
 )
 
 // Error level msg
@@ -52,4 +54,6 @@ const (
 	ParseHTTPRequestFormFileErrMsg = "[error] parse http request failed, err msg: %v"
 	OsOperationErrMsg              = "[error] os operation failed, err msg: %v"
 	RPCCallErrMsg                  = "[error] rpc call failed, err msg: %v"
+	JsonMarshalErrMsg              = "[error] json marshal or unmarshal failed, err msg: %v"
+	StructpbConvertErrMsg          = "[error] structpb conversion failed, err msg: %v"
 )

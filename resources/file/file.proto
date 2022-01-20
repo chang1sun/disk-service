@@ -11,7 +11,7 @@ service FileService {
     
     rpc UploadFile(UploadFileReq) returns (UploadFileRsp) {
         option (google.api.http) = {
-            post: "/v1/{user_id}/files/upload"
+            post: "/v1/files/quick-upload"
             body: "*"
         };
     }
@@ -30,14 +30,14 @@ service FileService {
 
     rpc MakeNewFolder (MakeNewFolderReq) returns (MakeNewFolderRsp) {
         option (google.api.http) = {
-            post: "/v1/{user_id}/files/makedir"
+            post: "/v1/files/mkdir"
             body: "*"
         };
     }
 
     rpc MoveToRecycleBin (MoveToRecycleBinReq) returns (google.protobuf.Empty) {
         option (google.api.http) = {
-            post: "/v1/{user_id}/files/recycle"
+            post: "/v1/files/recycle"
             body: "*"
         };
     }
@@ -50,49 +50,49 @@ service FileService {
 
     rpc SoftDelete (SoftDeleteReq) returns (google.protobuf.Empty) {
         option (google.api.http) = {
-            post: "/v1/{user_id}/files/delete"
+            post: "/v1/files/delete"
             body: "*"
         };
     }
 
     rpc HardDelete (HardDeleteReq) returns (google.protobuf.Empty) {
         option (google.api.http) = {
-            post: "/v1/{user_id}/files/hard-delete"
+            post: "/v1/files/hard-delete"
             body: "*"
         };
     }
 
     rpc Rename (RenameReq) returns (google.protobuf.Empty) {
         option (google.api.http) = {
-            post: "/v1/{user_id}/files/rename"
+            post: "/v1/files/rename"
             body: "*"
         };
     }
 
     rpc MoveToPath (MoveToPathReq) returns (google.protobuf.Empty) {
         option (google.api.http) = {
-            post: "/v1/{user_id}/files/move"
+            post: "/v1/files/move"
             body: "*"
         };
     }
 
     rpc CopyToPath (CopyToPathReq) returns (google.protobuf.Empty) {
         option (google.api.http) = {
-            post: "/v1/{user_id}/files/copy"
+            post: "/v1/files/copy"
             body: "*"
         };
     }
 
     rpc CreateShare (CreateShareReq) returns (CreateShareRsp) {
         option (google.api.http) = {
-            post: "/v1/{user_id}/files/create-share"
+            post: "/v1/files/create-share"
             body: "*"
         };
     }
 
     rpc RetrieveShareToPath (RetrieveShareToPathReq) returns (google.protobuf.Empty) {
         option (google.api.http) = {
-            post: "/v1/{user_id}/files/save-from-share"
+            post: "/v1/files/save-from-share"
             body: "*"
         };
     }
@@ -100,6 +100,12 @@ service FileService {
     rpc GetShareRecords (GetShareRecordsReq) returns (GetShareRecordsRsp) {
         option (google.api.http) = {
             get: "/v1/{user_id}/files/share-records"
+        };
+    }
+
+    rpc GetShareDetail (GetShareDetailReq) returns (GetShareDetailRsp) {
+        option (google.api.http) = {
+            get: "/v1/files/share/{token}"
         };
     }
 }
@@ -192,8 +198,9 @@ message CopyToPathReq {
 
 message CreateShareReq {
     string user_id = 1;
-    string id = 2;
-    int32 expire_hour = 3;
+    string file_id = 2;
+    string file_name = 3;
+    int32 expire_hour = 4;
 }
 
 message CreateShareRsp {
@@ -204,6 +211,21 @@ message RetrieveShareToPathReq {
     string user_id = 1;
     string token = 2;
     string path = 3;
+}
+
+message GetShareDetailReq {
+    string token = 1;
+}
+
+message GetShareDetailRsp {
+    string uploader = 1;
+    string file_id = 2;
+    string file_name = 3;
+    int32 expire_hour = 4;
+    string create_time = 5;
+    string view_num = 6;
+    string save_num = 7;
+    string size = 8;
 }
 
 message GetShareRecordsReq {

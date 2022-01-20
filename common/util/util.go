@@ -28,6 +28,7 @@ func Sha1FromReader(r io.Reader) string {
 func AnyToStructpb(i interface{}) *structpb.Struct {
 	s := structs.New(i)
 	s.TagName = "json"
+	log.Println(s.Map())
 	pb, err := structpb.NewStruct(s.Map())
 	if err != nil {
 		log.Fatalf("cannot convert, err: %v", err)

@@ -2,11 +2,14 @@ package repo
 
 import (
 	"context"
+	"log"
+	"time"
 
 	"github.com/changpro/disk-service/file/constants"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 const collUserFiles = "user_files"
@@ -26,12 +29,10 @@ func SetUserFileDao(dao *UserFileDao) {
 }
 
 func (dao *UserFileDao) MakeNewFolder(ctx context.Context, po *UserFilePO) (string, error) {
-	// add a placeholder(fake file) to sync path if it is a folder
-	if po.IsDir == 1 {
-		_, err := dao.addFakeFile(ctx, po.UserID, po.Path, po.Name)
-		if err != nil {
-			return "", err
-		}
+	// add a placeholder(fake file) to sync path
+	_, err := dao.addFakeFile(ctx, po.UserID, po.Path, po.Name)
+	if err != nil {
+		return "", err
 	}
 	res, err := dao.Database.Collection(collUserFiles).InsertOne(ctx, po)
 	if err != nil {
@@ -89,21 +90,32 @@ func (dao *UserFileDao) AddFileOrDir(ctx context.Context, po *UserFilePO) (strin
 // }
 
 func (dao *UserFileDao) addFakeFile(ctx context.Context, userID, path, name string) (string, error) {
-	res, err := dao.Database.Collection(collUserFiles).InsertOne(ctx, &UserFilePO{Status: 5, Path: path + name + "/", IsDir: 2})
+	res, err := dao.Database.Collection(collUserFiles).
+		InsertOne(ctx, &UserFilePO{
+			UserID:   userID,
+			Status:   5,
+			Path:     path + name + "/",
+			IsDir:    2,
+			CreateAt: time.Now(),
+			UpdateAt: time.Now(),
+		})
 	if err != nil {
 		return "", err
 	}
+	log.Println("add fake file success, id: ", res.InsertedID)
 	return res.InsertedID.(primitive.ObjectID).String(), nil
 }
 
 func (dao *UserFileDao) IsPathExist(ctx context.Context, userID, path string) (bool, error) {
-	filter := bson.D{
-		{"user_id", userID},
-		{"path", path},
-		{"status", bson.E{"$in", []int32{1, 5}}}, // 1: enable, 5: placeholder used to check path
+	log.Println(userID, path)
+	filter := bson.M{
+		"user_id": userID,
+		"path":    path,
+		"status":  bson.M{"$in": []int32{1, 5}}, // 1: enable, 5: placeholder used to check path
 	}
 	res := dao.Database.Collection(collUserFiles).FindOne(ctx, filter)
 	if res.Err() == mongo.ErrNoDocuments {
+		log.Println(res.Err())
 		return false, nil
 	}
 	if res.Err() != nil {
@@ -114,12 +126,12 @@ func (dao *UserFileDao) IsPathExist(ctx context.Context, userID, path string) (b
 
 func (dao *UserFileDao) QueryUserRoot(ctx context.Context, userID string, showHide bool) ([]*UserFilePO, error) {
 	var content []*UserFilePO
-	filter := bson.D{
-		{"user_id", userID},
-		{"path", "/"},
+	filter := bson.M{
+		"user_id": userID,
+		"path":    "/",
 	}
 	if !showHide {
-		filter = append(filter, bson.E{"is_hide", constants.FileDisplayStatusShow})
+		filter["is_hide"] = constants.FileDisplayStatusShow
 	}
 	cursor, err := dao.Database.Collection(collUserFiles).Find(ctx, filter)
 	if err != nil {
@@ -142,8 +154,8 @@ func (dao *UserFileDao) QueryDetail(ctx context.Context, fileID string) (*UserFi
 	if err != nil {
 		return nil, err
 	}
-	filter := bson.D{
-		{"_id", oid},
+	filter := bson.M{
+		"_id": oid,
 	}
 	res := dao.Database.Collection(collUserFiles).FindOne(ctx, filter)
 	if res.Err() != nil {
@@ -158,12 +170,13 @@ func (dao *UserFileDao) QueryDetail(ctx context.Context, fileID string) (*UserFi
 
 func (dao *UserFileDao) QueryDirByPath(ctx context.Context, userID, path string, showHide bool) ([]*UserFilePO, error) {
 	var content []*UserFilePO
-	filter := bson.D{
-		{"user_id", userID},
-		{"path", path},
+	filter := bson.M{
+		"user_id": userID,
+		"path":    path,
+		"status":  1,
 	}
 	if !showHide {
-		filter = append(filter, bson.E{"is_hide", constants.FileDisplayStatusShow})
+		filter["is_hide"] = constants.FileDisplayStatusShow
 	}
 	cursor, err := dao.Database.Collection(collUserFiles).Find(ctx, filter)
 	if err != nil {
@@ -181,10 +194,10 @@ func (dao *UserFileDao) QueryDirByPath(ctx context.Context, userID, path string,
 }
 
 func (dao *UserFileDao) IsFileOrDirExist(ctx context.Context, userID, name, path string) (bool, error) {
-	filter := bson.D{
-		{"user_id", userID},
-		{"path", path},
-		{"name", name},
+	filter := bson.M{
+		"user_id": userID,
+		"path":    path,
+		"name":    name,
 	}
 	res := dao.Database.Collection(collUserFiles).FindOne(ctx, filter)
 	if res.Err() == mongo.ErrNoDocuments {
@@ -197,11 +210,13 @@ func (dao *UserFileDao) IsFileOrDirExist(ctx context.Context, userID, name, path
 }
 
 func (dao *UserFileDao) ReplaceFileOrDir(ctx context.Context, po *UserFilePO) (string, error) {
-	filter := bson.D{
-		{"user_id", po.UserID},
-		{"path", po.Path},
-		{"name", po.Name},
+	filter := bson.M{
+		"user_id": po.UserID,
+		"path":    po.Path,
+		"name":    po.Name,
 	}
+	opts := &options.ReplaceOptions{}
+	opts.SetUpsert(true)
 	res, err := dao.Database.Collection(collUserFiles).ReplaceOne(ctx, filter, po)
 	if err != nil {
 		return "", err
@@ -233,8 +248,8 @@ func (dao *UserFileDao) UpdateFileOrDirByIDs(ctx context.Context, ids []string, 
 		}
 		oids = append(oids, oid)
 	}
-	filter := bson.D{
-		{"_id", bson.E{"$in", oids}},
+	filter := bson.M{
+		"_id": bson.M{"$in": oids},
 	}
 	update := bson.D{
 		{"$set", updatePO},
@@ -247,7 +262,7 @@ func (dao *UserFileDao) UpdateFileOrDirByIDs(ctx context.Context, ids []string, 
 }
 
 func (dao *UserFileDao) DeleteFileOrDir(ctx context.Context, id string) error {
-	_, err := dao.Database.Collection(collUserFiles).DeleteOne(ctx, bson.D{{"_id", id}})
+	_, err := dao.Database.Collection(collUserFiles).DeleteOne(ctx, bson.M{"_id": id})
 	if err != nil {
 		return err
 	}
@@ -264,8 +279,8 @@ func (dao *UserFileDao) QueryDocByIDs(ctx context.Context, ids []string) ([]*Use
 		}
 		oids = append(oids, oid)
 	}
-	filter := bson.D{
-		{"_id", bson.E{"$in", oids}},
+	filter := bson.M{
+		"_id": bson.M{"$in": oids},
 	}
 	cursor, err := dao.Database.Collection(collUserFiles).Find(ctx, filter)
 	if err != nil {

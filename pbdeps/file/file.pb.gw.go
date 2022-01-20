@@ -43,23 +43,6 @@ func request_FileService_UploadFile_0(ctx context.Context, marshaler runtime.Mar
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
 
-	var (
-		val string
-		ok  bool
-		err error
-		_   = err
-	)
-
-	val, ok = pathParams["user_id"]
-	if !ok {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "user_id")
-	}
-
-	protoReq.UserId, err = runtime.String(val)
-	if err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "user_id", err)
-	}
-
 	msg, err := client.UploadFile(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
 	return msg, metadata, err
 
@@ -75,23 +58,6 @@ func local_request_FileService_UploadFile_0(ctx context.Context, marshaler runti
 	}
 	if err := marshaler.NewDecoder(newReader()).Decode(&protoReq); err != nil && err != io.EOF {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
-	}
-
-	var (
-		val string
-		ok  bool
-		err error
-		_   = err
-	)
-
-	val, ok = pathParams["user_id"]
-	if !ok {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "user_id")
-	}
-
-	protoReq.UserId, err = runtime.String(val)
-	if err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "user_id", err)
 	}
 
 	msg, err := server.UploadFile(ctx, &protoReq)
@@ -271,23 +237,6 @@ func request_FileService_MakeNewFolder_0(ctx context.Context, marshaler runtime.
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
 
-	var (
-		val string
-		ok  bool
-		err error
-		_   = err
-	)
-
-	val, ok = pathParams["user_id"]
-	if !ok {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "user_id")
-	}
-
-	protoReq.UserId, err = runtime.String(val)
-	if err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "user_id", err)
-	}
-
 	msg, err := client.MakeNewFolder(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
 	return msg, metadata, err
 
@@ -303,23 +252,6 @@ func local_request_FileService_MakeNewFolder_0(ctx context.Context, marshaler ru
 	}
 	if err := marshaler.NewDecoder(newReader()).Decode(&protoReq); err != nil && err != io.EOF {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
-	}
-
-	var (
-		val string
-		ok  bool
-		err error
-		_   = err
-	)
-
-	val, ok = pathParams["user_id"]
-	if !ok {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "user_id")
-	}
-
-	protoReq.UserId, err = runtime.String(val)
-	if err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "user_id", err)
 	}
 
 	msg, err := server.MakeNewFolder(ctx, &protoReq)
@@ -339,23 +271,6 @@ func request_FileService_MoveToRecycleBin_0(ctx context.Context, marshaler runti
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
 
-	var (
-		val string
-		ok  bool
-		err error
-		_   = err
-	)
-
-	val, ok = pathParams["user_id"]
-	if !ok {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "user_id")
-	}
-
-	protoReq.UserId, err = runtime.String(val)
-	if err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "user_id", err)
-	}
-
 	msg, err := client.MoveToRecycleBin(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
 	return msg, metadata, err
 
@@ -371,23 +286,6 @@ func local_request_FileService_MoveToRecycleBin_0(ctx context.Context, marshaler
 	}
 	if err := marshaler.NewDecoder(newReader()).Decode(&protoReq); err != nil && err != io.EOF {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
-	}
-
-	var (
-		val string
-		ok  bool
-		err error
-		_   = err
-	)
-
-	val, ok = pathParams["user_id"]
-	if !ok {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "user_id")
-	}
-
-	protoReq.UserId, err = runtime.String(val)
-	if err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "user_id", err)
 	}
 
 	msg, err := server.MoveToRecycleBin(ctx, &protoReq)
@@ -459,23 +357,6 @@ func request_FileService_SoftDelete_0(ctx context.Context, marshaler runtime.Mar
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
 
-	var (
-		val string
-		ok  bool
-		err error
-		_   = err
-	)
-
-	val, ok = pathParams["user_id"]
-	if !ok {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "user_id")
-	}
-
-	protoReq.UserId, err = runtime.String(val)
-	if err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "user_id", err)
-	}
-
 	msg, err := client.SoftDelete(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
 	return msg, metadata, err
 
@@ -491,23 +372,6 @@ func local_request_FileService_SoftDelete_0(ctx context.Context, marshaler runti
 	}
 	if err := marshaler.NewDecoder(newReader()).Decode(&protoReq); err != nil && err != io.EOF {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
-	}
-
-	var (
-		val string
-		ok  bool
-		err error
-		_   = err
-	)
-
-	val, ok = pathParams["user_id"]
-	if !ok {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "user_id")
-	}
-
-	protoReq.UserId, err = runtime.String(val)
-	if err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "user_id", err)
 	}
 
 	msg, err := server.SoftDelete(ctx, &protoReq)
@@ -527,23 +391,6 @@ func request_FileService_HardDelete_0(ctx context.Context, marshaler runtime.Mar
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
 
-	var (
-		val string
-		ok  bool
-		err error
-		_   = err
-	)
-
-	val, ok = pathParams["user_id"]
-	if !ok {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "user_id")
-	}
-
-	protoReq.UserId, err = runtime.String(val)
-	if err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "user_id", err)
-	}
-
 	msg, err := client.HardDelete(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
 	return msg, metadata, err
 
@@ -559,23 +406,6 @@ func local_request_FileService_HardDelete_0(ctx context.Context, marshaler runti
 	}
 	if err := marshaler.NewDecoder(newReader()).Decode(&protoReq); err != nil && err != io.EOF {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
-	}
-
-	var (
-		val string
-		ok  bool
-		err error
-		_   = err
-	)
-
-	val, ok = pathParams["user_id"]
-	if !ok {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "user_id")
-	}
-
-	protoReq.UserId, err = runtime.String(val)
-	if err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "user_id", err)
 	}
 
 	msg, err := server.HardDelete(ctx, &protoReq)
@@ -595,23 +425,6 @@ func request_FileService_Rename_0(ctx context.Context, marshaler runtime.Marshal
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
 
-	var (
-		val string
-		ok  bool
-		err error
-		_   = err
-	)
-
-	val, ok = pathParams["user_id"]
-	if !ok {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "user_id")
-	}
-
-	protoReq.UserId, err = runtime.String(val)
-	if err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "user_id", err)
-	}
-
 	msg, err := client.Rename(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
 	return msg, metadata, err
 
@@ -627,23 +440,6 @@ func local_request_FileService_Rename_0(ctx context.Context, marshaler runtime.M
 	}
 	if err := marshaler.NewDecoder(newReader()).Decode(&protoReq); err != nil && err != io.EOF {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
-	}
-
-	var (
-		val string
-		ok  bool
-		err error
-		_   = err
-	)
-
-	val, ok = pathParams["user_id"]
-	if !ok {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "user_id")
-	}
-
-	protoReq.UserId, err = runtime.String(val)
-	if err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "user_id", err)
 	}
 
 	msg, err := server.Rename(ctx, &protoReq)
@@ -663,23 +459,6 @@ func request_FileService_MoveToPath_0(ctx context.Context, marshaler runtime.Mar
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
 
-	var (
-		val string
-		ok  bool
-		err error
-		_   = err
-	)
-
-	val, ok = pathParams["user_id"]
-	if !ok {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "user_id")
-	}
-
-	protoReq.UserId, err = runtime.String(val)
-	if err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "user_id", err)
-	}
-
 	msg, err := client.MoveToPath(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
 	return msg, metadata, err
 
@@ -695,23 +474,6 @@ func local_request_FileService_MoveToPath_0(ctx context.Context, marshaler runti
 	}
 	if err := marshaler.NewDecoder(newReader()).Decode(&protoReq); err != nil && err != io.EOF {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
-	}
-
-	var (
-		val string
-		ok  bool
-		err error
-		_   = err
-	)
-
-	val, ok = pathParams["user_id"]
-	if !ok {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "user_id")
-	}
-
-	protoReq.UserId, err = runtime.String(val)
-	if err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "user_id", err)
 	}
 
 	msg, err := server.MoveToPath(ctx, &protoReq)
@@ -731,23 +493,6 @@ func request_FileService_CopyToPath_0(ctx context.Context, marshaler runtime.Mar
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
 
-	var (
-		val string
-		ok  bool
-		err error
-		_   = err
-	)
-
-	val, ok = pathParams["user_id"]
-	if !ok {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "user_id")
-	}
-
-	protoReq.UserId, err = runtime.String(val)
-	if err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "user_id", err)
-	}
-
 	msg, err := client.CopyToPath(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
 	return msg, metadata, err
 
@@ -763,23 +508,6 @@ func local_request_FileService_CopyToPath_0(ctx context.Context, marshaler runti
 	}
 	if err := marshaler.NewDecoder(newReader()).Decode(&protoReq); err != nil && err != io.EOF {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
-	}
-
-	var (
-		val string
-		ok  bool
-		err error
-		_   = err
-	)
-
-	val, ok = pathParams["user_id"]
-	if !ok {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "user_id")
-	}
-
-	protoReq.UserId, err = runtime.String(val)
-	if err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "user_id", err)
 	}
 
 	msg, err := server.CopyToPath(ctx, &protoReq)
@@ -799,23 +527,6 @@ func request_FileService_CreateShare_0(ctx context.Context, marshaler runtime.Ma
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
 
-	var (
-		val string
-		ok  bool
-		err error
-		_   = err
-	)
-
-	val, ok = pathParams["user_id"]
-	if !ok {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "user_id")
-	}
-
-	protoReq.UserId, err = runtime.String(val)
-	if err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "user_id", err)
-	}
-
 	msg, err := client.CreateShare(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
 	return msg, metadata, err
 
@@ -831,23 +542,6 @@ func local_request_FileService_CreateShare_0(ctx context.Context, marshaler runt
 	}
 	if err := marshaler.NewDecoder(newReader()).Decode(&protoReq); err != nil && err != io.EOF {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
-	}
-
-	var (
-		val string
-		ok  bool
-		err error
-		_   = err
-	)
-
-	val, ok = pathParams["user_id"]
-	if !ok {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "user_id")
-	}
-
-	protoReq.UserId, err = runtime.String(val)
-	if err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "user_id", err)
 	}
 
 	msg, err := server.CreateShare(ctx, &protoReq)
@@ -867,23 +561,6 @@ func request_FileService_RetrieveShareToPath_0(ctx context.Context, marshaler ru
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
 
-	var (
-		val string
-		ok  bool
-		err error
-		_   = err
-	)
-
-	val, ok = pathParams["user_id"]
-	if !ok {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "user_id")
-	}
-
-	protoReq.UserId, err = runtime.String(val)
-	if err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "user_id", err)
-	}
-
 	msg, err := client.RetrieveShareToPath(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
 	return msg, metadata, err
 
@@ -899,23 +576,6 @@ func local_request_FileService_RetrieveShareToPath_0(ctx context.Context, marsha
 	}
 	if err := marshaler.NewDecoder(newReader()).Decode(&protoReq); err != nil && err != io.EOF {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
-	}
-
-	var (
-		val string
-		ok  bool
-		err error
-		_   = err
-	)
-
-	val, ok = pathParams["user_id"]
-	if !ok {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "user_id")
-	}
-
-	protoReq.UserId, err = runtime.String(val)
-	if err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "user_id", err)
 	}
 
 	msg, err := server.RetrieveShareToPath(ctx, &protoReq)
@@ -975,6 +635,58 @@ func local_request_FileService_GetShareRecords_0(ctx context.Context, marshaler 
 
 }
 
+func request_FileService_GetShareDetail_0(ctx context.Context, marshaler runtime.Marshaler, client FileServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+	var protoReq GetShareDetailReq
+	var metadata runtime.ServerMetadata
+
+	var (
+		val string
+		ok  bool
+		err error
+		_   = err
+	)
+
+	val, ok = pathParams["token"]
+	if !ok {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "token")
+	}
+
+	protoReq.Token, err = runtime.String(val)
+	if err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "token", err)
+	}
+
+	msg, err := client.GetShareDetail(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
+	return msg, metadata, err
+
+}
+
+func local_request_FileService_GetShareDetail_0(ctx context.Context, marshaler runtime.Marshaler, server FileServiceServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+	var protoReq GetShareDetailReq
+	var metadata runtime.ServerMetadata
+
+	var (
+		val string
+		ok  bool
+		err error
+		_   = err
+	)
+
+	val, ok = pathParams["token"]
+	if !ok {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "token")
+	}
+
+	protoReq.Token, err = runtime.String(val)
+	if err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "token", err)
+	}
+
+	msg, err := server.GetShareDetail(ctx, &protoReq)
+	return msg, metadata, err
+
+}
+
 // RegisterFileServiceHandlerServer registers the http handlers for service FileService to "mux".
 // UnaryRPC     :call FileServiceServer directly.
 // StreamingRPC :currently unsupported pending https://github.com/grpc/grpc-go/issues/906.
@@ -987,7 +699,7 @@ func RegisterFileServiceHandlerServer(ctx context.Context, mux *runtime.ServeMux
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/.FileService/UploadFile", runtime.WithHTTPPathPattern("/v1/{user_id}/files/upload"))
+		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/.FileService/UploadFile", runtime.WithHTTPPathPattern("/v1/files/quick-upload"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -1056,7 +768,7 @@ func RegisterFileServiceHandlerServer(ctx context.Context, mux *runtime.ServeMux
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/.FileService/MakeNewFolder", runtime.WithHTTPPathPattern("/v1/{user_id}/files/makedir"))
+		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/.FileService/MakeNewFolder", runtime.WithHTTPPathPattern("/v1/files/mkdir"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -1079,7 +791,7 @@ func RegisterFileServiceHandlerServer(ctx context.Context, mux *runtime.ServeMux
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/.FileService/MoveToRecycleBin", runtime.WithHTTPPathPattern("/v1/{user_id}/files/recycle"))
+		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/.FileService/MoveToRecycleBin", runtime.WithHTTPPathPattern("/v1/files/recycle"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -1125,7 +837,7 @@ func RegisterFileServiceHandlerServer(ctx context.Context, mux *runtime.ServeMux
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/.FileService/SoftDelete", runtime.WithHTTPPathPattern("/v1/{user_id}/files/delete"))
+		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/.FileService/SoftDelete", runtime.WithHTTPPathPattern("/v1/files/delete"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -1148,7 +860,7 @@ func RegisterFileServiceHandlerServer(ctx context.Context, mux *runtime.ServeMux
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/.FileService/HardDelete", runtime.WithHTTPPathPattern("/v1/{user_id}/files/hard-delete"))
+		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/.FileService/HardDelete", runtime.WithHTTPPathPattern("/v1/files/hard-delete"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -1171,7 +883,7 @@ func RegisterFileServiceHandlerServer(ctx context.Context, mux *runtime.ServeMux
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/.FileService/Rename", runtime.WithHTTPPathPattern("/v1/{user_id}/files/rename"))
+		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/.FileService/Rename", runtime.WithHTTPPathPattern("/v1/files/rename"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -1194,7 +906,7 @@ func RegisterFileServiceHandlerServer(ctx context.Context, mux *runtime.ServeMux
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/.FileService/MoveToPath", runtime.WithHTTPPathPattern("/v1/{user_id}/files/move"))
+		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/.FileService/MoveToPath", runtime.WithHTTPPathPattern("/v1/files/move"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -1217,7 +929,7 @@ func RegisterFileServiceHandlerServer(ctx context.Context, mux *runtime.ServeMux
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/.FileService/CopyToPath", runtime.WithHTTPPathPattern("/v1/{user_id}/files/copy"))
+		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/.FileService/CopyToPath", runtime.WithHTTPPathPattern("/v1/files/copy"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -1240,7 +952,7 @@ func RegisterFileServiceHandlerServer(ctx context.Context, mux *runtime.ServeMux
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/.FileService/CreateShare", runtime.WithHTTPPathPattern("/v1/{user_id}/files/create-share"))
+		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/.FileService/CreateShare", runtime.WithHTTPPathPattern("/v1/files/create-share"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -1263,7 +975,7 @@ func RegisterFileServiceHandlerServer(ctx context.Context, mux *runtime.ServeMux
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/.FileService/RetrieveShareToPath", runtime.WithHTTPPathPattern("/v1/{user_id}/files/save-from-share"))
+		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/.FileService/RetrieveShareToPath", runtime.WithHTTPPathPattern("/v1/files/save-from-share"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -1300,6 +1012,29 @@ func RegisterFileServiceHandlerServer(ctx context.Context, mux *runtime.ServeMux
 		}
 
 		forward_FileService_GetShareRecords_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+
+	})
+
+	mux.Handle("GET", pattern_FileService_GetShareDetail_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+		ctx, cancel := context.WithCancel(req.Context())
+		defer cancel()
+		var stream runtime.ServerTransportStream
+		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
+		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
+		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/.FileService/GetShareDetail", runtime.WithHTTPPathPattern("/v1/files/share/{token}"))
+		if err != nil {
+			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
+			return
+		}
+		resp, md, err := local_request_FileService_GetShareDetail_0(rctx, inboundMarshaler, server, req, pathParams)
+		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
+		ctx = runtime.NewServerMetadataContext(ctx, md)
+		if err != nil {
+			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
+			return
+		}
+
+		forward_FileService_GetShareDetail_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 
 	})
 
@@ -1348,7 +1083,7 @@ func RegisterFileServiceHandlerClient(ctx context.Context, mux *runtime.ServeMux
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/.FileService/UploadFile", runtime.WithHTTPPathPattern("/v1/{user_id}/files/upload"))
+		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/.FileService/UploadFile", runtime.WithHTTPPathPattern("/v1/files/quick-upload"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -1408,7 +1143,7 @@ func RegisterFileServiceHandlerClient(ctx context.Context, mux *runtime.ServeMux
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/.FileService/MakeNewFolder", runtime.WithHTTPPathPattern("/v1/{user_id}/files/makedir"))
+		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/.FileService/MakeNewFolder", runtime.WithHTTPPathPattern("/v1/files/mkdir"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -1428,7 +1163,7 @@ func RegisterFileServiceHandlerClient(ctx context.Context, mux *runtime.ServeMux
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/.FileService/MoveToRecycleBin", runtime.WithHTTPPathPattern("/v1/{user_id}/files/recycle"))
+		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/.FileService/MoveToRecycleBin", runtime.WithHTTPPathPattern("/v1/files/recycle"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -1468,7 +1203,7 @@ func RegisterFileServiceHandlerClient(ctx context.Context, mux *runtime.ServeMux
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/.FileService/SoftDelete", runtime.WithHTTPPathPattern("/v1/{user_id}/files/delete"))
+		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/.FileService/SoftDelete", runtime.WithHTTPPathPattern("/v1/files/delete"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -1488,7 +1223,7 @@ func RegisterFileServiceHandlerClient(ctx context.Context, mux *runtime.ServeMux
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/.FileService/HardDelete", runtime.WithHTTPPathPattern("/v1/{user_id}/files/hard-delete"))
+		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/.FileService/HardDelete", runtime.WithHTTPPathPattern("/v1/files/hard-delete"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -1508,7 +1243,7 @@ func RegisterFileServiceHandlerClient(ctx context.Context, mux *runtime.ServeMux
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/.FileService/Rename", runtime.WithHTTPPathPattern("/v1/{user_id}/files/rename"))
+		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/.FileService/Rename", runtime.WithHTTPPathPattern("/v1/files/rename"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -1528,7 +1263,7 @@ func RegisterFileServiceHandlerClient(ctx context.Context, mux *runtime.ServeMux
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/.FileService/MoveToPath", runtime.WithHTTPPathPattern("/v1/{user_id}/files/move"))
+		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/.FileService/MoveToPath", runtime.WithHTTPPathPattern("/v1/files/move"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -1548,7 +1283,7 @@ func RegisterFileServiceHandlerClient(ctx context.Context, mux *runtime.ServeMux
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/.FileService/CopyToPath", runtime.WithHTTPPathPattern("/v1/{user_id}/files/copy"))
+		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/.FileService/CopyToPath", runtime.WithHTTPPathPattern("/v1/files/copy"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -1568,7 +1303,7 @@ func RegisterFileServiceHandlerClient(ctx context.Context, mux *runtime.ServeMux
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/.FileService/CreateShare", runtime.WithHTTPPathPattern("/v1/{user_id}/files/create-share"))
+		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/.FileService/CreateShare", runtime.WithHTTPPathPattern("/v1/files/create-share"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -1588,7 +1323,7 @@ func RegisterFileServiceHandlerClient(ctx context.Context, mux *runtime.ServeMux
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/.FileService/RetrieveShareToPath", runtime.WithHTTPPathPattern("/v1/{user_id}/files/save-from-share"))
+		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/.FileService/RetrieveShareToPath", runtime.WithHTTPPathPattern("/v1/files/save-from-share"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -1624,37 +1359,59 @@ func RegisterFileServiceHandlerClient(ctx context.Context, mux *runtime.ServeMux
 
 	})
 
+	mux.Handle("GET", pattern_FileService_GetShareDetail_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+		ctx, cancel := context.WithCancel(req.Context())
+		defer cancel()
+		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
+		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/.FileService/GetShareDetail", runtime.WithHTTPPathPattern("/v1/files/share/{token}"))
+		if err != nil {
+			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
+			return
+		}
+		resp, md, err := request_FileService_GetShareDetail_0(rctx, inboundMarshaler, client, req, pathParams)
+		ctx = runtime.NewServerMetadataContext(ctx, md)
+		if err != nil {
+			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
+			return
+		}
+
+		forward_FileService_GetShareDetail_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+
+	})
+
 	return nil
 }
 
 var (
-	pattern_FileService_UploadFile_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 1, 0, 4, 1, 5, 1, 2, 2, 2, 3}, []string{"v1", "user_id", "files", "upload"}, ""))
+	pattern_FileService_UploadFile_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2}, []string{"v1", "files", "quick-upload"}, ""))
 
 	pattern_FileService_GetDirsAndFiles_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 1, 0, 4, 1, 5, 1, 2, 2}, []string{"v1", "user_id", "files"}, ""))
 
 	pattern_FileService_GetFileDetail_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 1, 0, 4, 1, 5, 1, 2, 2, 1, 0, 4, 1, 5, 3}, []string{"v1", "user_id", "files", "file_name"}, ""))
 
-	pattern_FileService_MakeNewFolder_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 1, 0, 4, 1, 5, 1, 2, 2, 2, 3}, []string{"v1", "user_id", "files", "makedir"}, ""))
+	pattern_FileService_MakeNewFolder_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2}, []string{"v1", "files", "mkdir"}, ""))
 
-	pattern_FileService_MoveToRecycleBin_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 1, 0, 4, 1, 5, 1, 2, 2, 2, 3}, []string{"v1", "user_id", "files", "recycle"}, ""))
+	pattern_FileService_MoveToRecycleBin_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2}, []string{"v1", "files", "recycle"}, ""))
 
 	pattern_FileService_GetRecycleBinList_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 1, 0, 4, 1, 5, 1, 2, 2, 2, 3}, []string{"v1", "user_id", "files", "recycle-bin"}, ""))
 
-	pattern_FileService_SoftDelete_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 1, 0, 4, 1, 5, 1, 2, 2, 2, 3}, []string{"v1", "user_id", "files", "delete"}, ""))
+	pattern_FileService_SoftDelete_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2}, []string{"v1", "files", "delete"}, ""))
 
-	pattern_FileService_HardDelete_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 1, 0, 4, 1, 5, 1, 2, 2, 2, 3}, []string{"v1", "user_id", "files", "hard-delete"}, ""))
+	pattern_FileService_HardDelete_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2}, []string{"v1", "files", "hard-delete"}, ""))
 
-	pattern_FileService_Rename_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 1, 0, 4, 1, 5, 1, 2, 2, 2, 3}, []string{"v1", "user_id", "files", "rename"}, ""))
+	pattern_FileService_Rename_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2}, []string{"v1", "files", "rename"}, ""))
 
-	pattern_FileService_MoveToPath_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 1, 0, 4, 1, 5, 1, 2, 2, 2, 3}, []string{"v1", "user_id", "files", "move"}, ""))
+	pattern_FileService_MoveToPath_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2}, []string{"v1", "files", "move"}, ""))
 
-	pattern_FileService_CopyToPath_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 1, 0, 4, 1, 5, 1, 2, 2, 2, 3}, []string{"v1", "user_id", "files", "copy"}, ""))
+	pattern_FileService_CopyToPath_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2}, []string{"v1", "files", "copy"}, ""))
 
-	pattern_FileService_CreateShare_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 1, 0, 4, 1, 5, 1, 2, 2, 2, 3}, []string{"v1", "user_id", "files", "create-share"}, ""))
+	pattern_FileService_CreateShare_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2}, []string{"v1", "files", "create-share"}, ""))
 
-	pattern_FileService_RetrieveShareToPath_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 1, 0, 4, 1, 5, 1, 2, 2, 2, 3}, []string{"v1", "user_id", "files", "save-from-share"}, ""))
+	pattern_FileService_RetrieveShareToPath_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2}, []string{"v1", "files", "save-from-share"}, ""))
 
 	pattern_FileService_GetShareRecords_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 1, 0, 4, 1, 5, 1, 2, 2, 2, 3}, []string{"v1", "user_id", "files", "share-records"}, ""))
+
+	pattern_FileService_GetShareDetail_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 1, 0, 4, 1, 5, 3}, []string{"v1", "files", "share", "token"}, ""))
 )
 
 var (
@@ -1685,4 +1442,6 @@ var (
 	forward_FileService_RetrieveShareToPath_0 = runtime.ForwardResponseMessage
 
 	forward_FileService_GetShareRecords_0 = runtime.ForwardResponseMessage
+
+	forward_FileService_GetShareDetail_0 = runtime.ForwardResponseMessage
 )
