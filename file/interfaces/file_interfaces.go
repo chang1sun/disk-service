@@ -136,34 +136,53 @@ func (s *server) MoveToPath(ctx context.Context,
 func (s *server) CreateShare(ctx context.Context,
 	req *filepb.CreateShareReq) (*filepb.CreateShareRsp, error) {
 	rsp := &filepb.CreateShareRsp{}
-	// TODO
+	token, err := service.CreateShare(ctx, assembler.AssembleCreateShareDTO(req))
+	if err != nil {
+		cutil.LogErr(err, "CreateShare")
+		return rsp, err
+	}
+	rsp.Token = token
 	return rsp, nil
 }
 
 func (s *server) RetrieveShareToPath(ctx context.Context,
 	req *filepb.RetrieveShareToPathReq) (*emptypb.Empty, error) {
 	rsp := &emptypb.Empty{}
-	// TODO
-	return rsp, nil
-}
-
-func (s *server) GetRecycleBinList(ctx context.Context,
-	req *filepb.GetRecycleBinListReq) (*filepb.GetRecycleBinListRsp, error) {
-	rsp := &filepb.GetRecycleBinListRsp{}
-	// TODO
+	err := service.RetrieveShareFromToken(ctx, req.UserId, req.Token, req.Path)
+	if err != nil {
+		cutil.LogErr(err, "RetrieveShareToPath")
+		return rsp, err
+	}
 	return rsp, nil
 }
 
 func (s *server) GetShareRecords(ctx context.Context,
 	req *filepb.GetShareRecordsReq) (*filepb.GetShareRecordsRsp, error) {
 	rsp := &filepb.GetShareRecordsRsp{}
-	// TODO
+	list, count, err := service.GetShareRecordList(ctx, req.UserId, req.Start, req.Limit)
+	if err != nil {
+		cutil.LogErr(err, "GetShareRecords")
+		return rsp, err
+	}
+	rsp.Count = count
+	rsp.List = assembler.AssembleShareRecordList(list)
 	return rsp, nil
 }
 
 func (s *server) GetShareDetail(ctx context.Context,
 	req *filepb.GetShareDetailReq) (*filepb.GetShareDetailRsp, error) {
 	rsp := &filepb.GetShareDetailRsp{}
+	detail, err := service.GetShareDetail(ctx, req.Token)
+	if err != nil {
+		cutil.LogErr(err, "GetShareDetail")
+		return rsp, err
+	}
+	return assembler.AssembleShareDetail(detail), nil
+}
+
+func (s *server) GetRecycleBinList(ctx context.Context,
+	req *filepb.GetRecycleBinListReq) (*filepb.GetRecycleBinListRsp, error) {
+	rsp := &filepb.GetRecycleBinListRsp{}
 	// TODO
 	return rsp, nil
 }

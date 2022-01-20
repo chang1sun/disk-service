@@ -537,3 +537,27 @@ func buildNewFolderPO(userID, name, path string) *repo.UserFilePO {
 		UpdateAt: time.Now(),
 	}
 }
+
+func GetDirSizeAndSubFilesNum(ctx context.Context, dir *repo.UserFilePO) (int64, int32, error) {
+	// when meet file, jump out
+	if dir.IsDir == isFile {
+		return dir.FileSize, 1, nil
+	}
+	// recursively cal sub folder
+	var totalSize int64
+	var totalNum int32
+	subPOs, err := repo.GetUserFileDao().QueryDirByPath(ctx, dir.UserID, dir.Path+dir.Name+"/", true)
+	if err != nil {
+		return 0, 0, status.Errorf(errcode.DatabaseOperationErrCode, errcode.DatabaseOperationErrMsg, err)
+	}
+	for _, subPO := range subPOs {
+		curSize, curNum, err := GetDirSizeAndSubFilesNum(ctx, subPO)
+		if err != nil {
+			return 0, 0, status.Errorf(errcode.DatabaseOperationErrCode, errcode.DatabaseOperationErrMsg, err)
+		}
+		totalSize += curSize
+		totalNum += curNum
+
+	}
+	return totalSize, totalNum, nil
+}

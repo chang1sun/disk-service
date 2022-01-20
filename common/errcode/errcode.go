@@ -10,6 +10,7 @@ const (
 	PathNotExistCode           = 10105
 	DirOrFileAlreadyExistCode  = 10106
 	ForbidHardDeleteFolderCode = 10107
+	NoSuchShareCode            = 10108
 )
 
 // Tips level msg
@@ -22,6 +23,7 @@ const (
 	PathNotExistMsg           = "[tips] path is not existed, check the input of the path"
 	DirOrFileAlreadyExistMsg  = "[tips] there is already a file or folder respond to input name and path exist, do you want to overwrite?"
 	ForbidHardDeleteFolderMsg = "[tips] force delete a folder is not allowed, delete the files one by one if you insist"
+	NoSuchShareMsg            = "[tips] cannot find such share, maybe it has expired if once existed"
 )
 
 // Warn level code

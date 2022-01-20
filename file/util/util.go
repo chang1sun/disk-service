@@ -28,3 +28,9 @@ func GetFileMD5FromReader(r io.Reader) string {
 	}
 	return hex.EncodeToString(m.Sum(nil))
 }
+
+func GetMd5FromJson(data []byte) string {
+	m := md5.New()
+	m.Write(data)
+	return hex.EncodeToString(m.Sum(nil))
+}

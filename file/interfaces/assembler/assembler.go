@@ -45,3 +45,37 @@ func AssembleDirsAndFilesList(pos []*repo.UserFilePO) ([]*structpb.Struct, error
 	}
 	return list, nil
 }
+
+func AssembleCreateShareDTO(req *filepb.CreateShareReq) *repo.CreateShareDTO {
+	return &repo.CreateShareDTO{
+		UserID:     req.UserId,
+		DocID:      req.DocId,
+		ExpireHour: req.ExpireHour,
+	}
+}
+
+func AssembleShareRecordList(records []*repo.ShareRecordPO) []*filepb.ShareRecord {
+	var list []*filepb.ShareRecord
+	for _, record := range records {
+		list = append(list, &filepb.ShareRecord{
+			DocName:    record.DocName,
+			Message:    record.Message,
+			CreateTime: record.CreateTime.Format(constants.StandardTimeFormat),
+		})
+	}
+	return list
+}
+
+func AssembleShareDetail(detail *repo.ShareDetailPO) *filepb.GetShareDetailRsp {
+	return &filepb.GetShareDetailRsp{
+		Uploader:   detail.Uploader,
+		DocId:      detail.DocID,
+		DocName:    detail.DocName,
+		DocType:    detail.DocType,
+		ExpireHour: detail.ExpireHours,
+		CreateTime: detail.CreateTime,
+		ViewNum:    detail.ViewNum,
+		SaveNum:    detail.SaveNum,
+		Size:       detail.DocSize,
+	}
+}

@@ -77,7 +77,7 @@ func main() {
 	log.Fatalln(gwServer.ListenAndServe())
 }
 
-// to handle file transfer request
+// aim to handle file transfer request which cannot be implemented by grpc-gateway
 func AddCustomRoute(mux *runtime.ServeMux) error {
 	// single small file uplaod
 	err := mux.HandlePath("POST", "/v1/file/upload", service.FileUploadHandler)
@@ -115,9 +115,13 @@ func InitBase() error {
 	if err != nil {
 		return err
 	}
+	redisClient := cutil.GetRedisConn(config.GetConfig().Redis.Addr,
+		config.GetConfig().Redis.User, config.GetConfig().Redis.Password, config.GetConfig().Redis.DBShare)
+
 	// set repo
 	repo.SetUniFileStoreDao(&repo.UniFileStoreDao{Database: mongoDB, Bucket: bucket})
 	repo.SetUserFileDao(&repo.UserFileDao{Database: mongoDB})
+	repo.SetShareDao(&repo.ShareDao{Database: redisClient})
 
 	// set rpc
 	auth.SetAuthCaller()

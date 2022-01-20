@@ -22,6 +22,12 @@ type Config struct {
 		Database string `yaml:"db_name"`
 		Addr     string `yaml:"addr"`
 	} `yaml:"mongo"`
+	Redis struct {
+		Addr     string `yaml:"addr"`
+		DBShare  int    `yaml:"db_share"`
+		User     string `yaml:"user"`
+		Password string `yaml:"password"`
+	}
 	AuthAddr string `yaml:"auth_addr"`
 }
 
