@@ -1,0 +1,25 @@
+version: v1
+
+# initial size for new user
+init_user_storage_size: 2147483648 # aka, 2GiB
+
+# salt val for password cryption
+pw_salt: "*12#3"
+
+mysql:
+  user: "root"
+  password: "sc058918"
+  addr: "127.0.0.1:3306"
+  db_name: "netdisk"
+
+mongo:
+  addr: "mongodb://localhost:27017"
+  db_name: "netdisk"
+
+redis:
+  addr: "localhost:6379"
+  db_share: 0
+  user:
+  password:
+
+auth_addr: "127.0.0.1:8000"

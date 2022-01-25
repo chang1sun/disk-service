@@ -1,0 +1,344 @@
+syntax = "proto3";
+
+option go_package = "github.com/changpro/disk-service/stub";
+
+import "google/api/annotations.proto";
+import "google/protobuf/empty.proto";
+import "validate/validate.proto";
+import "google/protobuf/struct.proto";
+
+service FileService {
+    
+    rpc UploadFile(UploadFileReq) returns (UploadFileRsp) {
+        option (google.api.http) = {
+            post: "/v1/files/quick-upload"
+            body: "*"
+        };
+    }
+
+    rpc GetDirsAndFiles(GetDirsAndFilesReq) returns (GetDirsAndFilesRsp) {
+        option (google.api.http) = {
+            get: "/v1/{user_id}/files"
+        };
+    }
+
+    rpc GetFileDetail (GetFileDetailReq) returns (GetFileDetailRsp) {
+        option (google.api.http) = {
+            get: "/v1/{user_id}/files/{file_name}"
+        };
+    }
+
+    rpc MakeNewFolder (MakeNewFolderReq) returns (MakeNewFolderRsp) {
+        option (google.api.http) = {
+            post: "/v1/files/mkdir"
+            body: "*"
+        };
+    }
+
+    rpc MoveToRecycleBin (MoveToRecycleBinReq) returns (google.protobuf.Empty) {
+        option (google.api.http) = {
+            post: "/v1/files/recycle"
+            body: "*"
+        };
+    }
+
+    rpc GetRecycleBinList (GetRecycleBinListReq) returns (GetRecycleBinListRsp) {
+        option (google.api.http) = {
+            get: "/v1/{user_id}/files/recycle-bin"
+        };
+    }
+
+    rpc SoftDelete (SoftDeleteReq) returns (google.protobuf.Empty) {
+        option (google.api.http) = {
+            post: "/v1/files/delete"
+            body: "*"
+        };
+    }
+
+    rpc HardDelete (HardDeleteReq) returns (google.protobuf.Empty) {
+        option (google.api.http) = {
+            post: "/v1/files/hard-delete"
+            body: "*"
+        };
+    }
+
+    rpc Rename (RenameReq) returns (google.protobuf.Empty) {
+        option (google.api.http) = {
+            post: "/v1/files/rename"
+            body: "*"
+        };
+    }
+
+    rpc MoveToPath (MoveToPathReq) returns (google.protobuf.Empty) {
+        option (google.api.http) = {
+            post: "/v1/files/move"
+            body: "*"
+        };
+    }
+
+    rpc CopyToPath (CopyToPathReq) returns (google.protobuf.Empty) {
+        option (google.api.http) = {
+            post: "/v1/files/copy"
+            body: "*"
+        };
+    }
+
+    rpc CreateShare (CreateShareReq) returns (CreateShareRsp) {
+        option (google.api.http) = {
+            post: "/v1/files/create-share"
+            body: "*"
+        };
+    }
+
+    rpc RetrieveShareToPath (RetrieveShareToPathReq) returns (google.protobuf.Empty) {
+        option (google.api.http) = {
+            post: "/v1/files/save-from-share"
+            body: "*"
+        };
+    }
+
+    rpc GetShareRecords (GetShareRecordsReq) returns (GetShareRecordsRsp) {
+        option (google.api.http) = {
+            get: "/v1/{user_id}/files/share-records"
+        };
+    }
+
+    rpc GetShareDetail (GetShareDetailReq) returns (GetShareDetailRsp) {
+        option (google.api.http) = {
+            get: "/v1/files/share/{token}"
+        };
+    }
+}
+
+service AuthService {
+    
+    rpc RegisterNewUser(RegisterNewUserReq) returns (google.protobuf.Empty) {
+        option (google.api.http) = {
+            post: "/v1/auth/sign-up"
+            body: "*"
+        };
+    }
+
+    rpc SignIn(SignInReq) returns (google.protobuf.Empty) {
+        option (google.api.http) = {
+            post: "/v1/auth/sign-in"
+            body: "*"
+        };
+    }
+
+    rpc ModifyPassword(ModifyPasswordReq) returns (google.protobuf.Empty) {
+        option (google.api.http) = {
+            post: "/v1/auth/modify-pw"
+            body: "*"
+        };
+    }
+
+    rpc GetUserProfile(GetUserProfileReq) returns (GetUserProfileRsp) {
+        option (google.api.http) = {
+            get: "/v1/{user_id}/profile"
+        };
+    }
+
+    rpc ModifyUserProfile(ModifyUserProfileReq) returns (google.protobuf.Empty) {
+        option (google.api.http) = {
+            post: "/v1/{user_id}/profile/modify"
+            body: "*"
+        };
+    }
+
+    rpc UpdateUserStorage(UpdateUserStorageReq) returns (google.protobuf.Empty) {}
+}
+
+message RegisterNewUserReq {
+    string user_id = 1[(validate.rules).string = {min_len: 6, pattern: "^[0-9a-zA-Z]*$"}];
+    string auth_email = 2[(validate.rules).string = {min_len: 6, pattern: "^[A-Za-z0-9]+([_\\.][A-Za-z0-9]+)*@([A-Za-z0-9\\-]+\\.)+[A-Za-z]{2,6}$"}];
+    string pw = 3[(validate.rules).string.min_len = 6];
+}
+
+message SignInReq {
+    string user_id = 1[(validate.rules).string = {min_len: 6, pattern: "^[0-9a-zA-Z]*$"}];
+    string pw = 2[(validate.rules).string.min_len = 6];
+}
+
+message ModifyPasswordReq {
+    string user_id = 1[(validate.rules).string = {min_len: 6, pattern: "^[0-9a-zA-Z]*$"}];
+    string old_pw = 2; // need either old_pw or auth_email, not both
+    string auth_email = 3;
+    string new_pw = 4[(validate.rules).string.min_len = 6];
+}
+
+message GetUserProfileReq {
+    string user_id = 1[(validate.rules).string = {min_len: 6, pattern: "^[0-9a-zA-Z]*$"}];
+}
+
+message GetUserProfileRsp {
+    string icon = 1;
+    string register_time = 2;
+    int32 file_num = 3;
+    int32 file_upload_num = 4;
+    string auth_email = 5;
+    int64 used_size = 6;
+    int64 total_size = 7;
+}
+
+message ModifyUserProfileReq {
+    string user_id = 1[(validate.rules).string = {min_len: 6, pattern: "^[0-9a-zA-Z]*$"}];
+    string auth_email = 2[(validate.rules).string = {min_len: 6, pattern: "^[A-Za-z0-9]+([_\\.][A-Za-z0-9]+)*@([A-Za-z0-9\\-]+\\.)+[A-Za-z]{2,6}$"}];
+    string icon = 3;
+}
+
+message UpdateUserStorageReq {
+    string user_id = 1[(validate.rules).string = {min_len: 6, pattern: "^[0-9a-zA-Z]*$"}];
+    int32 file_num = 2[(validate.rules).int32.gt = 0];
+    int64 size = 3[(validate.rules).int64.gt = 0];
+    int32 upload_file_num = 4[(validate.rules).int32.gte = 0];
+}
+
+message UploadFileReq {
+    string file_name = 1;
+    string file_size = 2;
+    string file_md5 = 3;
+    string user_id = 4;
+}
+
+message UploadFileRsp {
+    string file_id = 1;
+}
+
+message GetDirsAndFilesReq {
+    string user_id = 1;
+    string path = 2;
+    bool show_hide = 3; // display(true) hidden dirs & files or not(false)
+}
+
+message GetDirsAndFilesRsp {
+    repeated google.protobuf.Struct details = 1;
+}
+
+message GetFileDetailReq {
+    string user_id = 1;
+    string file_id = 2;
+    string file_name = 3;
+}
+
+message GetFileDetailRsp {
+    string id = 1;
+    string name = 2;
+    int64  size = 3;
+    string type = 4;
+    string md5 = 5;
+    string path = 6;
+    int32 status = 7;
+    string create_time = 8;
+    string update_time = 9;
+}
+
+message MakeNewFolderReq {
+    string user_id = 1;
+    string path = 2;
+    string dir_name = 3;
+    int32 overwrite = 4; // overwrite(1) if already exist, or not(2)
+}
+
+message MakeNewFolderRsp {
+    string id = 1;
+}
+
+message MoveToRecycleBinReq {
+    string user_id = 1;
+    repeated string id = 2;
+}
+
+message SoftDeleteReq {
+    string user_id = 1;
+    repeated string id = 2;
+}
+
+message HardDeleteReq {
+    string user_id = 1;
+    string id = 2;
+}
+
+message RenameReq {
+    string user_id = 1;
+    string id = 2;
+    string new_name = 3;
+    int32 overwrite = 4; // overwrite(1) if already exist, or not(2)
+}
+
+message MoveToPathReq {
+    string user_id = 1;
+    repeated string ids = 2;
+    string path = 3;
+    int32 overwrite = 4; // overwrite(1) if already exist, or not(2)
+}
+
+message CopyToPathReq {
+    string user_id = 1;
+    repeated string ids = 2;
+    string path = 3;
+    int32 overwrite = 4; // overwrite(1) if already exist, or not(2)
+}
+
+message CreateShareReq {
+    string user_id = 1;
+    string doc_id = 2;
+    int32 expire_hour = 4;
+}
+
+message CreateShareRsp {
+    string token = 1;
+}
+
+message RetrieveShareToPathReq {
+    string user_id = 1;
+    string token = 2;
+    string path = 3;
+}
+
+message GetShareDetailReq {
+    string token = 1;
+}
+
+message GetShareDetailRsp {
+    string uploader = 1;
+    string doc_id = 2;
+    string doc_name = 3;
+    int32 expire_hour = 4;
+    string create_time = 5;
+    int32 view_num = 6;
+    int32 save_num = 7;
+    int64 size = 8;
+    int32 doc_type = 9; // 1 folder, 2 file
+}
+
+message GetShareRecordsReq {
+    string user_id = 1;
+    int32 start = 2;
+    int32 limit = 3;
+}
+
+message GetShareRecordsRsp {
+    int64 count = 1;
+    repeated ShareRecord list = 2;
+}
+
+message ShareRecord {
+    string doc_name = 1;
+    string message = 2;
+    string create_time = 3;
+}
+
+message GetRecycleBinListReq {
+    string user_id = 1;
+}
+
+message RecycleDocInfo {
+    string id = 1;
+    string name = 2;
+    string delete_time = 3;
+}
+
+message GetRecycleBinListRsp {
+    repeated RecycleDocInfo list = 1;
+}
