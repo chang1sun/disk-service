@@ -96,7 +96,7 @@ func (dao *UserDao) SignIn(ctx context.Context, userID string, pwMask string) (*
 func (dao *UserDao) UpdatePassword(ctx context.Context, dto *ModifyPwDTO) error {
 	if err := dao.Database.WithContext(ctx).
 		Where("user_id = ? and status != ? and (auth_email = ? or user_pw = ?)",
-			3, dto.UserID, dto.AuthEmail, dto.OldPw).
+			dto.UserID, 3, dto.AuthEmail, dto.OldPw).
 		Updates(&UserPO{UserPW: dto.NewPw, UpdateTime: time.Now()}).Error; err != nil {
 		return err
 	}

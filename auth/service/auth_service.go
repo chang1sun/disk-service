@@ -82,6 +82,13 @@ func assembleUserProfile(user *repo.UserPO, analysis *repo.UserAnalysisPO) *User
 func ModifyPassword(ctx context.Context, dto *repo.ModifyPwDTO) error {
 	dto.NewPw = util.GetStringWithSalt(dto.NewPw)
 	dto.OldPw = util.GetStringWithSalt(dto.OldPw)
+	user, err := repo.GetUserDao().QueryUserByID(ctx, dto.UserID)
+	if err != nil {
+		return status.Errorf(errcode.DatabaseOperationErrCode, errcode.DatabaseOperationErrMsg, err)
+	}
+	if user == nil {
+		return status.Error(errcode.NoSuchUserCode, errcode.NoSuchUserMsg)
+	}
 	if err := repo.GetUserDao().UpdatePassword(ctx, dto); err != nil {
 		return status.Errorf(errcode.DatabaseOperationErrCode, errcode.DatabaseOperationErrMsg, err)
 	}

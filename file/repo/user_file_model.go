@@ -8,12 +8,12 @@ import (
 )
 
 type UserFilePO struct {
-	ID        string `bson:"_id,omitempty" json:"id,omitempty"`
+	ID        string `bson:"_id,omitempty" json:"docId,omitempty"`
 	UserID    string `bson:"user_id,omitempty" json:"userId,omitempty"`
 	UniFileID string `bson:"uni_file_id,omitempty" json:"uniFileId,omitempty"`
-	Name      string `bson:"name,omitempty" json:"name,omitempty"`
+	Name      string `bson:"name,omitempty" json:"docName,omitempty"`
 	FileMd5   string `bson:"file_md5,omitempty" json:"fileMd5,omitempty"`
-	Path      string `bson:"path,omitempty" json:"path,omitempty"`
+	Path      string `bson:"path,omitempty" json:"docPath,omitempty"`
 	IsDir     int32  `bson:"is_dir,omitempty" json:"isDir,omitempty"` // 2: file, 1: directory
 	// IsDirEmpty int32     `bson:"is_dir_empty,omitempty" json:"isDirEmpty,omitempty"` // 2: not empty, 1: empty (case folder)
 	// SubIDs   []string  `bson:"sub_ids,omitempty" json:"subIds,omitempty"`
