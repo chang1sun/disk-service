@@ -4,6 +4,7 @@
 *.dll
 *.so
 *.dylib
+disk-service
 
 # Test binary, built with `go test -c`
 *.test
@@ -15,3 +16,4 @@
 # vendor/
 
 .DS_Store
+disk-service
