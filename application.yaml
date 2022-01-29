@@ -19,6 +19,7 @@ mongo:
 redis:
   addr: "localhost:6379"
   db_share: 0
+  db_upload: 1
   user:
   password:
 

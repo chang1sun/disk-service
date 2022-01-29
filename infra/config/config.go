@@ -25,6 +25,7 @@ type Config struct {
 	Redis struct {
 		Addr     string `yaml:"addr"`
 		DBShare  int    `yaml:"db_share"`
+		DBUpload int    `yaml:"db_upload"`
 		User     string `yaml:"user"`
 		Password string `yaml:"password"`
 	}

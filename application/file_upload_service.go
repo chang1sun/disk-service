@@ -7,6 +7,8 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"os"
+	"strconv"
 	"time"
 
 	arepo "github.com/changpro/disk-service/domain/auth/repo"
@@ -15,28 +17,20 @@ import (
 	frepo "github.com/changpro/disk-service/domain/file/repo"
 	"github.com/changpro/disk-service/infra/errcode"
 	"github.com/changpro/disk-service/infra/util"
+	"github.com/go-redis/redis/v8"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"google.golang.org/grpc/status"
 )
 
-func QuickUpload(ctx context.Context, userID, fileName, md5 string) (string, error) {
-	id, err := tryQuickUpload(ctx, userID, fileName, md5)
-	if err != nil {
-		return "", err
-	}
-	if id == "" {
-		return "", status.Error(errcode.FindNoFileInServerCode, errcode.FindNoFileInServerMsg)
-	}
-	return id, nil
-}
+var MPRedisClient *redis.Client
 
-func tryQuickUpload(ctx context.Context, userID, fileName, md5 string) (string, error) {
+func tryQuickUpload(ctx context.Context, userID, fileName, md5 string) (string, string, error) {
 	file, err := repo.GetUniFileStoreDao().QueryFileByMd5(ctx, md5)
 	if err != nil {
-		return "", status.Errorf(errcode.DatabaseOperationErrCode, errcode.DatabaseOperationErrMsg, err)
+		return "", "", status.Errorf(errcode.DatabaseOperationErrCode, errcode.DatabaseOperationErrMsg, err)
 	}
 	if file == nil {
-		return "", nil
+		return "", "", nil
 	}
 	fileMeta := &repo.UniFileMetaPO{
 		Size: file.Length,
@@ -52,20 +46,21 @@ func tryQuickUpload(ctx context.Context, userID, fileName, md5 string) (string, 
 		Size:          fileMeta.Size,
 	})
 	if err != nil {
-		return "", status.Errorf(errcode.RPCCallErrCode, errcode.RPCCallErrMsg, err)
+		return "", "", status.Errorf(errcode.RPCCallErrCode, errcode.RPCCallErrMsg, err)
 	}
 
 	// update user's level content
 	id, err := repo.GetUserFileDao().AddFileOrDir(ctx,
 		buildUploadUserFilePO(file.ID.(primitive.ObjectID).String(), fileName, userID, fileMeta))
 	if err != nil {
-		return "", status.Errorf(errcode.DatabaseOperationErrCode, errcode.DatabaseOperationErrMsg, err)
+		return "", "", status.Errorf(errcode.DatabaseOperationErrCode, errcode.DatabaseOperationErrMsg, err)
 	}
-	return id, nil
+	return id, file.ID.(primitive.ObjectID).String(), nil
 }
 
-// Handle multipart file upload request
+// Handle single-piece file upload request
 func FileUploadHandler(w http.ResponseWriter, r *http.Request, pathParams map[string]string) {
+	w.Header().Set("ContentType", "application/json")
 	err := r.ParseMultipartForm(2048)
 	if err != nil {
 		errorResp(errcode.ParseHTTPRequestFormFileErrCode, errcode.ParseHTTPRequestFormFileErrMsg, err, &w)
@@ -79,13 +74,22 @@ func FileUploadHandler(w http.ResponseWriter, r *http.Request, pathParams map[st
 	md5 := r.PostForm.Get("md5")
 	userID := r.PostForm.Get("user_id")
 	f, head, err := r.FormFile("file")
-	w.Header().Set("ContentType", "application/json")
 	defer f.Close()
 	if err != nil {
 		errorResp(errcode.ParseHTTPRequestFormFileErrCode, errcode.ParseHTTPRequestFormFileErrMsg, err, &w)
 		return
 	}
-
+	// try quick upload
+	fid, uniFileID, err := tryQuickUpload(r.Context(), userID, head.Filename, md5)
+	if err != nil {
+		s, _ := status.FromError(err)
+		errorResp(uint32(s.Code()), s.Message(), nil, &w)
+		return
+	}
+	if fid != "" {
+		w.Write([]byte(fmt.Sprintf(`"file_id: %v", "uni_file_id": %v`, fid, uniFileID)))
+		return
+	}
 	// cal md5 and compare
 	fileMd5 := util.GetFileMD5FromReader(f)
 	log.Printf("cal md5 is: %v\n", fileMd5)
@@ -93,7 +97,6 @@ func FileUploadHandler(w http.ResponseWriter, r *http.Request, pathParams map[st
 		errorResp(errcode.Md5CheckNotPassCode, errcode.Md5CheckNotPassMsg, nil, &w)
 		return
 	}
-
 	f.Seek(0, io.SeekStart)
 	fileName := fmt.Sprintf("%v-%v", head.Filename, time.Now().Format("20060102150405"))
 	fileMeta := &frepo.UniFileMetaPO{
@@ -135,14 +138,214 @@ func FileUploadHandler(w http.ResponseWriter, r *http.Request, pathParams map[st
 	w.Write([]byte(fmt.Sprintf(`"file_id: %v", "uni_file_id": %v`, id, uId)))
 }
 
-// Handle multipart file upload request
-func MPFileUploadHandler(w http.ResponseWriter, r *http.Request, pathParams map[string]string) {
-
+// Handle test request by testing if file already exist and acknowledging infos about upcoming formal upload requet
+func MPFileUploadTestHandler(w http.ResponseWriter, r *http.Request, pathParams map[string]string) {
+	w.Header().Set("ContentType", "application/json")
+	err := r.ParseMultipartForm(2048)
+	if err != nil {
+		errorResp(errcode.ParseHTTPRequestFormFileErrCode, errcode.ParseHTTPRequestFormFileErrMsg, err, &w)
+		return
+	}
+	err = r.ParseForm()
+	if err != nil {
+		errorResp(errcode.ParseHTTPRequestFormFileErrCode, errcode.ParseHTTPRequestFormFileErrMsg, err, &w)
+		return
+	}
+	md5 := r.PostForm.Get("md5")
+	userID := r.PostForm.Get("user_id")
+	fileName := r.PostForm.Get("file_name")
+	chunkSize := r.PostForm.Get("chunk_size")
+	chunkNum := r.PostForm.Get("chunk_num")
+	log.Println("md5 is ", md5)
+	// try quick upload
+	fid, uniFileID, err := tryQuickUpload(r.Context(), userID, fileName, md5)
+	if err != nil {
+		s, _ := status.FromError(err)
+		errorResp(uint32(s.Code()), s.Message(), nil, &w)
+		return
+	}
+	if fid != "" {
+		w.Write([]byte(fmt.Sprintf(`"file_id: %v", "uni_file_id": %v`, fid, uniFileID)))
+		return
+	}
+	// preparation
+	// check if file had been uploaded a part of it
+	existRes := MPRedisClient.Exists(r.Context(), md5)
+	if existRes.Err() != nil {
+		log.Fatalf("redis err, err msg: %v", existRes.Err())
+		errorResp(errcode.DatabaseOperationErrCode, errcode.DatabaseOperationErrMsg, err, &w)
+		return
+	}
+	if existRes.Val() == 1 {
+		res := MPRedisClient.HGet(r.Context(), md5, "next_idx")
+		if err != nil {
+			log.Fatalf("redis err, err msg: %v", res.Err())
+			errorResp(errcode.DatabaseOperationErrCode, errcode.DatabaseOperationErrMsg, err, &w)
+			return
+		}
+		w.Write([]byte(fmt.Sprintf(`"next_idx: %v"`, res.Val())))
+	}
+	// initiate
+	if err := MPRedisClient.HMSet(r.Context(), md5, "file_name", fileName, "chunk_num",
+		chunkNum, "chunk_size", chunkSize, "next_idx", 0).Err(); err != nil {
+		errorResp(errcode.DatabaseOperationErrCode, errcode.DatabaseOperationErrMsg, err, &w)
+		return
+	}
+	w.Write([]byte(fmt.Sprintf(`"next_idx: %v"`, 0)))
 }
 
-// Handle finish upload request
-func FileMergeHandler(w http.ResponseWriter, r *http.Request, pathParams map[string]string) {
+// Handle multipart file upload request
+func MPFileUploadHandler(w http.ResponseWriter, r *http.Request, pathParams map[string]string) {
+	w.Header().Set("ContentType", "application/json")
+	err := r.ParseMultipartForm(2048)
+	if err != nil {
+		errorResp(errcode.ParseHTTPRequestFormFileErrCode, errcode.ParseHTTPRequestFormFileErrMsg, err, &w)
+		return
+	}
+	err = r.ParseForm()
+	if err != nil {
+		errorResp(errcode.ParseHTTPRequestFormFileErrCode, errcode.ParseHTTPRequestFormFileErrMsg, err, &w)
+		return
+	}
+	md5 := r.PostForm.Get("md5")
+	userID := r.PostForm.Get("user_id")
+	chunkID := r.PostForm.Get("chunk_id")
+	f, _, err := r.FormFile("file")
+	defer f.Close()
+	if err != nil {
+		errorResp(errcode.ParseHTTPRequestFormFileErrCode, errcode.ParseHTTPRequestFormFileErrMsg, err, &w)
+		return
+	}
+	res := MPRedisClient.HGetAll(r.Context(), md5)
+	if res.Err() != nil {
+		errorResp(errcode.DatabaseOperationErrCode, errcode.DatabaseOperationErrMsg, err, &w)
+		return
+	}
+	data := res.Val()
+	nextIdx := data["next_idx"]
+	chunkNum, _ := strconv.Atoi(data["chunk_num"])
+	if chunkID != nextIdx {
+		w.Write([]byte(fmt.Sprintf(`"next_idx: %v"`, nextIdx)))
+		return
+	}
+	// if it is the first chunk, set its type
+	if nextIdx == "0" {
+		MPRedisClient.HSet(r.Context(), md5, "file_type", util.GetMIMETypeFromReader(f))
+		f.Seek(0, io.SeekStart)
+	}
+	// write in temperary file
+	tmpDir := fmt.Sprintf("~/tmpfiles/%v", md5)
+	if !util.IsPathExists(tmpDir) {
+		os.Mkdir(md5, os.ModePerm)
+	}
+	file, err := os.Create(fmt.Sprintf("~/tmpfiles/%v/chunk_%v", md5, nextIdx))
+	if err != nil {
+		log.Fatalf("os create tmp file failed, err msg: %v", err)
+		errorResp(errcode.OsOperationErrCode, errcode.OsOperationErrMsg, err, &w)
+		return
+	}
+	_, err = io.Copy(file, f)
+	if err != nil {
+		log.Fatalf("os copy file failed, err msg: %v", err)
+		errorResp(errcode.OsOperationErrCode, errcode.OsOperationErrMsg, err, &w)
+		return
+	}
+	// update next chunk id
+	updateIdx, _ := strconv.Atoi(nextIdx)
+	updateIdx += 1
+	// if it is the last chunk, call merge handler
+	if updateIdx == chunkNum {
+		MergeFile(r.Context(), w, md5, userID)
+		return
+	}
+	if err := MPRedisClient.HSet(r.Context(), md5, "next_idx", updateIdx).Err(); err != nil {
+		errorResp(errcode.DatabaseOperationErrCode, errcode.DatabaseOperationErrMsg, err, &w)
+		return
+	}
+	w.Write([]byte(fmt.Sprintf(`"next_idx: %v"`, updateIdx)))
+}
 
+// // Handle finish upload request
+// func FileMergeHandler(w http.ResponseWriter, r *http.Request, pathParams map[string]string) {
+
+// }
+
+func MergeFile(ctx context.Context, w http.ResponseWriter, md5 string, userID string) {
+	res := MPRedisClient.HGetAll(ctx, md5)
+	if res.Err() != nil {
+		errorResp(errcode.DatabaseOperationErrCode, errcode.DatabaseOperationErrMsg, res.Err(), &w)
+		log.Fatalf("redis err, err msg: %v", res.Err())
+	}
+	data := res.Val()
+	fileName := data["file_name"]
+	chunkNum := data["chunk_num"]
+	totalNum, _ := strconv.Atoi(chunkNum)
+	file, _ := os.Create(fmt.Sprintf("~/tmpfiles/%v/%v", md5, fileName))
+	var pos int64 = 0
+	for i := 0; i < totalNum; i++ {
+		chunkStream, err := os.OpenFile(fmt.Sprintf("~/tmpfiles/%v/chunk_%v", md5, i), os.O_CREATE|os.O_WRONLY, os.ModePerm)
+		if err != nil {
+			log.Fatalf("os open file failed, err msg: %v", err)
+			errorResp(errcode.OsOperationErrCode, errcode.OsOperationErrMsg, err, &w)
+			return
+		}
+		chunkInfo, err := os.Stat(fmt.Sprintf("~/tmpfiles/%v/chunk_%v", md5, i))
+		if err != nil {
+			log.Fatalf("os open file failed, err msg: %v", err)
+			errorResp(errcode.OsOperationErrCode, errcode.OsOperationErrMsg, err, &w)
+			return
+		}
+		file.Seek(pos+chunkInfo.Size(), 0)
+		_, err = io.Copy(file, chunkStream)
+		if err != nil {
+			log.Fatalf("os copy file failed, err msg: %v", err)
+			errorResp(errcode.OsOperationErrCode, errcode.OsOperationErrMsg, err, &w)
+			return
+		}
+	}
+	fileType := data["file_type"]
+	fileInfo, err := os.Stat(fmt.Sprintf("~/tmpfiles/%v/%v", md5, fileName))
+	if err != nil {
+		log.Fatalf("os open file failed, err msg: %v", err)
+		errorResp(errcode.OsOperationErrCode, errcode.OsOperationErrMsg, err, &w)
+		return
+	}
+	fileName = fmt.Sprintf("%v-%v", fileName, time.Now().Format("20060102150405"))
+	fileMeta := &frepo.UniFileMetaPO{
+		Size:     fileInfo.Size(),
+		Md5:      md5,
+		Type:     fileType,
+		UploadBy: userID,
+	}
+	log.Printf("file type: %v", fileMeta.Type)
+	// Write in gridfs
+	file.Seek(0, io.SeekStart)
+	uId, err := frepo.GetUniFileStoreDao().UploadFile(ctx, fileName, file, fileMeta)
+	if err != nil {
+		errorResp(errcode.DatabaseOperationErrCode, errcode.DatabaseOperationErrMsg, err, &w)
+		return
+	}
+	log.Printf("uid: %v\n", uId)
+
+	// update user's storage size
+	err = aservice.UpdateUserStorage(ctx, &arepo.UpdateUserAnalysisDTO{
+		UserID:        userID,
+		FileNum:       1,
+		UploadFileNum: 1,
+		Size:          fileMeta.Size,
+	})
+	if err != nil {
+		s, _ := status.FromError(err)
+		errorResp(uint32(s.Code()), s.Message(), nil, &w)
+		return
+	}
+	// update user's level content
+	id, err := frepo.GetUserFileDao().AddFileOrDir(ctx, buildUploadUserFilePO(uId, fileName, userID, fileMeta))
+	if err != nil {
+		errorResp(errcode.DatabaseOperationErrCode, errcode.DatabaseOperationErrMsg, err, &w)
+		return
+	}
+	w.Write([]byte(fmt.Sprintf(`"file_id: %v", "uni_file_id": %v`, id, uId)))
 }
 
 // Handle download request

@@ -102,12 +102,10 @@ func (dao *UserFileDao) addFakeFile(ctx context.Context, userID, path, name stri
 	if err != nil {
 		return "", err
 	}
-	log.Println("add fake file success, id: ", res.InsertedID)
 	return res.InsertedID.(primitive.ObjectID).String(), nil
 }
 
 func (dao *UserFileDao) IsPathExist(ctx context.Context, userID, path string) (bool, error) {
-	log.Println(userID, path)
 	filter := bson.M{
 		"user_id": userID,
 		"path":    path,

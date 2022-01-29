@@ -7,6 +7,7 @@ import (
 	"encoding/hex"
 	"io"
 	"log"
+	"os"
 
 	"github.com/changpro/disk-service/infra/config"
 	"github.com/fatih/structs"
@@ -31,7 +32,6 @@ func Sha1FromReader(r io.Reader) string {
 func AnyToStructpb(i interface{}) *structpb.Struct {
 	s := structs.New(i)
 	s.TagName = "json"
-	log.Println(s.Map())
 	pb, err := structpb.NewStruct(s.Map())
 	if err != nil {
 		log.Fatalf("cannot convert, err: %v", err)
@@ -67,4 +67,13 @@ func GetMd5FromJson(data []byte) string {
 	m := md5.New()
 	m.Write(data)
 	return hex.EncodeToString(m.Sum(nil))
+}
+
+// 判断所给路径文件/文件夹是否存在
+func IsPathExists(path string) bool {
+	_, err := os.Stat(path) //os.Stat获取文件信息
+	if err != nil {
+		return !os.IsNotExist(err)
+	}
+	return true
 }

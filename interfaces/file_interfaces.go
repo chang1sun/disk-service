@@ -22,12 +22,6 @@ func NewFileServer() *fileServerImpl {
 func (s *fileServerImpl) UploadFile(ctx context.Context,
 	req *stub.UploadFileReq) (*stub.UploadFileRsp, error) {
 	rsp := &stub.UploadFileRsp{}
-	id, err := application.QuickUpload(ctx, req.UserId, req.FileName, req.FileMd5)
-	if err != nil {
-		util.LogErr(err, "UploadFile")
-		return rsp, err
-	}
-	rsp.FileId = id
 	return rsp, nil
 }
 

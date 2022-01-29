@@ -83,8 +83,14 @@ func main() {
 		panic(err)
 	}
 
-	// Register RESTful api gateway
+	// Register auth RESTful api gateway
 	err = stub.RegisterAuthServiceHandler(context.Background(), gwmux, conn)
+	if err != nil {
+		log.Fatalln("Failed to register gateway:", err)
+	}
+
+	// Register file RESTful api gateway
+	err = stub.RegisterFileServiceHandler(context.Background(), gwmux, conn)
 	if err != nil {
 		log.Fatalln("Failed to register gateway:", err)
 	}
@@ -111,17 +117,17 @@ func AddCustomRoute(mux *runtime.ServeMux) error {
 		return err
 	}
 	// multipart uploader
-	err = mux.HandlePath("POST", "/v1/file/mp/upload", application.MPFileUploadHandler)
+	err = mux.HandlePath("POST", "/v1/file/mp-upload", application.MPFileUploadHandler)
 	if err != nil {
 		return err
 	}
-	// finish reminder
-	err = mux.HandlePath("POST", "/v1/file/mp/upload-finish", application.FileMergeHandler)
+	// multipart uploader test
+	err = mux.HandlePath("POST", "/v1/file/mp-test", application.MPFileUploadTestHandler)
 	if err != nil {
 		return err
 	}
 	// download file
-	err = mux.HandlePath("GET", "/v1/file/download", application.FileMergeHandler)
+	err = mux.HandlePath("GET", "/v1/file/download", application.DownloadHandler)
 	if err != nil {
 		return err
 	}
@@ -155,6 +161,7 @@ func InitBase() error {
 	frepo.SetUniFileStoreDao(&frepo.UniFileStoreDao{Database: mongoDB, Bucket: bucket})
 	frepo.SetUserFileDao(&frepo.UserFileDao{Database: mongoDB})
 	frepo.SetShareDao(&frepo.ShareDao{Database: redisClient})
-
+	application.MPRedisClient = util.GetRedisConn(config.GetConfig().Redis.Addr,
+		config.GetConfig().Redis.User, config.GetConfig().Redis.Password, config.GetConfig().Redis.DBUpload)
 	return nil
 }
