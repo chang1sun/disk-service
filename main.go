@@ -161,6 +161,7 @@ func InitBase() error {
 	frepo.SetUniFileStoreDao(&frepo.UniFileStoreDao{Database: mongoDB, Bucket: bucket})
 	frepo.SetUserFileDao(&frepo.UserFileDao{Database: mongoDB})
 	frepo.SetShareDao(&frepo.ShareDao{Database: redisClient})
+	frepo.SetRecycleFileDao(&frepo.RecycleFileDao{Database: mongoDB})
 	application.MPRedisClient = util.GetRedisConn(config.GetConfig().Redis.Addr,
 		config.GetConfig().Redis.User, config.GetConfig().Redis.Password, config.GetConfig().Redis.DBUpload)
 	return nil

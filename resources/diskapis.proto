@@ -49,6 +49,13 @@ service FileService {
         };
     }
 
+    rpc RecoverDocs (RecoverDocsReq) returns (google.protobuf.Empty) {
+        option (google.api.http) = {
+            post: "/v1/files/recover"
+            body: "*"
+        };
+    }
+
     rpc GetRecycleBinList (GetRecycleBinListReq) returns (GetRecycleBinListRsp) {
         option (google.api.http) = {
             get: "/v1/{user_id}/files/recycle-bin"
@@ -358,4 +365,9 @@ message RecycleDocInfo {
 
 message GetRecycleBinListRsp {
     repeated RecycleDocInfo list = 1;
+}
+
+message RecoverDocsReq {
+    string user_id = 1;
+    repeated string ids = 2;
 }

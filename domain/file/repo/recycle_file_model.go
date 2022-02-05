@@ -9,6 +9,7 @@ import (
 
 type RecycleFilePO struct {
 	ID       string    `bson:"_id,omitempty" json:"docId,omitempty"`
+	UserID   string    `bson:"user_id,omitempty" json:"userId,omitempty"`
 	Name     string    `bson:"name,omitempty" json:"docName,omitempty"`
 	IsDir    int32     `bson:"is_dir,omitempty" json:"isDir,omitempty"` // 2: file, 1: directory
 	DeleteAt time.Time `bson:"delete_at,omitempty" json:"-"`

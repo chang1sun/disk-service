@@ -95,6 +95,16 @@ func (s *fileServerImpl) MoveToRecycleBin(ctx context.Context,
 	return rsp, nil
 }
 
+func (s *fileServerImpl) RecoverDocs(ctx context.Context,
+	req *stub.RecoverDocsReq) (*emptypb.Empty, error) {
+	rsp := &emptypb.Empty{}
+	if err := service.RecoverDocs(ctx, req.UserId, req.Ids); err != nil {
+		util.LogErr(err, "RecoverDocs")
+		return rsp, err
+	}
+	return rsp, nil
+}
+
 func (s *fileServerImpl) SoftDelete(ctx context.Context,
 	req *stub.SoftDeleteReq) (*emptypb.Empty, error) {
 	rsp := &emptypb.Empty{}

@@ -427,6 +427,7 @@ func buildRecyclePOs(list []*repo.UserFilePO) []*repo.RecycleFilePO {
 	for _, po := range list {
 		res = append(res, &repo.RecycleFilePO{
 			ID:       po.ID,
+			UserID:   po.UserID,
 			Name:     po.Name,
 			IsDir:    po.IsDir,
 			DeleteAt: time.Now(),

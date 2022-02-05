@@ -29,6 +29,7 @@ type FileServiceClient interface {
 	MakeNewFolder(ctx context.Context, in *MakeNewFolderReq, opts ...grpc.CallOption) (*MakeNewFolderRsp, error)
 	SetHiddenDoc(ctx context.Context, in *SetHiddenDocReq, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	MoveToRecycleBin(ctx context.Context, in *MoveToRecycleBinReq, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	RecoverDocs(ctx context.Context, in *RecoverDocsReq, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	GetRecycleBinList(ctx context.Context, in *GetRecycleBinListReq, opts ...grpc.CallOption) (*GetRecycleBinListRsp, error)
 	SoftDelete(ctx context.Context, in *SoftDeleteReq, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	HardDelete(ctx context.Context, in *HardDeleteReq, opts ...grpc.CallOption) (*emptypb.Empty, error)
@@ -97,6 +98,15 @@ func (c *fileServiceClient) SetHiddenDoc(ctx context.Context, in *SetHiddenDocRe
 func (c *fileServiceClient) MoveToRecycleBin(ctx context.Context, in *MoveToRecycleBinReq, opts ...grpc.CallOption) (*emptypb.Empty, error) {
 	out := new(emptypb.Empty)
 	err := c.cc.Invoke(ctx, "/FileService/MoveToRecycleBin", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *fileServiceClient) RecoverDocs(ctx context.Context, in *RecoverDocsReq, opts ...grpc.CallOption) (*emptypb.Empty, error) {
+	out := new(emptypb.Empty)
+	err := c.cc.Invoke(ctx, "/FileService/RecoverDocs", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -203,6 +213,7 @@ type FileServiceServer interface {
 	MakeNewFolder(context.Context, *MakeNewFolderReq) (*MakeNewFolderRsp, error)
 	SetHiddenDoc(context.Context, *SetHiddenDocReq) (*emptypb.Empty, error)
 	MoveToRecycleBin(context.Context, *MoveToRecycleBinReq) (*emptypb.Empty, error)
+	RecoverDocs(context.Context, *RecoverDocsReq) (*emptypb.Empty, error)
 	GetRecycleBinList(context.Context, *GetRecycleBinListReq) (*GetRecycleBinListRsp, error)
 	SoftDelete(context.Context, *SoftDeleteReq) (*emptypb.Empty, error)
 	HardDelete(context.Context, *HardDeleteReq) (*emptypb.Empty, error)
@@ -236,6 +247,9 @@ func (UnimplementedFileServiceServer) SetHiddenDoc(context.Context, *SetHiddenDo
 }
 func (UnimplementedFileServiceServer) MoveToRecycleBin(context.Context, *MoveToRecycleBinReq) (*emptypb.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method MoveToRecycleBin not implemented")
+}
+func (UnimplementedFileServiceServer) RecoverDocs(context.Context, *RecoverDocsReq) (*emptypb.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method RecoverDocs not implemented")
 }
 func (UnimplementedFileServiceServer) GetRecycleBinList(context.Context, *GetRecycleBinListReq) (*GetRecycleBinListRsp, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetRecycleBinList not implemented")
@@ -383,6 +397,24 @@ func _FileService_MoveToRecycleBin_Handler(srv interface{}, ctx context.Context,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(FileServiceServer).MoveToRecycleBin(ctx, req.(*MoveToRecycleBinReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _FileService_RecoverDocs_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(RecoverDocsReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(FileServiceServer).RecoverDocs(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/FileService/RecoverDocs",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(FileServiceServer).RecoverDocs(ctx, req.(*RecoverDocsReq))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -597,6 +629,10 @@ var FileService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "MoveToRecycleBin",
 			Handler:    _FileService_MoveToRecycleBin_Handler,
+		},
+		{
+			MethodName: "RecoverDocs",
+			Handler:    _FileService_RecoverDocs_Handler,
 		},
 		{
 			MethodName: "GetRecycleBinList",
