@@ -122,7 +122,7 @@ func AddCustomRoute(mux *runtime.ServeMux) error {
 		return err
 	}
 	// multipart uploader test
-	err = mux.HandlePath("POST", "/v1/file/mp-test", application.MPFileUploadTestHandler)
+	err = mux.HandlePath("POST", "/v1/file/mp-upload-test", application.MPFileUploadTestHandler)
 	if err != nil {
 		return err
 	}

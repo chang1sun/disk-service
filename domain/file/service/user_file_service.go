@@ -312,7 +312,75 @@ func moveToPathByPOs(ctx context.Context, pos []*repo.UserFilePO, path string, o
 	return nil
 }
 
-func MoveToRecycleBin(ctx context.Context, ids []string) error {
+func SetHiddenDoc(ctx context.Context, ids []string, hideStatus int32) error {
+	if len(ids) == 0 {
+		return nil
+	}
+	// recursive call
+	pos, err := repo.GetUserFileDao().QueryDocByIDs(ctx, ids)
+	if err != nil {
+		return status.Errorf(errcode.DatabaseOperationErrCode, errcode.DatabaseOperationErrMsg, err)
+	}
+	if len(pos) != len(ids) {
+		return status.Error(errcode.FindCountNotMatchCode, errcode.FindCountNotMatchMsg)
+	}
+	for _, po := range pos {
+		if po.IsDir == isDir {
+			subPOs, err := repo.GetUserFileDao().QueryDirByPath(ctx, po.UserID, po.Path+po.Name+"/", true)
+			if err != nil {
+				return status.Errorf(errcode.DatabaseOperationErrCode, errcode.DatabaseOperationErrMsg, err)
+			}
+			if len(subPOs) > 0 {
+				err = setHiddenDocByPOs(ctx, subPOs, hideStatus)
+				if err != nil {
+					return err
+				}
+			}
+		}
+	}
+
+	count, err := repo.GetUserFileDao().UpdateFileOrDirByIDs(ctx, ids,
+		&repo.UserFilePO{IsHide: hideStatus, UpdateAt: time.Now()})
+	if err != nil {
+		return status.Errorf(errcode.DatabaseOperationErrCode, errcode.DatabaseOperationErrMsg, err)
+	}
+	if count != len(ids) {
+		return status.Error(errcode.UpdateCountNotMatchCode, errcode.UpdateCountNotMatchMsg)
+	}
+	return nil
+}
+
+func setHiddenDocByPOs(ctx context.Context, pos []*repo.UserFilePO, hideStatus int32) error {
+	for _, po := range pos {
+		if po.IsDir == isDir {
+			subPOs, err := repo.GetUserFileDao().QueryDirByPath(ctx, po.UserID, po.Path+po.Name+"/", true)
+			if err != nil {
+				return status.Errorf(errcode.DatabaseOperationErrCode, errcode.DatabaseOperationErrMsg, err)
+			}
+			if len(subPOs) > 0 {
+				err = setHiddenDocByPOs(ctx, subPOs, hideStatus)
+				if err != nil {
+					return err
+				}
+			}
+		}
+	}
+	var ids []string
+	for _, po := range pos {
+		ids = append(ids, po.ID)
+	}
+	count, err := repo.GetUserFileDao().UpdateFileOrDirByIDs(ctx, ids,
+		&repo.UserFilePO{IsHide: hideStatus, UpdateAt: time.Now()})
+	if err != nil {
+		return status.Errorf(errcode.DatabaseOperationErrCode, errcode.DatabaseOperationErrMsg, err)
+	}
+	if count != len(ids) {
+		return status.Error(errcode.UpdateCountNotMatchCode, errcode.UpdateCountNotMatchMsg)
+	}
+	return nil
+}
+
+func MoveToRecycleBin(ctx context.Context, userID string, ids []string) error {
 	if len(ids) == 0 {
 		return nil
 	}
@@ -338,7 +406,6 @@ func MoveToRecycleBin(ctx context.Context, ids []string) error {
 			}
 		}
 	}
-
 	count, err := repo.GetUserFileDao().UpdateFileOrDirByIDs(ctx, ids,
 		&repo.UserFilePO{Status: statusRecycleBin, UpdateAt: time.Now()})
 	if err != nil {
@@ -347,7 +414,26 @@ func MoveToRecycleBin(ctx context.Context, ids []string) error {
 	if count != len(ids) {
 		return status.Error(errcode.UpdateCountNotMatchCode, errcode.UpdateCountNotMatchMsg)
 	}
+	// only insert first level doc to recycle-bin
+	err = repo.GetRecycleFileDao().InsertToRecycleBin(ctx, userID, buildRecyclePOs(pos))
+	if err != nil {
+		return status.Errorf(errcode.DatabaseOperationErrCode, errcode.DatabaseOperationErrMsg, err)
+	}
 	return nil
+}
+
+func buildRecyclePOs(list []*repo.UserFilePO) []*repo.RecycleFilePO {
+	var res []*repo.RecycleFilePO
+	for _, po := range list {
+		res = append(res, &repo.RecycleFilePO{
+			ID:       po.ID,
+			Name:     po.Name,
+			IsDir:    po.IsDir,
+			DeleteAt: time.Now(),
+			ExpireAt: time.Now().Add(7 * 24 * time.Hour),
+		})
+	}
+	return res
 }
 
 func moveToRecycleBinByPOs(ctx context.Context, pos []*repo.UserFilePO) error {
@@ -380,7 +466,7 @@ func moveToRecycleBinByPOs(ctx context.Context, pos []*repo.UserFilePO) error {
 	return nil
 }
 
-func SoftDelete(ctx context.Context, ids []string) error {
+func SoftDelete(ctx context.Context, userID string, ids []string) error {
 	if len(ids) == 0 {
 		return nil
 	}
@@ -413,6 +499,11 @@ func SoftDelete(ctx context.Context, ids []string) error {
 	}
 	if count != len(ids) {
 		return status.Error(errcode.UpdateCountNotMatchCode, errcode.UpdateCountNotMatchMsg)
+	}
+	// only delete first level doc in recycle-bin
+	err = repo.GetRecycleFileDao().DeleteDocs(ctx, userID, ids)
+	if err != nil {
+		return status.Errorf(errcode.DatabaseOperationErrCode, errcode.DatabaseOperationErrMsg, err)
 	}
 	return nil
 }
@@ -518,4 +609,84 @@ func GetDirSizeAndSubFilesNum(ctx context.Context, dir *repo.UserFilePO) (int64,
 
 	}
 	return totalSize, totalNum, nil
+}
+
+func GetRecycleBinList(ctx context.Context, userID string, offset, limit int32) ([]*repo.RecycleFilePO, error) {
+	list, err := repo.GetRecycleFileDao().GetRecycleBinList(ctx, userID, offset, limit)
+	if err != nil {
+		return nil, status.Errorf(errcode.DatabaseOperationErrCode, errcode.DatabaseOperationErrMsg, err)
+	}
+	return list, nil
+}
+
+func RecoverDocs(ctx context.Context, userID string, ids []string) error {
+	if len(ids) == 0 {
+		return nil
+	}
+	// recursive call
+	pos, err := repo.GetUserFileDao().QueryDocByIDs(ctx, ids)
+	if err != nil {
+		return status.Errorf(errcode.DatabaseOperationErrCode, errcode.DatabaseOperationErrMsg, err)
+	}
+	if len(pos) != len(ids) {
+		return status.Error(errcode.FindCountNotMatchCode, errcode.FindCountNotMatchMsg)
+	}
+	for _, po := range pos {
+		if po.IsDir == isDir {
+			subPOs, err := repo.GetUserFileDao().QueryDirByPath(ctx, po.UserID, po.Path+po.Name+"/", true)
+			if err != nil {
+				return status.Errorf(errcode.DatabaseOperationErrCode, errcode.DatabaseOperationErrMsg, err)
+			}
+			if len(subPOs) > 0 {
+				err = recoverDocsByPOs(ctx, subPOs)
+				if err != nil {
+					return err
+				}
+			}
+		}
+	}
+	count, err := repo.GetUserFileDao().UpdateFileOrDirByIDs(ctx, ids,
+		&repo.UserFilePO{Status: statusRecycleBin, UpdateAt: time.Now()})
+	if err != nil {
+		return status.Errorf(errcode.DatabaseOperationErrCode, errcode.DatabaseOperationErrMsg, err)
+	}
+	if count != len(ids) {
+		return status.Error(errcode.UpdateCountNotMatchCode, errcode.UpdateCountNotMatchMsg)
+	}
+	// only delete first level doc in recycle-bin
+	err = repo.GetRecycleFileDao().DeleteDocs(ctx, userID, ids)
+	if err != nil {
+		return status.Errorf(errcode.DatabaseOperationErrCode, errcode.DatabaseOperationErrMsg, err)
+	}
+	return nil
+}
+
+func recoverDocsByPOs(ctx context.Context, pos []*repo.UserFilePO) error {
+	for _, po := range pos {
+		if po.IsDir == isDir {
+			subPOs, err := repo.GetUserFileDao().QueryDirByPath(ctx, po.UserID, po.Path+po.Name+"/", true)
+			if err != nil {
+				return status.Errorf(errcode.DatabaseOperationErrCode, errcode.DatabaseOperationErrMsg, err)
+			}
+			if len(subPOs) > 0 {
+				err = recoverDocsByPOs(ctx, subPOs)
+				if err != nil {
+					return err
+				}
+			}
+		}
+	}
+	var ids []string
+	for _, po := range pos {
+		ids = append(ids, po.ID)
+	}
+	count, err := repo.GetUserFileDao().UpdateFileOrDirByIDs(ctx, ids,
+		&repo.UserFilePO{Status: statusEnable, UpdateAt: time.Now()})
+	if err != nil {
+		return status.Errorf(errcode.DatabaseOperationErrCode, errcode.DatabaseOperationErrMsg, err)
+	}
+	if count != len(ids) {
+		return status.Error(errcode.UpdateCountNotMatchCode, errcode.UpdateCountNotMatchMsg)
+	}
+	return nil
 }

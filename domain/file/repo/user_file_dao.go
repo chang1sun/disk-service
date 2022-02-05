@@ -176,7 +176,10 @@ func (dao *UserFileDao) QueryDirByPath(ctx context.Context, userID, path string,
 	if !showHide {
 		filter["is_hide"] = constants.FileDisplayStatusShow
 	}
-	cursor, err := dao.Database.Collection(collUserFiles).Find(ctx, filter)
+	findOptions := options.Find()
+	// Sort by `is_dir` field ascending
+	findOptions.SetSort(bson.D{{"is_dir", 1}, {"update_time", -1}})
+	cursor, err := dao.Database.Collection(collUserFiles).Find(ctx, filter, findOptions)
 	if err != nil {
 		return nil, err
 	}
@@ -294,14 +297,3 @@ func (dao *UserFileDao) QueryDocByIDs(ctx context.Context, ids []string) ([]*Use
 	}
 	return content, nil
 }
-
-// func getParentPathAndName(path string) (string, string) {
-// 	if path == "/" {
-// 		return "", ""
-// 	}
-// 	p := strings.Split(path, "/")
-// 	if len(p) == 0 {
-// 		return "", ""
-// 	}
-// 	return strings.Join(p[:len(p)-2], "/") + "/", p[len(p)-2]
-// }

@@ -79,3 +79,17 @@ func AssembleShareDetail(detail *repo.ShareDetailPO) *stub.GetShareDetailRsp {
 		Size:       detail.DocSize,
 	}
 }
+
+func AssembleRecycleDocList(list []*repo.RecycleFilePO) []*stub.RecycleDocInfo {
+	var res []*stub.RecycleDocInfo
+	for _, doc := range list {
+		res = append(res, &stub.RecycleDocInfo{
+			DocId:    doc.ID,
+			DocName:  doc.Name,
+			IsDir:    doc.IsDir,
+			DeleteAt: doc.DeleteAt.Format("2006-01-02"),
+			ExpireAt: doc.DeleteAt.Format("2006-01-02"),
+		})
+	}
+	return res
+}

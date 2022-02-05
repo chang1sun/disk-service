@@ -27,6 +27,7 @@ type FileServiceClient interface {
 	GetDirsAndFiles(ctx context.Context, in *GetDirsAndFilesReq, opts ...grpc.CallOption) (*GetDirsAndFilesRsp, error)
 	GetFileDetail(ctx context.Context, in *GetFileDetailReq, opts ...grpc.CallOption) (*GetFileDetailRsp, error)
 	MakeNewFolder(ctx context.Context, in *MakeNewFolderReq, opts ...grpc.CallOption) (*MakeNewFolderRsp, error)
+	SetHiddenDoc(ctx context.Context, in *SetHiddenDocReq, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	MoveToRecycleBin(ctx context.Context, in *MoveToRecycleBinReq, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	GetRecycleBinList(ctx context.Context, in *GetRecycleBinListReq, opts ...grpc.CallOption) (*GetRecycleBinListRsp, error)
 	SoftDelete(ctx context.Context, in *SoftDeleteReq, opts ...grpc.CallOption) (*emptypb.Empty, error)
@@ -78,6 +79,15 @@ func (c *fileServiceClient) GetFileDetail(ctx context.Context, in *GetFileDetail
 func (c *fileServiceClient) MakeNewFolder(ctx context.Context, in *MakeNewFolderReq, opts ...grpc.CallOption) (*MakeNewFolderRsp, error) {
 	out := new(MakeNewFolderRsp)
 	err := c.cc.Invoke(ctx, "/FileService/MakeNewFolder", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *fileServiceClient) SetHiddenDoc(ctx context.Context, in *SetHiddenDocReq, opts ...grpc.CallOption) (*emptypb.Empty, error) {
+	out := new(emptypb.Empty)
+	err := c.cc.Invoke(ctx, "/FileService/SetHiddenDoc", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -191,6 +201,7 @@ type FileServiceServer interface {
 	GetDirsAndFiles(context.Context, *GetDirsAndFilesReq) (*GetDirsAndFilesRsp, error)
 	GetFileDetail(context.Context, *GetFileDetailReq) (*GetFileDetailRsp, error)
 	MakeNewFolder(context.Context, *MakeNewFolderReq) (*MakeNewFolderRsp, error)
+	SetHiddenDoc(context.Context, *SetHiddenDocReq) (*emptypb.Empty, error)
 	MoveToRecycleBin(context.Context, *MoveToRecycleBinReq) (*emptypb.Empty, error)
 	GetRecycleBinList(context.Context, *GetRecycleBinListReq) (*GetRecycleBinListRsp, error)
 	SoftDelete(context.Context, *SoftDeleteReq) (*emptypb.Empty, error)
@@ -219,6 +230,9 @@ func (UnimplementedFileServiceServer) GetFileDetail(context.Context, *GetFileDet
 }
 func (UnimplementedFileServiceServer) MakeNewFolder(context.Context, *MakeNewFolderReq) (*MakeNewFolderRsp, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method MakeNewFolder not implemented")
+}
+func (UnimplementedFileServiceServer) SetHiddenDoc(context.Context, *SetHiddenDocReq) (*emptypb.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SetHiddenDoc not implemented")
 }
 func (UnimplementedFileServiceServer) MoveToRecycleBin(context.Context, *MoveToRecycleBinReq) (*emptypb.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method MoveToRecycleBin not implemented")
@@ -333,6 +347,24 @@ func _FileService_MakeNewFolder_Handler(srv interface{}, ctx context.Context, de
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(FileServiceServer).MakeNewFolder(ctx, req.(*MakeNewFolderReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _FileService_SetHiddenDoc_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SetHiddenDocReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(FileServiceServer).SetHiddenDoc(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/FileService/SetHiddenDoc",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(FileServiceServer).SetHiddenDoc(ctx, req.(*SetHiddenDocReq))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -557,6 +589,10 @@ var FileService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "MakeNewFolder",
 			Handler:    _FileService_MakeNewFolder_Handler,
+		},
+		{
+			MethodName: "SetHiddenDoc",
+			Handler:    _FileService_SetHiddenDoc_Handler,
 		},
 		{
 			MethodName: "MoveToRecycleBin",

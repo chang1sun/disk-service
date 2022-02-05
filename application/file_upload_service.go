@@ -2,6 +2,7 @@ package application
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -46,7 +47,7 @@ func tryQuickUpload(ctx context.Context, userID, fileName, md5 string) (string, 
 		Size:          fileMeta.Size,
 	})
 	if err != nil {
-		return "", "", status.Errorf(errcode.RPCCallErrCode, errcode.RPCCallErrMsg, err)
+		return "", "", err
 	}
 
 	// update user's level content
@@ -60,7 +61,12 @@ func tryQuickUpload(ctx context.Context, userID, fileName, md5 string) (string, 
 
 // Handle single-piece file upload request
 func FileUploadHandler(w http.ResponseWriter, r *http.Request, pathParams map[string]string) {
-	w.Header().Set("ContentType", "application/json")
+	defer func() {
+		if r := recover(); r != nil {
+			log.Println("Recovered in FileUploadHandler", r)
+		}
+	}()
+	w.Header().Set("Content-Type", "application/json")
 	err := r.ParseMultipartForm(2048)
 	if err != nil {
 		errorResp(errcode.ParseHTTPRequestFormFileErrCode, errcode.ParseHTTPRequestFormFileErrMsg, err, &w)
@@ -82,17 +88,18 @@ func FileUploadHandler(w http.ResponseWriter, r *http.Request, pathParams map[st
 	// try quick upload
 	fid, uniFileID, err := tryQuickUpload(r.Context(), userID, head.Filename, md5)
 	if err != nil {
+		log.Fatalf("try quick upload err, err msg: %v", err)
 		s, _ := status.FromError(err)
 		errorResp(uint32(s.Code()), s.Message(), nil, &w)
 		return
 	}
 	if fid != "" {
-		w.Write([]byte(fmt.Sprintf(`"file_id: %v", "uni_file_id": %v`, fid, uniFileID)))
+		rsp, _ := json.Marshal(map[string]string{"file_id": fid, "uni_file_id": uniFileID})
+		w.Write(rsp)
 		return
 	}
 	// cal md5 and compare
 	fileMd5 := util.GetFileMD5FromReader(f)
-	log.Printf("cal md5 is: %v\n", fileMd5)
 	if fileMd5 != md5 {
 		errorResp(errcode.Md5CheckNotPassCode, errcode.Md5CheckNotPassMsg, nil, &w)
 		return
@@ -105,7 +112,6 @@ func FileUploadHandler(w http.ResponseWriter, r *http.Request, pathParams map[st
 		Type:     util.GetMIMETypeFromReader(f),
 		UploadBy: userID,
 	}
-	log.Printf("file type: %v", fileMeta.Type)
 	// Write in gridfs
 	f.Seek(0, io.SeekStart)
 	uId, err := frepo.GetUniFileStoreDao().UploadFile(r.Context(), fileName, f, fileMeta)
@@ -113,7 +119,6 @@ func FileUploadHandler(w http.ResponseWriter, r *http.Request, pathParams map[st
 		errorResp(errcode.DatabaseOperationErrCode, errcode.DatabaseOperationErrMsg, err, &w)
 		return
 	}
-	log.Printf("uid: %v\n", uId)
 
 	// update user's storage size
 	err = aservice.UpdateUserStorage(r.Context(), &arepo.UpdateUserAnalysisDTO{
@@ -129,18 +134,23 @@ func FileUploadHandler(w http.ResponseWriter, r *http.Request, pathParams map[st
 	}
 
 	// update user's level content
-	id, err := frepo.GetUserFileDao().AddFileOrDir(r.Context(), buildUploadUserFilePO(uId, fileName, userID, fileMeta))
+	id, err := frepo.GetUserFileDao().AddFileOrDir(r.Context(), buildUploadUserFilePO(uId, head.Filename, userID, fileMeta))
 	if err != nil {
 		errorResp(errcode.DatabaseOperationErrCode, errcode.DatabaseOperationErrMsg, err, &w)
 		return
 	}
-
-	w.Write([]byte(fmt.Sprintf(`"file_id: %v", "uni_file_id": %v`, id, uId)))
+	rsp, _ := json.Marshal(map[string]string{"file_id": id, "uni_file_id": uId})
+	w.Write(rsp)
 }
 
 // Handle test request by testing if file already exist and acknowledging infos about upcoming formal upload requet
 func MPFileUploadTestHandler(w http.ResponseWriter, r *http.Request, pathParams map[string]string) {
-	w.Header().Set("ContentType", "application/json")
+	defer func() {
+		if r := recover(); r != nil {
+			log.Println("Recovered in MPFileUploadTestHandler", r)
+		}
+	}()
+	w.Header().Set("Content-Type", "application/json")
 	err := r.ParseMultipartForm(2048)
 	if err != nil {
 		errorResp(errcode.ParseHTTPRequestFormFileErrCode, errcode.ParseHTTPRequestFormFileErrMsg, err, &w)
@@ -156,7 +166,6 @@ func MPFileUploadTestHandler(w http.ResponseWriter, r *http.Request, pathParams 
 	fileName := r.PostForm.Get("file_name")
 	chunkSize := r.PostForm.Get("chunk_size")
 	chunkNum := r.PostForm.Get("chunk_num")
-	log.Println("md5 is ", md5)
 	// try quick upload
 	fid, uniFileID, err := tryQuickUpload(r.Context(), userID, fileName, md5)
 	if err != nil {
@@ -165,8 +174,8 @@ func MPFileUploadTestHandler(w http.ResponseWriter, r *http.Request, pathParams 
 		return
 	}
 	if fid != "" {
-		w.Write([]byte(fmt.Sprintf(`"file_id: %v", "uni_file_id": %v`, fid, uniFileID)))
-		return
+		rsp, _ := json.Marshal(map[string]string{"file_id": fid, "uni_file_id": uniFileID})
+		w.Write(rsp)
 	}
 	// preparation
 	// check if file had been uploaded a part of it
@@ -183,7 +192,16 @@ func MPFileUploadTestHandler(w http.ResponseWriter, r *http.Request, pathParams 
 			errorResp(errcode.DatabaseOperationErrCode, errcode.DatabaseOperationErrMsg, err, &w)
 			return
 		}
-		w.Write([]byte(fmt.Sprintf(`"next_idx: %v"`, res.Val())))
+		nextIdx := res.Val()
+		// if all chunks have been uploaded, call merge
+		if nextIdx == chunkNum {
+			mergeFile(r.Context(), w, md5, userID)
+			return
+		}
+		rsp, _ := json.Marshal(map[string]string{"next_idx": nextIdx})
+		log.Println(rsp)
+		w.Write(rsp)
+		return
 	}
 	// initiate
 	if err := MPRedisClient.HMSet(r.Context(), md5, "file_name", fileName, "chunk_num",
@@ -191,12 +209,18 @@ func MPFileUploadTestHandler(w http.ResponseWriter, r *http.Request, pathParams 
 		errorResp(errcode.DatabaseOperationErrCode, errcode.DatabaseOperationErrMsg, err, &w)
 		return
 	}
-	w.Write([]byte(fmt.Sprintf(`"next_idx: %v"`, 0)))
+	rsp, _ := json.Marshal(map[string]string{"next_idx": "0"})
+	w.Write(rsp)
 }
 
 // Handle multipart file upload request
 func MPFileUploadHandler(w http.ResponseWriter, r *http.Request, pathParams map[string]string) {
-	w.Header().Set("ContentType", "application/json")
+	defer func() {
+		if r := recover(); r != nil {
+			log.Println("Recovered in MPFileUploadHandler", r)
+		}
+	}()
+	w.Header().Set("Content-Type", "application/json")
 	err := r.ParseMultipartForm(2048)
 	if err != nil {
 		errorResp(errcode.ParseHTTPRequestFormFileErrCode, errcode.ParseHTTPRequestFormFileErrMsg, err, &w)
@@ -225,7 +249,9 @@ func MPFileUploadHandler(w http.ResponseWriter, r *http.Request, pathParams map[
 	nextIdx := data["next_idx"]
 	chunkNum, _ := strconv.Atoi(data["chunk_num"])
 	if chunkID != nextIdx {
-		w.Write([]byte(fmt.Sprintf(`"next_idx: %v"`, nextIdx)))
+		rsp, _ := json.Marshal(map[string]string{"next_idx": nextIdx})
+		log.Println("chunkIdx != nextIdx, rsp is ", rsp)
+		w.Write(rsp)
 		return
 	}
 	// if it is the first chunk, set its type
@@ -234,68 +260,67 @@ func MPFileUploadHandler(w http.ResponseWriter, r *http.Request, pathParams map[
 		f.Seek(0, io.SeekStart)
 	}
 	// write in temperary file
-	tmpDir := fmt.Sprintf("~/tmpfiles/%v", md5)
-	if !util.IsPathExists(tmpDir) {
-		os.Mkdir(md5, os.ModePerm)
+	tmpDir := fmt.Sprintf("tmpfiles/%v", md5)
+	if err = os.MkdirAll(tmpDir, os.ModePerm); err != nil {
+		errorResp(errcode.OsOperationErrCode, errcode.OsOperationErrMsg, err, &w)
+		return
 	}
-	file, err := os.Create(fmt.Sprintf("~/tmpfiles/%v/chunk_%v", md5, nextIdx))
+	file, err := os.Create(fmt.Sprintf("tmpfiles/%v/chunk_%v", md5, nextIdx))
 	if err != nil {
-		log.Fatalf("os create tmp file failed, err msg: %v", err)
 		errorResp(errcode.OsOperationErrCode, errcode.OsOperationErrMsg, err, &w)
 		return
 	}
 	_, err = io.Copy(file, f)
 	if err != nil {
-		log.Fatalf("os copy file failed, err msg: %v", err)
 		errorResp(errcode.OsOperationErrCode, errcode.OsOperationErrMsg, err, &w)
 		return
 	}
 	// update next chunk id
 	updateIdx, _ := strconv.Atoi(nextIdx)
 	updateIdx += 1
-	// if it is the last chunk, call merge handler
-	if updateIdx == chunkNum {
-		MergeFile(r.Context(), w, md5, userID)
-		return
-	}
 	if err := MPRedisClient.HSet(r.Context(), md5, "next_idx", updateIdx).Err(); err != nil {
 		errorResp(errcode.DatabaseOperationErrCode, errcode.DatabaseOperationErrMsg, err, &w)
 		return
 	}
-	w.Write([]byte(fmt.Sprintf(`"next_idx: %v"`, updateIdx)))
+	// if it is the last chunk, call merge handler
+	if updateIdx == chunkNum {
+		mergeFile(r.Context(), w, md5, userID)
+		return
+	}
+	rsp, _ := json.Marshal(map[string]string{"next_idx": strconv.Itoa(updateIdx)})
+	w.Write(rsp)
 }
 
-// // Handle finish upload request
+// // // Handle finish upload request
 // func FileMergeHandler(w http.ResponseWriter, r *http.Request, pathParams map[string]string) {
 
 // }
 
-func MergeFile(ctx context.Context, w http.ResponseWriter, md5 string, userID string) {
+func mergeFile(ctx context.Context, w http.ResponseWriter, md5 string, userID string) {
+	w.Header().Set("Content-Type", "application/json")
 	res := MPRedisClient.HGetAll(ctx, md5)
 	if res.Err() != nil {
 		errorResp(errcode.DatabaseOperationErrCode, errcode.DatabaseOperationErrMsg, res.Err(), &w)
-		log.Fatalf("redis err, err msg: %v", res.Err())
 	}
 	data := res.Val()
 	fileName := data["file_name"]
 	chunkNum := data["chunk_num"]
 	totalNum, _ := strconv.Atoi(chunkNum)
-	file, _ := os.Create(fmt.Sprintf("~/tmpfiles/%v/%v", md5, fileName))
+	file, _ := os.Create(fmt.Sprintf("tmpfiles/%v/%v", md5, fileName))
 	var pos int64 = 0
 	for i := 0; i < totalNum; i++ {
-		chunkStream, err := os.OpenFile(fmt.Sprintf("~/tmpfiles/%v/chunk_%v", md5, i), os.O_CREATE|os.O_WRONLY, os.ModePerm)
+		chunkStream, err := os.OpenFile(fmt.Sprintf("tmpfiles/%v/chunk_%v", md5, i), os.O_RDONLY, os.ModePerm)
 		if err != nil {
-			log.Fatalf("os open file failed, err msg: %v", err)
 			errorResp(errcode.OsOperationErrCode, errcode.OsOperationErrMsg, err, &w)
 			return
 		}
-		chunkInfo, err := os.Stat(fmt.Sprintf("~/tmpfiles/%v/chunk_%v", md5, i))
+		chunkInfo, err := os.Stat(fmt.Sprintf("tmpfiles/%v/chunk_%v", md5, i))
 		if err != nil {
-			log.Fatalf("os open file failed, err msg: %v", err)
 			errorResp(errcode.OsOperationErrCode, errcode.OsOperationErrMsg, err, &w)
 			return
 		}
-		file.Seek(pos+chunkInfo.Size(), 0)
+		file.Seek(pos, 0)
+		pos += chunkInfo.Size()
 		_, err = io.Copy(file, chunkStream)
 		if err != nil {
 			log.Fatalf("os copy file failed, err msg: %v", err)
@@ -304,29 +329,25 @@ func MergeFile(ctx context.Context, w http.ResponseWriter, md5 string, userID st
 		}
 	}
 	fileType := data["file_type"]
-	fileInfo, err := os.Stat(fmt.Sprintf("~/tmpfiles/%v/%v", md5, fileName))
+	fileInfo, err := os.Stat(fmt.Sprintf("tmpfiles/%v/%v", md5, fileName))
 	if err != nil {
-		log.Fatalf("os open file failed, err msg: %v", err)
 		errorResp(errcode.OsOperationErrCode, errcode.OsOperationErrMsg, err, &w)
 		return
 	}
-	fileName = fmt.Sprintf("%v-%v", fileName, time.Now().Format("20060102150405"))
 	fileMeta := &frepo.UniFileMetaPO{
 		Size:     fileInfo.Size(),
 		Md5:      md5,
 		Type:     fileType,
 		UploadBy: userID,
 	}
-	log.Printf("file type: %v", fileMeta.Type)
 	// Write in gridfs
 	file.Seek(0, io.SeekStart)
-	uId, err := frepo.GetUniFileStoreDao().UploadFile(ctx, fileName, file, fileMeta)
+	uId, err := frepo.GetUniFileStoreDao().UploadFile(ctx,
+		fmt.Sprintf("%v-%v", fileName, time.Now().Format("20060102150405")), file, fileMeta)
 	if err != nil {
 		errorResp(errcode.DatabaseOperationErrCode, errcode.DatabaseOperationErrMsg, err, &w)
 		return
 	}
-	log.Printf("uid: %v\n", uId)
-
 	// update user's storage size
 	err = aservice.UpdateUserStorage(ctx, &arepo.UpdateUserAnalysisDTO{
 		UserID:        userID,
@@ -345,7 +366,13 @@ func MergeFile(ctx context.Context, w http.ResponseWriter, md5 string, userID st
 		errorResp(errcode.DatabaseOperationErrCode, errcode.DatabaseOperationErrMsg, err, &w)
 		return
 	}
-	w.Write([]byte(fmt.Sprintf(`"file_id: %v", "uni_file_id": %v`, id, uId)))
+	// delete tmp dir
+	if err := os.RemoveAll(fmt.Sprintf("tmpfiles/%v", md5)); err != nil {
+		errorResp(errcode.OsOperationErrCode, errcode.OsOperationErrMsg, err, &w)
+		return
+	}
+	rsp, _ := json.Marshal(map[string]string{"file_id": id, "uni_file_id": uId})
+	w.Write(rsp)
 }
 
 // Handle download request
@@ -365,7 +392,6 @@ func DownloadHandler(w http.ResponseWriter, r *http.Request, pathParams map[stri
 	}
 	w.Header().Set("Content-Type", f.GetFile().Metadata.Lookup("type").String())
 	w.Header().Set("Content-Disposition", "attachment; filename=\""+fileName+"\"")
-	log.Println(w.Header())
 	// _, err = io.Copy(w, f)
 	b, err := ioutil.ReadAll(f)
 	if err != nil {
@@ -379,14 +405,13 @@ func DownloadHandler(w http.ResponseWriter, r *http.Request, pathParams map[stri
 }
 
 func errorResp(code uint32, msg string, err error, w *http.ResponseWriter) {
+	log.Fatalf("err occured, code: %v, msg: %v", code, fmt.Sprintf(msg, err))
 	if err == nil {
-		(*w).Write([]byte(fmt.Sprintf(`{"code: %v, "msg": %v}`,
-			code, msg),
-		))
+		rsp, _ := json.Marshal(map[string]string{"code": strconv.Itoa(int(code)), "msg": msg})
+		(*w).Write(rsp)
 	} else {
-		(*w).Write([]byte(fmt.Sprintf(`{"code: %v, "msg": %v}`,
-			code, fmt.Sprintf(msg, err)),
-		))
+		rsp, _ := json.Marshal(map[string]string{"code": strconv.Itoa(int(code)), "msg": fmt.Sprintf(msg, err)})
+		(*w).Write(rsp)
 	}
 }
 

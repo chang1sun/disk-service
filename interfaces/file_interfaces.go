@@ -2,7 +2,6 @@ package interfaces
 
 import (
 	"context"
-	"log"
 
 	"github.com/changpro/disk-service/application"
 	"github.com/changpro/disk-service/domain/file/service"
@@ -28,7 +27,6 @@ func (s *fileServerImpl) UploadFile(ctx context.Context,
 func (s *fileServerImpl) GetDirsAndFiles(ctx context.Context,
 	req *stub.GetDirsAndFilesReq) (*stub.GetDirsAndFilesRsp, error) {
 	rsp := &stub.GetDirsAndFilesRsp{}
-	log.Println(req.UserId, req.Path, req.ShowHide)
 	content, err := service.GetDirByPath(ctx, req.UserId, req.Path, req.ShowHide)
 	if err != nil {
 		util.LogErr(err, "GetDirsAndFiles")
@@ -66,6 +64,17 @@ func (s *fileServerImpl) MakeNewFolder(ctx context.Context,
 	return rsp, nil
 }
 
+func (s *fileServerImpl) SetHiddenDoc(ctx context.Context,
+	req *stub.SetHiddenDocReq) (*emptypb.Empty, error) {
+	rsp := &emptypb.Empty{}
+	err := service.SetHiddenDoc(ctx, req.Ids, req.HideStatus)
+	if err != nil {
+		util.LogErr(err, "SetHiddenDoc")
+		return rsp, err
+	}
+	return rsp, nil
+}
+
 func (s *fileServerImpl) Rename(ctx context.Context,
 	req *stub.RenameReq) (*emptypb.Empty, error) {
 	rsp := &emptypb.Empty{}
@@ -79,7 +88,7 @@ func (s *fileServerImpl) Rename(ctx context.Context,
 func (s *fileServerImpl) MoveToRecycleBin(ctx context.Context,
 	req *stub.MoveToRecycleBinReq) (*emptypb.Empty, error) {
 	rsp := &emptypb.Empty{}
-	if err := service.MoveToRecycleBin(ctx, req.Id); err != nil {
+	if err := service.MoveToRecycleBin(ctx, req.UserId, req.Ids); err != nil {
 		util.LogErr(err, "MoveToRecycleBin")
 		return rsp, err
 	}
@@ -89,7 +98,7 @@ func (s *fileServerImpl) MoveToRecycleBin(ctx context.Context,
 func (s *fileServerImpl) SoftDelete(ctx context.Context,
 	req *stub.SoftDeleteReq) (*emptypb.Empty, error) {
 	rsp := &emptypb.Empty{}
-	if err := service.SoftDelete(ctx, req.Id); err != nil {
+	if err := service.SoftDelete(ctx, req.UserId, req.Ids); err != nil {
 		util.LogErr(err, "SoftDelete")
 		return rsp, err
 	}
@@ -99,7 +108,7 @@ func (s *fileServerImpl) SoftDelete(ctx context.Context,
 func (s *fileServerImpl) HardDelete(ctx context.Context,
 	req *stub.HardDeleteReq) (*emptypb.Empty, error) {
 	rsp := &emptypb.Empty{}
-	if err := service.HardDelete(ctx, req.Id); err != nil {
+	if err := service.HardDelete(ctx, req.Ids); err != nil {
 		util.LogErr(err, "HardDelete")
 		return rsp, err
 	}
@@ -178,6 +187,11 @@ func (s *fileServerImpl) GetShareDetail(ctx context.Context,
 func (s *fileServerImpl) GetRecycleBinList(ctx context.Context,
 	req *stub.GetRecycleBinListReq) (*stub.GetRecycleBinListRsp, error) {
 	rsp := &stub.GetRecycleBinListRsp{}
-	// TODO
+	list, err := service.GetRecycleBinList(ctx, req.UserId, req.Offset, req.Limit)
+	if err != nil {
+		util.LogErr(err, "GetRecycleBinList")
+		return rsp, err
+	}
+	rsp.List = assembler.AssembleRecycleDocList(list)
 	return rsp, nil
 }

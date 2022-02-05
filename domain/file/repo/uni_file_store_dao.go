@@ -36,7 +36,7 @@ func (dao *UniFileStoreDao) QueryFileByMd5(ctx context.Context, md5 string) (*gr
 	if err != nil {
 		return nil, err
 	}
-	err = cursor.All(ctx, files)
+	err = cursor.All(ctx, &files)
 	if err != nil {
 		return nil, err
 	}

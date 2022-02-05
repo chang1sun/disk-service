@@ -35,6 +35,13 @@ service FileService {
         };
     }
 
+    rpc SetHiddenDoc (SetHiddenDocReq) returns (google.protobuf.Empty) {
+        option (google.api.http) = {
+            post: "/v1/files/set-hidden"
+            body: "*"
+        };
+    }
+
     rpc MoveToRecycleBin (MoveToRecycleBinReq) returns (google.protobuf.Empty) {
         option (google.api.http) = {
             post: "/v1/files/recycle"
@@ -244,19 +251,25 @@ message MakeNewFolderRsp {
     string id = 1;
 }
 
+message SetHiddenDocReq {
+    string user_id = 1;
+    repeated string ids = 2;
+    int32 hide_status = 3; // hide(1) or not(2)
+}
+
 message MoveToRecycleBinReq {
     string user_id = 1;
-    repeated string id = 2;
+    repeated string ids = 2;
 }
 
 message SoftDeleteReq {
     string user_id = 1;
-    repeated string id = 2;
+    repeated string ids = 2;
 }
 
 message HardDeleteReq {
     string user_id = 1;
-    string id = 2;
+    string ids = 2;
 }
 
 message RenameReq {
@@ -331,12 +344,16 @@ message ShareRecord {
 
 message GetRecycleBinListReq {
     string user_id = 1;
+    int32 offset = 2;
+    int32 limit = 3;
 }
 
 message RecycleDocInfo {
-    string id = 1;
-    string name = 2;
-    string delete_time = 3;
+    string doc_id = 1;
+    string doc_name = 2;
+    int32 is_dir = 3;
+    string delete_at = 4;
+    string expire_at = 5;
 }
 
 message GetRecycleBinListRsp {
