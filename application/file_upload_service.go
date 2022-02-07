@@ -38,7 +38,12 @@ func tryQuickUpload(ctx context.Context, userID, fileName, md5 string) (string, 
 		Md5:  md5,
 		Type: file.Metadata.Lookup("type").String(),
 	}
-
+	// update user's level content
+	id, err := repo.GetUserFileDao().AddFileOrDir(ctx,
+		buildUploadUserFilePO(file.ID.(primitive.ObjectID).String(), fileName, userID, fileMeta))
+	if err != nil {
+		return "", "", status.Errorf(errcode.DatabaseOperationErrCode, errcode.DatabaseOperationErrMsg, err)
+	}
 	// update user's storage size
 	err = aservice.UpdateUserStorage(ctx, &arepo.UpdateUserAnalysisDTO{
 		UserID:        userID,
@@ -48,13 +53,6 @@ func tryQuickUpload(ctx context.Context, userID, fileName, md5 string) (string, 
 	})
 	if err != nil {
 		return "", "", err
-	}
-
-	// update user's level content
-	id, err := repo.GetUserFileDao().AddFileOrDir(ctx,
-		buildUploadUserFilePO(file.ID.(primitive.ObjectID).String(), fileName, userID, fileMeta))
-	if err != nil {
-		return "", "", status.Errorf(errcode.DatabaseOperationErrCode, errcode.DatabaseOperationErrMsg, err)
 	}
 	return id, file.ID.(primitive.ObjectID).String(), nil
 }
@@ -79,6 +77,12 @@ func FileUploadHandler(w http.ResponseWriter, r *http.Request, pathParams map[st
 	}
 	md5 := r.PostForm.Get("md5")
 	userID := r.PostForm.Get("user_id")
+	// check if already exist
+	if err := checkUserMd5Repeat(r.Context(), userID, md5); err != nil {
+		s, _ := status.FromError(err)
+		errorResp(uint32(s.Code()), s.Message(), nil, &w)
+		return
+	}
 	f, head, err := r.FormFile("file")
 	defer f.Close()
 	if err != nil {
@@ -88,7 +92,6 @@ func FileUploadHandler(w http.ResponseWriter, r *http.Request, pathParams map[st
 	// try quick upload
 	fid, uniFileID, err := tryQuickUpload(r.Context(), userID, head.Filename, md5)
 	if err != nil {
-		log.Fatalf("try quick upload err, err msg: %v", err)
 		s, _ := status.FromError(err)
 		errorResp(uint32(s.Code()), s.Message(), nil, &w)
 		return
@@ -143,6 +146,17 @@ func FileUploadHandler(w http.ResponseWriter, r *http.Request, pathParams map[st
 	w.Write(rsp)
 }
 
+func checkUserMd5Repeat(ctx context.Context, userID, md5 string) error {
+	ok, err := repo.GetUserFileDao().IsFileExistByMD5(ctx, userID, md5)
+	if err != nil {
+		return status.Errorf(errcode.DatabaseOperationErrCode, errcode.DatabaseOperationErrMsg, err)
+	}
+	if ok {
+		return status.Error(errcode.SameFileHasAlreadyBeenUploadedCode, errcode.SameFileHasAlreadyBeenUploadedMsg)
+	}
+	return nil
+}
+
 // Handle test request by testing if file already exist and acknowledging infos about upcoming formal upload requet
 func MPFileUploadTestHandler(w http.ResponseWriter, r *http.Request, pathParams map[string]string) {
 	defer func() {
@@ -166,6 +180,12 @@ func MPFileUploadTestHandler(w http.ResponseWriter, r *http.Request, pathParams 
 	fileName := r.PostForm.Get("file_name")
 	chunkSize := r.PostForm.Get("chunk_size")
 	chunkNum := r.PostForm.Get("chunk_num")
+	// check if already exist
+	if err := checkUserMd5Repeat(r.Context(), userID, md5); err != nil {
+		s, _ := status.FromError(err)
+		errorResp(uint32(s.Code()), s.Message(), nil, &w)
+		return
+	}
 	// try quick upload
 	fid, uniFileID, err := tryQuickUpload(r.Context(), userID, fileName, md5)
 	if err != nil {
@@ -181,14 +201,12 @@ func MPFileUploadTestHandler(w http.ResponseWriter, r *http.Request, pathParams 
 	// check if file had been uploaded a part of it
 	existRes := MPRedisClient.Exists(r.Context(), md5)
 	if existRes.Err() != nil {
-		log.Fatalf("redis err, err msg: %v", existRes.Err())
 		errorResp(errcode.DatabaseOperationErrCode, errcode.DatabaseOperationErrMsg, err, &w)
 		return
 	}
 	if existRes.Val() == 1 {
 		res := MPRedisClient.HGet(r.Context(), md5, "next_idx")
 		if err != nil {
-			log.Fatalf("redis err, err msg: %v", res.Err())
 			errorResp(errcode.DatabaseOperationErrCode, errcode.DatabaseOperationErrMsg, err, &w)
 			return
 		}
@@ -323,7 +341,6 @@ func mergeFile(ctx context.Context, w http.ResponseWriter, md5 string, userID st
 		pos += chunkInfo.Size()
 		_, err = io.Copy(file, chunkStream)
 		if err != nil {
-			log.Fatalf("os copy file failed, err msg: %v", err)
 			errorResp(errcode.OsOperationErrCode, errcode.OsOperationErrMsg, err, &w)
 			return
 		}
@@ -405,7 +422,7 @@ func DownloadHandler(w http.ResponseWriter, r *http.Request, pathParams map[stri
 }
 
 func errorResp(code uint32, msg string, err error, w *http.ResponseWriter) {
-	log.Fatalf("err occured, code: %v, msg: %v", code, fmt.Sprintf(msg, err))
+	log.Printf("err occured, code: %v, msg: %v", code, fmt.Sprintf(msg, err))
 	if err == nil {
 		rsp, _ := json.Marshal(map[string]string{"code": strconv.Itoa(int(code)), "msg": msg})
 		(*w).Write(rsp)

@@ -199,6 +199,23 @@ func (dao *UserFileDao) IsFileOrDirExist(ctx context.Context, userID, name, path
 		"user_id": userID,
 		"path":    path,
 		"name":    name,
+		"status":  1,
+	}
+	res := dao.Database.Collection(collUserFiles).FindOne(ctx, filter)
+	if res.Err() == mongo.ErrNoDocuments {
+		return false, nil
+	}
+	if res.Err() != nil {
+		return false, res.Err()
+	}
+	return true, nil
+}
+
+func (dao *UserFileDao) IsFileExistByMD5(ctx context.Context, userID, md5 string) (bool, error) {
+	filter := bson.M{
+		"user_id":  userID,
+		"file_md5": md5,
+		"status":   1,
 	}
 	res := dao.Database.Collection(collUserFiles).FindOne(ctx, filter)
 	if res.Err() == mongo.ErrNoDocuments {

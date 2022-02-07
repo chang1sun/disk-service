@@ -19,7 +19,7 @@ func CustomErrorHandler(c context.Context, sm *runtime.ServeMux, m runtime.Marsh
 	rw http.ResponseWriter, r *http.Request, e error) {
 	status, ok := status.FromError(e)
 	if !ok {
-		log.Fatalln("not a valid grpc error")
+		log.Println("not a valid grpc error")
 	}
 	rw.Header().Set("ContentType", "application/json")
 	errbody := &errorBody{
@@ -37,5 +37,5 @@ func LogErr(err error, intName string) {
 	if uint32(s.Code()) < uint32(20000) {
 		return
 	}
-	log.Fatalf("[%v] request failed, err msg: %v", intName, err)
+	log.Printf("[%v] request failed, err msg: %v", intName, err)
 }

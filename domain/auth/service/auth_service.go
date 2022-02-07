@@ -89,8 +89,18 @@ func ModifyPassword(ctx context.Context, dto *repo.ModifyPwDTO) error {
 	if user == nil {
 		return status.Error(errcode.NoSuchUserCode, errcode.NoSuchUserMsg)
 	}
-	if err := repo.GetUserDao().UpdatePassword(ctx, dto); err != nil {
+	if err := isAuthMatch(ctx, user, dto); err != nil {
+		return err
+	}
+	if err := repo.GetUserDao().UpdatePassword(ctx, dto.UserID, dto.NewPw); err != nil {
 		return status.Errorf(errcode.DatabaseOperationErrCode, errcode.DatabaseOperationErrMsg, err)
+	}
+	return nil
+}
+
+func isAuthMatch(ctx context.Context, user *repo.UserPO, dto *repo.ModifyPwDTO) error {
+	if !(user.AuthEmail == dto.AuthEmail || user.UserPW == dto.OldPw) {
+		return status.Error(errcode.AuthMatchFailCode, errcode.AuthMatchFailMsg)
 	}
 	return nil
 }

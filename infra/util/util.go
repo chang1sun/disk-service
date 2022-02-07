@@ -34,7 +34,7 @@ func AnyToStructpb(i interface{}) *structpb.Struct {
 	s.TagName = "json"
 	pb, err := structpb.NewStruct(s.Map())
 	if err != nil {
-		log.Fatalf("cannot convert, err: %v", err)
+		log.Printf("cannot convert, err: %v", err)
 	}
 	return pb
 }
@@ -46,7 +46,7 @@ func GetStringWithSalt(s string) string {
 func GetMIMETypeFromReader(r io.Reader) string {
 	t, err := mimetype.DetectReader(r)
 	if err != nil {
-		log.Fatalf("get file mime type failed, err msg: %v", err)
+		log.Printf("get file mime type failed, err msg: %v", err)
 	}
 	if t.String() == "" {
 		return "unknown"
@@ -58,7 +58,7 @@ func GetFileMD5FromReader(r io.Reader) string {
 	m := md5.New()
 	_, err := io.Copy(m, r)
 	if err != nil {
-		log.Fatalf("io copy failed, err msg: %v", err)
+		log.Printf("io copy failed, err msg: %v", err)
 	}
 	return hex.EncodeToString(m.Sum(nil))
 }

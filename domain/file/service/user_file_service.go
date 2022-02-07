@@ -4,6 +4,7 @@ import (
 	"context"
 	"time"
 
+	arepo "github.com/changpro/disk-service/domain/auth/repo"
 	"github.com/changpro/disk-service/domain/file/repo"
 	"github.com/changpro/disk-service/infra/errcode"
 	"google.golang.org/grpc/status"
@@ -72,7 +73,7 @@ func MakeNewFolder(ctx context.Context, userID, dirName, path string, overwrite 
 		return "", err
 	}
 	// check repeat
-	if err := checkRepeat(ctx, userID, dirName, path); err != nil {
+	if err := CheckRepeat(ctx, userID, dirName, path); err != nil {
 		return "", err
 	}
 	id, err := repo.GetUserFileDao().MakeNewFolder(ctx, buildNewFolderPO(userID, dirName, path))
@@ -99,7 +100,7 @@ func Rename(ctx context.Context, id, newName string, overwrite int32) error {
 		}
 		return nil
 	}
-	if err := checkRepeat(ctx, po.UserID, newName, po.Path); err != nil {
+	if err := CheckRepeat(ctx, po.UserID, newName, po.Path); err != nil {
 		return err
 	}
 	if err := repo.GetUserFileDao().UpdateFileOrDir(ctx, id,
@@ -145,6 +146,8 @@ func CopyToPath(ctx context.Context, ids []string, path string, overwrite int32)
 	if err != nil {
 		return err
 	}
+	// update storage size
+
 	return nil
 }
 
@@ -206,7 +209,7 @@ func addDocsToPath(ctx context.Context, pos []*repo.UserFilePO, overwrite int32)
 	} else {
 		// check repeat
 		for _, po := range pos {
-			if err := checkRepeat(ctx, po.UserID, po.Name, po.Path); err != nil {
+			if err := CheckRepeat(ctx, po.UserID, po.Name, po.Path); err != nil {
 				return err
 			}
 		}
@@ -419,6 +422,18 @@ func MoveToRecycleBin(ctx context.Context, userID string, ids []string) error {
 	if err != nil {
 		return status.Errorf(errcode.DatabaseOperationErrCode, errcode.DatabaseOperationErrMsg, err)
 	}
+	// sync storage size
+	totalSize, err := getDocsTotalSize(ctx, pos)
+	if err != nil {
+		return err
+	}
+	if err := arepo.GetUserAnalysisDao().UpdateUserStorage(ctx, &arepo.UpdateUserAnalysisDTO{
+		UserID:  userID,
+		FileNum: -1,
+		Size:    -totalSize,
+	}); err != nil {
+		return status.Errorf(errcode.DatabaseOperationErrCode, errcode.DatabaseOperationErrMsg, err)
+	}
 	return nil
 }
 
@@ -501,12 +516,36 @@ func SoftDelete(ctx context.Context, userID string, ids []string) error {
 	if count != len(ids) {
 		return status.Error(errcode.UpdateCountNotMatchCode, errcode.UpdateCountNotMatchMsg)
 	}
+	// sync storage size
+	totalSize, err := getDocsTotalSize(ctx, pos)
+	if err != nil {
+		return err
+	}
+	if err := arepo.GetUserAnalysisDao().UpdateUserStorage(ctx, &arepo.UpdateUserAnalysisDTO{
+		UserID:  userID,
+		FileNum: -1,
+		Size:    -totalSize,
+	}); err != nil {
+		return status.Errorf(errcode.DatabaseOperationErrCode, errcode.DatabaseOperationErrMsg, err)
+	}
 	// only delete first level doc in recycle-bin
 	err = repo.GetRecycleFileDao().DeleteDocs(ctx, userID, ids)
 	if err != nil {
 		return status.Errorf(errcode.DatabaseOperationErrCode, errcode.DatabaseOperationErrMsg, err)
 	}
 	return nil
+}
+
+func getDocsTotalSize(ctx context.Context, pos []*repo.UserFilePO) (int64, error) {
+	var res int64
+	for _, po := range pos {
+		size, _, err := GetDirSizeAndSubFilesNum(ctx, po)
+		if err != nil {
+			return 0, err
+		}
+		res += size
+	}
+	return res, nil
 }
 
 func softDeleteByPOs(ctx context.Context, pos []*repo.UserFilePO) error {
@@ -564,7 +603,7 @@ func CheckPath(ctx context.Context, userID, path string) error {
 	return nil
 }
 
-func checkRepeat(ctx context.Context, userID, name, path string) error {
+func CheckRepeat(ctx context.Context, userID, name, path string) error {
 	ok, err := repo.GetUserFileDao().IsFileOrDirExist(ctx, userID, name, path)
 	if err != nil {
 		return status.Errorf(errcode.DatabaseOperationErrCode, errcode.DatabaseOperationErrMsg, err)
