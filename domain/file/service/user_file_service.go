@@ -91,6 +91,16 @@ func Rename(ctx context.Context, id, newName string, overwrite int32) error {
 	if po == nil {
 		return status.Error(errcode.FindNoFileInServerCode, errcode.FindNoFileInServerMsg)
 	}
+	// for sync purpose, update sub docs' path
+	subPOs, err := repo.GetUserFileDao().QueryDirByPath(ctx, po.UserID, po.Path+po.Name+"/", true)
+	if err != nil {
+		return err
+	}
+	if len(subPOs) > 0 {
+		if err := modifyPathByPOs(ctx, subPOs, po.Path+newName+"/"); err != nil {
+			return err
+		}
+	}
 	po.Name = newName
 	po.UpdateAt = time.Now()
 	if overwrite == doOverwrite {
@@ -110,7 +120,35 @@ func Rename(ctx context.Context, id, newName string, overwrite int32) error {
 	return nil
 }
 
-func CopyToPath(ctx context.Context, ids []string, path string, overwrite int32) error {
+func modifyPathByPOs(ctx context.Context, pos []*repo.UserFilePO, newPath string) error {
+	// if it is a folder, then trigger recursively call
+	var ids []string
+	for _, po := range pos {
+		ids = append(ids, po.ID)
+		if po.IsDir == isDir {
+			// recursively look up sub folder or files and update them first
+			subPOs, err := repo.GetUserFileDao().QueryDirByPath(ctx, po.UserID, po.Path+po.Name+"/", true)
+			if err != nil {
+				return err
+			}
+			if len(subPOs) > 0 {
+				err = modifyPathByPOs(ctx, subPOs, newPath+po.Name+"/")
+				if err != nil {
+					return err
+				}
+			}
+		}
+	}
+	updatePO := &repo.UserFilePO{
+		Path: newPath,
+	}
+	if _, err := repo.GetUserFileDao().UpdateFileOrDirByIDs(ctx, ids, updatePO); err != nil {
+		return status.Errorf(errcode.DatabaseOperationErrCode, errcode.DatabaseOperationErrMsg, err)
+	}
+	return nil
+}
+
+func CopyToPath(ctx context.Context, userID string, ids []string, path string, overwrite int32) error {
 	pos, err := repo.GetUserFileDao().QueryDocByIDs(ctx, ids)
 	if err != nil {
 		return status.Errorf(errcode.DatabaseOperationErrCode, errcode.DatabaseOperationErrMsg, err)
@@ -146,8 +184,18 @@ func CopyToPath(ctx context.Context, ids []string, path string, overwrite int32)
 	if err != nil {
 		return err
 	}
-	// update storage size
-
+	// sync storage size
+	totalSize, totalNum, err := getDocsTotalSizeAndSubFileNum(ctx, pos)
+	if err != nil {
+		return err
+	}
+	if err := arepo.GetUserAnalysisDao().UpdateUserStorage(ctx, &arepo.UpdateUserAnalysisDTO{
+		UserID:  userID,
+		FileNum: totalNum,
+		Size:    totalSize,
+	}); err != nil {
+		return status.Errorf(errcode.DatabaseOperationErrCode, errcode.DatabaseOperationErrMsg, err)
+	}
 	return nil
 }
 
@@ -422,18 +470,6 @@ func MoveToRecycleBin(ctx context.Context, userID string, ids []string) error {
 	if err != nil {
 		return status.Errorf(errcode.DatabaseOperationErrCode, errcode.DatabaseOperationErrMsg, err)
 	}
-	// sync storage size
-	totalSize, err := getDocsTotalSize(ctx, pos)
-	if err != nil {
-		return err
-	}
-	if err := arepo.GetUserAnalysisDao().UpdateUserStorage(ctx, &arepo.UpdateUserAnalysisDTO{
-		UserID:  userID,
-		FileNum: -1,
-		Size:    -totalSize,
-	}); err != nil {
-		return status.Errorf(errcode.DatabaseOperationErrCode, errcode.DatabaseOperationErrMsg, err)
-	}
 	return nil
 }
 
@@ -517,13 +553,13 @@ func SoftDelete(ctx context.Context, userID string, ids []string) error {
 		return status.Error(errcode.UpdateCountNotMatchCode, errcode.UpdateCountNotMatchMsg)
 	}
 	// sync storage size
-	totalSize, err := getDocsTotalSize(ctx, pos)
+	totalSize, totalNum, err := getDocsTotalSizeAndSubFileNum(ctx, pos)
 	if err != nil {
 		return err
 	}
 	if err := arepo.GetUserAnalysisDao().UpdateUserStorage(ctx, &arepo.UpdateUserAnalysisDTO{
 		UserID:  userID,
-		FileNum: -1,
+		FileNum: -totalNum,
 		Size:    -totalSize,
 	}); err != nil {
 		return status.Errorf(errcode.DatabaseOperationErrCode, errcode.DatabaseOperationErrMsg, err)
@@ -536,16 +572,18 @@ func SoftDelete(ctx context.Context, userID string, ids []string) error {
 	return nil
 }
 
-func getDocsTotalSize(ctx context.Context, pos []*repo.UserFilePO) (int64, error) {
-	var res int64
+func getDocsTotalSizeAndSubFileNum(ctx context.Context, pos []*repo.UserFilePO) (int64, int32, error) {
+	var totalSize int64
+	var count int32
 	for _, po := range pos {
-		size, _, err := GetDirSizeAndSubFilesNum(ctx, po)
+		size, num, err := GetDirSizeAndSubFilesNum(ctx, po)
 		if err != nil {
-			return 0, err
+			return 0, 0, err
 		}
-		res += size
+		totalSize += size
+		count += num
 	}
-	return res, nil
+	return totalSize, count, nil
 }
 
 func softDeleteByPOs(ctx context.Context, pos []*repo.UserFilePO) error {
@@ -672,6 +710,9 @@ func RecoverDocs(ctx context.Context, userID string, ids []string) error {
 		return status.Error(errcode.FindCountNotMatchCode, errcode.FindCountNotMatchMsg)
 	}
 	for _, po := range pos {
+		if err := CheckRepeat(ctx, userID, po.Name, po.Path); err != nil {
+			return err
+		}
 		if po.IsDir == isDir {
 			subPOs, err := repo.GetUserFileDao().QueryDirByPath(ctx, po.UserID, po.Path+po.Name+"/", true)
 			if err != nil {
@@ -686,7 +727,7 @@ func RecoverDocs(ctx context.Context, userID string, ids []string) error {
 		}
 	}
 	count, err := repo.GetUserFileDao().UpdateFileOrDirByIDs(ctx, ids,
-		&repo.UserFilePO{Status: statusRecycleBin, UpdateAt: time.Now()})
+		&repo.UserFilePO{Status: statusEnable, UpdateAt: time.Now()})
 	if err != nil {
 		return status.Errorf(errcode.DatabaseOperationErrCode, errcode.DatabaseOperationErrMsg, err)
 	}

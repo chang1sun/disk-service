@@ -58,9 +58,13 @@ func AssembleShareRecordList(records []*repo.ShareRecordPO) []*stub.ShareRecord 
 	var list []*stub.ShareRecord
 	for _, record := range records {
 		list = append(list, &stub.ShareRecord{
+			Id:         record.ID,
+			DocId:      record.DocID,
 			DocName:    record.DocName,
-			Message:    record.Message,
-			CreateTime: record.CreateTime.Format(constants.StandardTimeFormat),
+			CreateTime: record.CreateTime.Unix(),
+			ExpireTime: record.ExpireTime.Unix(),
+			Token:      record.Token,
+			Type:       record.Type,
 		})
 	}
 	return list
@@ -88,7 +92,7 @@ func AssembleRecycleDocList(list []*repo.RecycleFilePO) []*stub.RecycleDocInfo {
 			DocName:  doc.Name,
 			IsDir:    doc.IsDir,
 			DeleteAt: doc.DeleteAt.Format("2006-01-02"),
-			ExpireAt: doc.DeleteAt.Format("2006-01-02"),
+			ExpireAt: doc.ExpireAt.Format("2006-01-02"),
 		})
 	}
 	return res

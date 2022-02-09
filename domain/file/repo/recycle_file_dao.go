@@ -2,9 +2,9 @@ package repo
 
 import (
 	"context"
+	"log"
 
 	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
@@ -57,17 +57,14 @@ func (dao *RecycleFileDao) InsertToRecycleBin(ctx context.Context, userID string
 }
 
 func (dao *RecycleFileDao) DeleteDocs(ctx context.Context, userID string, ids []string) error {
-	var oids []primitive.ObjectID
-	for _, id := range ids {
-		oid, _ := primitive.ObjectIDFromHex(id)
-		oids = append(oids, oid)
+	filter := bson.M{
+		"_id": bson.M{"$in": ids},
 	}
-	filter := bson.D{
-		{"id", bson.E{"$in", oids}},
-	}
-	_, err := dao.Database.Collection(collRecycle).DeleteMany(ctx, filter)
+	log.Println(ids)
+	res, err := dao.Database.Collection(collRecycle).DeleteMany(ctx, filter)
 	if err != nil {
 		return err
 	}
+	log.Println(res.DeletedCount)
 	return nil
 }

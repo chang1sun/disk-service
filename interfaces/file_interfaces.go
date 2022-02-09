@@ -3,7 +3,6 @@ package interfaces
 import (
 	"context"
 
-	"github.com/changpro/disk-service/application"
 	"github.com/changpro/disk-service/domain/file/service"
 	"github.com/changpro/disk-service/infra/util"
 	"github.com/changpro/disk-service/interfaces/assembler"
@@ -128,7 +127,7 @@ func (s *fileServerImpl) HardDelete(ctx context.Context,
 func (s *fileServerImpl) CopyToPath(ctx context.Context,
 	req *stub.CopyToPathReq) (*emptypb.Empty, error) {
 	rsp := &emptypb.Empty{}
-	err := service.CopyToPath(ctx, req.Ids, req.Path, req.Overwrite)
+	err := service.CopyToPath(ctx, req.UserId, req.Ids, req.Path, req.Overwrite)
 	if err != nil {
 		util.LogErr(err, "CopyToPath")
 		return rsp, err
@@ -162,7 +161,7 @@ func (s *fileServerImpl) CreateShare(ctx context.Context,
 func (s *fileServerImpl) RetrieveShareToPath(ctx context.Context,
 	req *stub.RetrieveShareToPathReq) (*emptypb.Empty, error) {
 	rsp := &emptypb.Empty{}
-	err := application.RetrieveShareFromToken(ctx, req.UserId, req.Token, req.Path)
+	err := service.RetrieveShareFromToken(ctx, req.UserId, req.Token, req.Path)
 	if err != nil {
 		util.LogErr(err, "RetrieveShareToPath")
 		return rsp, err
@@ -173,7 +172,7 @@ func (s *fileServerImpl) RetrieveShareToPath(ctx context.Context,
 func (s *fileServerImpl) GetShareRecords(ctx context.Context,
 	req *stub.GetShareRecordsReq) (*stub.GetShareRecordsRsp, error) {
 	rsp := &stub.GetShareRecordsRsp{}
-	list, count, err := service.GetShareRecordList(ctx, req.UserId, req.Start, req.Limit)
+	list, count, err := service.GetShareRecordList(ctx, req.UserId, req.Type, req.Offset, req.Limit)
 	if err != nil {
 		util.LogErr(err, "GetShareRecords")
 		return rsp, err
