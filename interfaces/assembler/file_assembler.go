@@ -62,7 +62,7 @@ func AssembleShareRecordList(records []*repo.ShareRecordPO) []*stub.ShareRecord 
 			DocId:      record.DocID,
 			DocName:    record.DocName,
 			CreateTime: record.CreateTime.UnixNano() / 1000,
-			ExpireTime: record.ExpireTime.Unix() / 1000,
+			ExpireTime: record.ExpireTime.UnixNano() / 1000,
 			Token:      record.Token,
 			Type:       record.Type,
 		})
