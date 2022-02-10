@@ -684,7 +684,7 @@ var FileService_ServiceDesc = grpc.ServiceDesc{
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type AuthServiceClient interface {
 	RegisterNewUser(ctx context.Context, in *RegisterNewUserReq, opts ...grpc.CallOption) (*emptypb.Empty, error)
-	SignIn(ctx context.Context, in *SignInReq, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	SignIn(ctx context.Context, in *SignInReq, opts ...grpc.CallOption) (*SignInRsp, error)
 	ModifyPassword(ctx context.Context, in *ModifyPasswordReq, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	GetUserProfile(ctx context.Context, in *GetUserProfileReq, opts ...grpc.CallOption) (*GetUserProfileRsp, error)
 	ModifyUserProfile(ctx context.Context, in *ModifyUserProfileReq, opts ...grpc.CallOption) (*emptypb.Empty, error)
@@ -708,8 +708,8 @@ func (c *authServiceClient) RegisterNewUser(ctx context.Context, in *RegisterNew
 	return out, nil
 }
 
-func (c *authServiceClient) SignIn(ctx context.Context, in *SignInReq, opts ...grpc.CallOption) (*emptypb.Empty, error) {
-	out := new(emptypb.Empty)
+func (c *authServiceClient) SignIn(ctx context.Context, in *SignInReq, opts ...grpc.CallOption) (*SignInRsp, error) {
+	out := new(SignInRsp)
 	err := c.cc.Invoke(ctx, "/AuthService/SignIn", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -758,7 +758,7 @@ func (c *authServiceClient) UpdateUserStorage(ctx context.Context, in *UpdateUse
 // for forward compatibility
 type AuthServiceServer interface {
 	RegisterNewUser(context.Context, *RegisterNewUserReq) (*emptypb.Empty, error)
-	SignIn(context.Context, *SignInReq) (*emptypb.Empty, error)
+	SignIn(context.Context, *SignInReq) (*SignInRsp, error)
 	ModifyPassword(context.Context, *ModifyPasswordReq) (*emptypb.Empty, error)
 	GetUserProfile(context.Context, *GetUserProfileReq) (*GetUserProfileRsp, error)
 	ModifyUserProfile(context.Context, *ModifyUserProfileReq) (*emptypb.Empty, error)
@@ -772,7 +772,7 @@ type UnimplementedAuthServiceServer struct {
 func (UnimplementedAuthServiceServer) RegisterNewUser(context.Context, *RegisterNewUserReq) (*emptypb.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method RegisterNewUser not implemented")
 }
-func (UnimplementedAuthServiceServer) SignIn(context.Context, *SignInReq) (*emptypb.Empty, error) {
+func (UnimplementedAuthServiceServer) SignIn(context.Context, *SignInReq) (*SignInRsp, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method SignIn not implemented")
 }
 func (UnimplementedAuthServiceServer) ModifyPassword(context.Context, *ModifyPasswordReq) (*emptypb.Empty, error) {

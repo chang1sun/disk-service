@@ -2,11 +2,15 @@ package service
 
 import (
 	"context"
+	"strconv"
+	"time"
 
 	"github.com/changpro/disk-service/domain/auth/repo"
+	"github.com/changpro/disk-service/infra/config"
 	"github.com/changpro/disk-service/infra/constants"
 	"github.com/changpro/disk-service/infra/errcode"
 	"github.com/changpro/disk-service/infra/util"
+	"github.com/golang-jwt/jwt"
 	"google.golang.org/grpc/status"
 )
 
@@ -42,17 +46,37 @@ func RegisterNewUser(ctx context.Context, userPO *repo.UserPO) error {
 	return nil
 }
 
-func SignIn(ctx context.Context, userID string, password string) error {
+func SignIn(ctx context.Context, userID string, password string) (string, error) {
 	// add salt and calculate sha
 	pwMask := util.GetStringWithSalt(password)
 	user, err := repo.GetUserDao().SignIn(ctx, userID, pwMask)
 	if err != nil {
-		return status.Errorf(errcode.DatabaseOperationErrCode, errcode.DatabaseOperationErrMsg, err)
+		return "", status.Errorf(errcode.DatabaseOperationErrCode, errcode.DatabaseOperationErrMsg, err)
 	}
 	if user == nil {
-		return status.Error(errcode.NoSuchUserCode, errcode.NoSuchUserMsg)
+		return "", status.Error(errcode.NoSuchUserCode, errcode.NoSuchUserMsg)
 	}
-	return nil
+	now := time.Now()
+	jwtId := userID + strconv.FormatInt(now.Unix(), 10)
+	// set claims and sign
+	claims := util.Claim{
+		UserID: userID,
+		StandardClaims: jwt.StandardClaims{
+			Audience:  userID,
+			ExpiresAt: now.Add(7 * 24 * time.Hour).Unix(),
+			Id:        jwtId,
+			IssuedAt:  now.Unix(),
+			Issuer:    "easydisk",
+			NotBefore: now.Add(3 * time.Second).Unix(),
+			Subject:   userID,
+		},
+	}
+	tokenClaims := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	token, err := tokenClaims.SignedString(config.GetConfig().AuthKey)
+	if err != nil {
+		return "", status.Errorf(errcode.JWTParseErrCode, errcode.JWTParseErrMsg, err)
+	}
+	return token, nil
 }
 
 func GetUserProfile(ctx context.Context, userID string) (*UserProfile, error) {

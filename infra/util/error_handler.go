@@ -3,8 +3,10 @@ package util
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
+	"strconv"
 
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"google.golang.org/grpc/status"
@@ -29,6 +31,18 @@ func CustomErrorHandler(c context.Context, sm *runtime.ServeMux, m runtime.Marsh
 	err := json.NewEncoder(rw).Encode(errbody)
 	if err != nil {
 		rw.Write([]byte("json marshal failed"))
+	}
+}
+
+// used in middleware and custom route handler to build error response body
+func ErrorResp(code uint32, msg string, err error, w *http.ResponseWriter) {
+	log.Printf("err occured, code: %v, msg: %v", code, fmt.Sprintf(msg, err))
+	if err == nil {
+		rsp, _ := json.Marshal(map[string]string{"code": strconv.Itoa(int(code)), "msg": msg})
+		(*w).Write(rsp)
+	} else {
+		rsp, _ := json.Marshal(map[string]string{"code": strconv.Itoa(int(code)), "msg": fmt.Sprintf(msg, err)})
+		(*w).Write(rsp)
 	}
 }
 

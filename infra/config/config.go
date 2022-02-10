@@ -11,6 +11,7 @@ var config *Config
 type Config struct {
 	Version             string `yaml:"version"`
 	InitUserStorageSize int64  `yaml:"init_user_storage_size"`
+	AuthKey             string `yaml:"auth_secret_key"`
 	PwSalt              string `yaml:"pw_salt"`
 	Mysql               struct {
 		User     string `yaml:"user"`

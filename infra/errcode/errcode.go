@@ -52,6 +52,7 @@ const (
 	RPCCallErrCode                  = 50103
 	JsonMarshalErrCode              = 50104
 	StructpbConvertErrCode          = 50105
+	JWTParseErrCode                 = 50106
 )
 
 // Error level msg
@@ -62,4 +63,5 @@ const (
 	RPCCallErrMsg                  = "[error] rpc call failed, err msg: %v"
 	JsonMarshalErrMsg              = "[error] json marshal or unmarshal failed, err msg: %v"
 	StructpbConvertErrMsg          = "[error] structpb conversion failed, err msg: %v"
+	JWTParseErrMsg                 = "[error] jwt string signing failed, err msg: %v"
 )

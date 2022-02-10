@@ -5,7 +5,6 @@ import (
 	"log"
 	"net"
 	"net/http"
-	"strings"
 
 	"github.com/changpro/disk-service/application"
 	arepo "github.com/changpro/disk-service/domain/auth/repo"
@@ -19,21 +18,6 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 )
-
-// handle cors
-func cors(h http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if strings.HasPrefix(r.Header.Get("Origin"), "http://localhost") {
-			w.Header().Set("Access-Control-Allow-Origin", r.Header.Get("Origin"))
-			w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PATCH, DELETE")
-			w.Header().Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, Authorization, ResponseType")
-		}
-		if r.Method == "OPTIONS" {
-			return
-		}
-		h.ServeHTTP(w, r)
-	})
-}
 
 func main() {
 	// Init
@@ -97,7 +81,7 @@ func main() {
 
 	gwServer := &http.Server{
 		Addr:    ":8001",
-		Handler: cors(gwmux),
+		Handler: addMiddleware(gwmux),
 	}
 
 	log.Println("Serving gRPC-Gateway on localhost:8001")
@@ -107,6 +91,10 @@ func main() {
 		log.Fatalln(err)
 		panic(err)
 	}
+}
+
+func addMiddleware(h http.Handler) http.Handler {
+	return util.Auth(util.CORS(h))
 }
 
 // aim to handle file transfer request which cannot be implemented by grpc-gateway

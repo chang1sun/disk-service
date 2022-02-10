@@ -29,13 +29,14 @@ func (*authServerImpl) RegisterNewUser(ctx context.Context,
 }
 
 func (*authServerImpl) SignIn(ctx context.Context,
-	req *stub.SignInReq) (*emptypb.Empty, error) {
-	rsp := &emptypb.Empty{}
-	err := service.SignIn(ctx, req.UserId, req.Pw)
+	req *stub.SignInReq) (*stub.SignInRsp, error) {
+	rsp := &stub.SignInRsp{}
+	token, err := service.SignIn(ctx, req.UserId, req.Pw)
 	if err != nil {
 		log.Println("SignIn failed, err msg: ", err)
 		return rsp, err
 	}
+	rsp.Token = token
 	return rsp, nil
 }
 

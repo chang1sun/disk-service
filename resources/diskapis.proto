@@ -133,7 +133,7 @@ service AuthService {
         };
     }
 
-    rpc SignIn(SignInReq) returns (google.protobuf.Empty) {
+    rpc SignIn(SignInReq) returns (SignInRsp) {
         option (google.api.http) = {
             post: "/v1/auth/sign-in"
             body: "*"
@@ -172,6 +172,10 @@ message RegisterNewUserReq {
 message SignInReq {
     string user_id = 1[(validate.rules).string = {min_len: 6, pattern: "^[0-9a-zA-Z]*$"}];
     string pw = 2[(validate.rules).string.min_len = 6];
+}
+
+message SignInRsp {
+    string token = 1;
 }
 
 message ModifyPasswordReq {
