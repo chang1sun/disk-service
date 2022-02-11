@@ -81,7 +81,7 @@ func main() {
 
 	gwServer := &http.Server{
 		Addr:    ":8001",
-		Handler: addMiddleware(gwmux),
+		Handler: util.AuthMiddleware(gwmux),
 	}
 
 	log.Println("Serving gRPC-Gateway on localhost:8001")
@@ -91,10 +91,6 @@ func main() {
 		log.Fatalln(err)
 		panic(err)
 	}
-}
-
-func addMiddleware(h http.Handler) http.Handler {
-	return util.Auth(util.CORS(h))
 }
 
 // aim to handle file transfer request which cannot be implemented by grpc-gateway

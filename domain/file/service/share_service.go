@@ -86,8 +86,8 @@ func createPostShareRecord(ctx context.Context, userID, token string, share *rep
 	return nil
 }
 
-func GetShareRecordList(ctx context.Context, userID string, recordType, offset, limit int32) ([]*repo.ShareRecordPO, int64, error) {
-	list, count, err := repo.GetShareRecordDao().QueryRecordList(ctx, userID, recordType, offset, limit)
+func GetShareRecordList(ctx context.Context, query *repo.RecordQuery) ([]*repo.ShareRecordPO, int64, error) {
+	list, count, err := repo.GetShareRecordDao().QueryRecordList(ctx, query)
 	if err != nil {
 		return nil, 0, status.Errorf(errcode.DatabaseOperationErrCode, errcode.DatabaseOperationErrMsg, err)
 	}

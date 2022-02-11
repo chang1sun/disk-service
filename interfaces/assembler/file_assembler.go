@@ -2,6 +2,8 @@ package assembler
 
 import (
 	"encoding/json"
+	"log"
+	"time"
 
 	"github.com/changpro/disk-service/domain/file/repo"
 	"github.com/changpro/disk-service/infra/constants"
@@ -96,4 +98,17 @@ func AssembleRecycleDocList(list []*repo.RecycleFilePO) []*stub.RecycleDocInfo {
 		})
 	}
 	return res
+}
+
+func AssemblShareRecordQuery(req *stub.GetShareRecordsReq) *repo.RecordQuery {
+	log.Println(req.StartTime)
+	log.Println(time.UnixMilli(req.StartTime).Unix())
+	return &repo.RecordQuery{
+		UserID:    req.UserId,
+		Offset:    req.Offset,
+		Limit:     req.Offset,
+		Type:      req.Type,
+		StartTime: time.UnixMilli(req.StartTime).Unix(),
+		EndTime:   time.UnixMilli(req.EndTime).Unix(),
+	}
 }

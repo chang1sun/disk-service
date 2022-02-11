@@ -2,7 +2,9 @@ package repo
 
 import (
 	"context"
+	"time"
 
+	"github.com/changpro/disk-service/infra/constants"
 	"gorm.io/gorm"
 )
 
@@ -27,12 +29,16 @@ func (dao *ShareRecordDao) CreateShareRecord(ctx context.Context, po *ShareRecor
 	return nil
 }
 
-func (dao *ShareRecordDao) QueryRecordList(ctx context.Context, userID string, recordType,
-	offset, limit int32) ([]*ShareRecordPO, int64, error) {
+func (dao *ShareRecordDao) QueryRecordList(ctx context.Context, query *RecordQuery) ([]*ShareRecordPO, int64, error) {
 	var count int64
-	cond := dao.Database.WithContext(ctx).Model(&ShareRecordPO{}).Where("user_id = ?", userID)
-	if recordType != 0 {
-		cond.Where("type = ?", recordType)
+	cond := dao.Database.WithContext(ctx).Model(&ShareRecordPO{}).Where("user_id = ?", query.UserID)
+	if query.Type != 0 {
+		cond.Where("type = ?", query.Type)
+	}
+	if query.StartTime != 0 && query.EndTime != 0 {
+		cond.Where("create_time > ? and create_time < ?",
+			time.Unix(query.StartTime, 0).Format(constants.StandardTimeFormat),
+			time.Unix(query.EndTime, 0).Format(constants.StandardTimeFormat))
 	}
 	if err := cond.Count(&count).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {
@@ -41,7 +47,7 @@ func (dao *ShareRecordDao) QueryRecordList(ctx context.Context, userID string, r
 		return nil, 0, err
 	}
 	var list []*ShareRecordPO
-	if err := cond.Offset(int(offset)).Limit(int(limit)).Order("id DESC").Find(&list).Error; err != nil {
+	if err := cond.Offset(int(query.Offset)).Limit(int(query.Limit)).Order("id DESC").Find(&list).Error; err != nil {
 		return nil, 0, err
 	}
 	return list, count, nil

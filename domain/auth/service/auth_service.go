@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"log"
 	"strconv"
 	"time"
 
@@ -72,10 +73,11 @@ func SignIn(ctx context.Context, userID string, password string) (string, error)
 		},
 	}
 	tokenClaims := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	token, err := tokenClaims.SignedString(config.GetConfig().AuthKey)
+	token, err := tokenClaims.SignedString([]byte(config.GetConfig().AuthKey))
 	if err != nil {
 		return "", status.Errorf(errcode.JWTParseErrCode, errcode.JWTParseErrMsg, err)
 	}
+	log.Println(token)
 	return token, nil
 }
 

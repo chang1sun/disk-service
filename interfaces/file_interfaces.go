@@ -172,7 +172,7 @@ func (s *fileServerImpl) RetrieveShareToPath(ctx context.Context,
 func (s *fileServerImpl) GetShareRecords(ctx context.Context,
 	req *stub.GetShareRecordsReq) (*stub.GetShareRecordsRsp, error) {
 	rsp := &stub.GetShareRecordsRsp{}
-	list, count, err := service.GetShareRecordList(ctx, req.UserId, req.Type, req.Offset, req.Limit)
+	list, count, err := service.GetShareRecordList(ctx, assembler.AssemblShareRecordQuery(req))
 	if err != nil {
 		util.LogErr(err, "GetShareRecords")
 		return rsp, err
