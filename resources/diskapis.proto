@@ -122,6 +122,12 @@ service FileService {
             get: "/v1/files/share/{token}"
         };
     }
+
+    rpc GetClassifiedDocs (GetClassifiedDocsReq) returns (GetClassifiedDocsRsp) {
+        option (google.api.http) = {
+            get: "/v1/{user_id}/files/classified"
+        };
+    }
 }
 
 service AuthService {
@@ -381,4 +387,25 @@ message GetRecycleBinListRsp {
 message RecoverDocsReq {
     string user_id = 1;
     repeated string ids = 2;
+}
+
+message GetClassifiedDocsReq {
+    string user_id = 1;
+    int32 type = 2[(validate.rules).int32 = {in: [1,2,3,4]}]; // 1: pic, 2: video, 3: music, 4: document
+    int32 offset = 3;
+    int32 limit = 4;
+}
+
+message ClassifiedDoc {
+    string doc_id = 1;
+    string doc_name = 2;
+    int64 doc_size = 3;
+    string doc_type = 4;
+    string doc_path = 5;
+    string create_at = 6;
+    string update_at = 7;
+}
+
+message GetClassifiedDocsRsp { 
+    repeated ClassifiedDoc list = 1;
 }

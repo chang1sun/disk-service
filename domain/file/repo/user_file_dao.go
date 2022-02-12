@@ -314,3 +314,25 @@ func (dao *UserFileDao) QueryDocByIDs(ctx context.Context, ids []string) ([]*Use
 	}
 	return content, nil
 }
+
+func (dao *UserFileDao) QueryDocByType(ctx context.Context, query *ClassifiedDocsQuery,
+	typeList []string) ([]*UserFilePO, error) {
+	filter := bson.M{
+		"user_id":   query.UserID,
+		"file_type": bson.M{"$in": typeList},
+		"status":    1,
+	}
+	opt := options.FindOptions{}
+	opt.SetSkip(int64(query.Offset))
+	opt.SetLimit(int64(query.Limit))
+	opt.SetSort(bson.D{{"update_time", -1}})
+	var list []*UserFilePO
+	cursor, err := dao.Database.Collection(collUserFiles).Find(ctx, filter, &opt)
+	if err != nil {
+		return nil, err
+	}
+	if err := cursor.All(ctx, &list); err != nil {
+		return nil, err
+	}
+	return list, nil
+}

@@ -771,3 +771,12 @@ func recoverDocsByPOs(ctx context.Context, pos []*repo.UserFilePO) error {
 	}
 	return nil
 }
+
+func GetClassifiedDocs(ctx context.Context, query *repo.ClassifiedDocsQuery) ([]*repo.UserFilePO, error) {
+	relatedTypeList := docTypeMap[query.Type]
+	list, err := repo.GetUserFileDao().QueryDocByType(ctx, query, relatedTypeList)
+	if err != nil {
+		return nil, status.Errorf(errcode.DatabaseOperationErrCode, errcode.DatabaseOperationErrMsg, err)
+	}
+	return list, nil
+}

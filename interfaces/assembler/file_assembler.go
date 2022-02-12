@@ -112,3 +112,28 @@ func AssemblShareRecordQuery(req *stub.GetShareRecordsReq) *repo.RecordQuery {
 		EndTime:   time.UnixMilli(req.EndTime).Unix(),
 	}
 }
+
+func AssemblClassQuery(req *stub.GetClassifiedDocsReq) *repo.ClassifiedDocsQuery {
+	return &repo.ClassifiedDocsQuery{
+		UserID: req.UserId,
+		Type:   req.Type,
+		Offset: req.Offset,
+		Limit:  req.Limit,
+	}
+}
+
+func AssemblClassifiedDocList(list []*repo.UserFilePO) []*stub.ClassifiedDoc {
+	var res []*stub.ClassifiedDoc
+	for _, po := range list {
+		res = append(res, &stub.ClassifiedDoc{
+			DocId:    po.ID,
+			DocName:  po.Name,
+			DocSize:  po.FileSize,
+			DocType:  po.FileType,
+			DocPath:  po.Path,
+			CreateAt: po.CreateAt.Format(constants.StandardTimeFormat),
+			UpdateAt: po.UpdateAt.Format(constants.StandardTimeFormat),
+		})
+	}
+	return res
+}

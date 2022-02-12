@@ -40,6 +40,7 @@ type FileServiceClient interface {
 	RetrieveShareToPath(ctx context.Context, in *RetrieveShareToPathReq, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	GetShareRecords(ctx context.Context, in *GetShareRecordsReq, opts ...grpc.CallOption) (*GetShareRecordsRsp, error)
 	GetShareDetail(ctx context.Context, in *GetShareDetailReq, opts ...grpc.CallOption) (*GetShareDetailRsp, error)
+	GetClassifiedDocs(ctx context.Context, in *GetClassifiedDocsReq, opts ...grpc.CallOption) (*GetClassifiedDocsRsp, error)
 }
 
 type fileServiceClient struct {
@@ -203,6 +204,15 @@ func (c *fileServiceClient) GetShareDetail(ctx context.Context, in *GetShareDeta
 	return out, nil
 }
 
+func (c *fileServiceClient) GetClassifiedDocs(ctx context.Context, in *GetClassifiedDocsReq, opts ...grpc.CallOption) (*GetClassifiedDocsRsp, error) {
+	out := new(GetClassifiedDocsRsp)
+	err := c.cc.Invoke(ctx, "/FileService/GetClassifiedDocs", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // FileServiceServer is the server API for FileService service.
 // All implementations should embed UnimplementedFileServiceServer
 // for forward compatibility
@@ -224,6 +234,7 @@ type FileServiceServer interface {
 	RetrieveShareToPath(context.Context, *RetrieveShareToPathReq) (*emptypb.Empty, error)
 	GetShareRecords(context.Context, *GetShareRecordsReq) (*GetShareRecordsRsp, error)
 	GetShareDetail(context.Context, *GetShareDetailReq) (*GetShareDetailRsp, error)
+	GetClassifiedDocs(context.Context, *GetClassifiedDocsReq) (*GetClassifiedDocsRsp, error)
 }
 
 // UnimplementedFileServiceServer should be embedded to have forward compatible implementations.
@@ -280,6 +291,9 @@ func (UnimplementedFileServiceServer) GetShareRecords(context.Context, *GetShare
 }
 func (UnimplementedFileServiceServer) GetShareDetail(context.Context, *GetShareDetailReq) (*GetShareDetailRsp, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetShareDetail not implemented")
+}
+func (UnimplementedFileServiceServer) GetClassifiedDocs(context.Context, *GetClassifiedDocsReq) (*GetClassifiedDocsRsp, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetClassifiedDocs not implemented")
 }
 
 // UnsafeFileServiceServer may be embedded to opt out of forward compatibility for this service.
@@ -599,6 +613,24 @@ func _FileService_GetShareDetail_Handler(srv interface{}, ctx context.Context, d
 	return interceptor(ctx, in, info, handler)
 }
 
+func _FileService_GetClassifiedDocs_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetClassifiedDocsReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(FileServiceServer).GetClassifiedDocs(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/FileService/GetClassifiedDocs",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(FileServiceServer).GetClassifiedDocs(ctx, req.(*GetClassifiedDocsReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // FileService_ServiceDesc is the grpc.ServiceDesc for FileService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -673,6 +705,10 @@ var FileService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetShareDetail",
 			Handler:    _FileService_GetShareDetail_Handler,
+		},
+		{
+			MethodName: "GetClassifiedDocs",
+			Handler:    _FileService_GetClassifiedDocs_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

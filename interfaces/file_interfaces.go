@@ -204,3 +204,15 @@ func (s *fileServerImpl) GetRecycleBinList(ctx context.Context,
 	rsp.List = assembler.AssembleRecycleDocList(list)
 	return rsp, nil
 }
+
+func (s *fileServerImpl) GetClassifiedDocs(ctx context.Context,
+	req *stub.GetClassifiedDocsReq) (*stub.GetClassifiedDocsRsp, error) {
+	rsp := &stub.GetClassifiedDocsRsp{}
+	list, err := service.GetClassifiedDocs(ctx, assembler.AssemblClassQuery(req))
+	if err != nil {
+		util.LogErr(err, "GetClassifiedDocs")
+		return rsp, err
+	}
+	rsp.List = assembler.AssemblClassifiedDocList(list)
+	return rsp, nil
+}
