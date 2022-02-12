@@ -2,10 +2,12 @@ package repo
 
 type ShareDetailPO struct {
 	Uploader    string `redis:"uploader" json:"uploader,omitempty"`
+	Password    string `redis:"password" json:"password,omitempty"`
 	DocID       string `redis:"docId" json:"docId,omitempty"`
 	DocName     string `redis:"docName" json:"docName,omitempty"`
 	DocSize     int64  `redis:"docSize" json:"docSize,omitempty"`
-	DocType     int32  `redis:"docType" json:"docType,omitempty"` // 1 folder, 2 file
+	DocType     string `redis:"docType" json:"docType,omitempty"`
+	IsDir       int32  `redis:"isDir" json:"isDir,omitempty"`     // 1 folder, 2 file
 	FileNum     int32  `redis:"fileNum" json:"fileNum,omitempty"` // specificly, if it's a file, this field has a value of 1;
 	CreateTime  string `redis:"createTime" json:"createTime,omitempty"`
 	ExpireHours int32  `redis:"expireHours" json:"expireHours,omitempty"`

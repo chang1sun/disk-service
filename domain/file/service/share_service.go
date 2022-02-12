@@ -19,53 +19,58 @@ const (
 	RecordTypeSave  = 2
 )
 
-func CreateShare(ctx context.Context, dto *repo.CreateShareDTO) (string, error) {
+func CreateShare(ctx context.Context, dto *repo.CreateShareDTO) (string, string, error) {
 	doc, err := GetFileDetail(ctx, dto.UserID, dto.DocID)
 	if err != nil {
-		return "", err
+		return "", "", err
 	}
 	if doc == nil {
-		return "", status.Error(errcode.FindNoFileInServerCode, errcode.FindNoFileInServerMsg)
+		return "", "", status.Error(errcode.FindNoFileInServerCode, errcode.FindNoFileInServerMsg)
 	}
 	// cal size and file num
 	size, fileNum, err := GetDirSizeAndSubFilesNum(ctx, doc)
 	if err != nil {
-		return "", err
+		return "", "", err
 	}
 	// wrap into po
 	po := &repo.ShareDetailPO{
 		Uploader:    doc.UserID,
+		Password:    util.NewLenRandomString(4), // 4 bytes rand
 		DocID:       doc.ID,
 		DocName:     doc.Name,
 		DocSize:     size,
-		DocType:     doc.IsDir,
+		DocType:     doc.FileType,
+		IsDir:       doc.IsDir,
 		FileNum:     fileNum,
 		ExpireHours: dto.ExpireHour,
 	}
 	data, err := json.Marshal(po)
 	if err != nil {
-		return "", status.Errorf(errcode.JsonMarshalErrCode, errcode.JsonMarshalErrMsg, err)
+		return "", "", status.Errorf(errcode.JsonMarshalErrCode, errcode.JsonMarshalErrMsg, err)
 	}
 	token := util.GetMd5FromJson(data)
 	// write in redis
 	err = repo.GetShareDao().CreateShareToken(ctx, token, po)
 	if err != nil {
-		return "", status.Errorf(errcode.DatabaseOperationErrCode, errcode.DatabaseOperationErrMsg, err)
+		return "", "", status.Errorf(errcode.DatabaseOperationErrCode, errcode.DatabaseOperationErrMsg, err)
 	}
 	// create a record
 	if err = createPostShareRecord(ctx, dto.UserID, token, po); err != nil {
-		return "", err
+		return "", "", err
 	}
-	return token, nil
+	return token, po.Password, nil
 }
 
-func GetShareDetail(ctx context.Context, token string) (*repo.ShareDetailPO, error) {
+func GetShareDetail(ctx context.Context, token, password string) (*repo.ShareDetailPO, error) {
 	po, err := repo.GetShareDao().GetShareDetail(ctx, token)
 	if err != nil {
 		return nil, status.Errorf(errcode.DatabaseOperationErrCode, errcode.DatabaseOperationErrMsg, err)
 	}
 	if po == nil {
 		return nil, status.Error(errcode.NoSuchShareCode, errcode.NoSuchShareMsg)
+	}
+	if po.Password != password {
+		return nil, status.Error(errcode.WrongSharePasswordCode, errcode.WrongSharePasswordMsg)
 	}
 	return po, nil
 }
@@ -101,7 +106,13 @@ func RetrieveShareFromToken(ctx context.Context, userID, token, path string) err
 	if err := CheckPath(ctx, userID, path); err != nil {
 		return err
 	}
-	po, err := GetShareDetail(ctx, token)
+	po, err := repo.GetShareDao().GetShareDetail(ctx, token)
+	if err != nil {
+		return status.Errorf(errcode.DatabaseOperationErrCode, errcode.DatabaseOperationErrMsg, err)
+	}
+	if po == nil {
+		return status.Error(errcode.NoSuchShareCode, errcode.NoSuchShareMsg)
+	}
 	if err != nil {
 		return err
 	}

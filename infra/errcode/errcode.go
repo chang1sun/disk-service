@@ -13,6 +13,7 @@ const (
 	NoSuchShareCode                    = 10108
 	SameFileHasAlreadyBeenUploadedCode = 10109
 	AuthMatchFailCode                  = 10110
+	WrongSharePasswordCode             = 10111
 )
 
 // Tips level msg
@@ -28,6 +29,7 @@ const (
 	NoSuchShareMsg                    = "[tips] cannot find such share, maybe it has expired if once existed"
 	SameFileHasAlreadyBeenUploadedMsg = "[tips] there is a same file already existed in your collection, no need to upload"
 	AuthMatchFailMsg                  = "[tips] auth value didn't match given user"
+	WrongSharePasswordMsg             = "[tips] wrong password for this share, check params and retry"
 )
 
 // Warn level code

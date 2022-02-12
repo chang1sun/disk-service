@@ -149,12 +149,13 @@ func (s *fileServerImpl) MoveToPath(ctx context.Context,
 func (s *fileServerImpl) CreateShare(ctx context.Context,
 	req *stub.CreateShareReq) (*stub.CreateShareRsp, error) {
 	rsp := &stub.CreateShareRsp{}
-	token, err := service.CreateShare(ctx, assembler.AssembleCreateShareDTO(req))
+	token, password, err := service.CreateShare(ctx, assembler.AssembleCreateShareDTO(req))
 	if err != nil {
 		util.LogErr(err, "CreateShare")
 		return rsp, err
 	}
 	rsp.Token = token
+	rsp.Password = password
 	return rsp, nil
 }
 
@@ -185,7 +186,7 @@ func (s *fileServerImpl) GetShareRecords(ctx context.Context,
 func (s *fileServerImpl) GetShareDetail(ctx context.Context,
 	req *stub.GetShareDetailReq) (*stub.GetShareDetailRsp, error) {
 	rsp := &stub.GetShareDetailRsp{}
-	detail, err := service.GetShareDetail(ctx, req.Token)
+	detail, err := service.GetShareDetail(ctx, req.Token, req.Password)
 	if err != nil {
 		util.LogErr(err, "GetShareDetail")
 		return rsp, err

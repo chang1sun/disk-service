@@ -318,6 +318,7 @@ message CreateShareReq {
 
 message CreateShareRsp {
     string token = 1;
+    string password = 2;
 }
 
 message RetrieveShareToPathReq {
@@ -328,6 +329,7 @@ message RetrieveShareToPathReq {
 
 message GetShareDetailReq {
     string token = 1;
+    string password = 2;
 }
 
 message GetShareDetailRsp {
@@ -338,8 +340,10 @@ message GetShareDetailRsp {
     string create_time = 5;
     int32 view_num = 6;
     int32 save_num = 7;
-    int64 size = 8;
-    int32 doc_type = 9; // 1 folder, 2 file
+    int64 doc_size = 8;
+    string doc_type = 9;
+    int32 is_dir = 10; // 1 folder, 2 file
+    int32 file_num = 11;
 }
 
 message GetShareRecordsReq {

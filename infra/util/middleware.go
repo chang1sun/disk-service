@@ -1,7 +1,6 @@
 package util
 
 import (
-	"log"
 	"net/http"
 	"strings"
 
@@ -42,7 +41,6 @@ func AuthMiddleware(h http.Handler) http.Handler {
 			return
 		}
 		if strings.Contains(r.URL.String(), "sign-in") {
-			log.Println(r.URL.String())
 			h.ServeHTTP(w, r)
 			return
 		}

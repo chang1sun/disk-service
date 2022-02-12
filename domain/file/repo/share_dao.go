@@ -27,9 +27,11 @@ func (dao *ShareDao) CreateShareToken(ctx context.Context, token string, po *Sha
 	p := dao.Database.Pipeline()
 	if err := p.HMSet(ctx, token,
 		"uploader", po.Uploader,
+		"password", po.Password,
 		"docId", po.DocID,
 		"docName", po.DocName,
 		"docSize", po.DocSize,
+		"isDir", po.IsDir,
 		"docType", po.DocType,
 		"createTime", time.Now().Format(constants.StandardTimeFormat),
 		"expireHours", po.ExpireHours,

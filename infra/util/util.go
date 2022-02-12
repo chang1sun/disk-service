@@ -3,6 +3,7 @@ package util
 import (
 	"bytes"
 	"crypto/md5"
+	"crypto/rand"
 	"crypto/sha1"
 	"encoding/hex"
 	"io"
@@ -69,11 +70,57 @@ func GetMd5FromJson(data []byte) string {
 	return hex.EncodeToString(m.Sum(nil))
 }
 
-// 判断所给路径文件/文件夹是否存在
 func IsPathExists(path string) bool {
 	_, err := os.Stat(path) //os.Stat获取文件信息
 	if err != nil {
 		return !os.IsNotExist(err)
 	}
 	return true
+}
+
+const (
+	StdLen  = 16
+	UUIDLen = 20
+)
+
+var StdChars = []byte("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789")
+
+// var AsciiChars = []byte("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()-_=+,.?/:;{}[]`~")
+
+func NewRandomString() string {
+	return NewLenChars(StdLen, StdChars)
+}
+
+func NewLenRandomString(length int) string {
+	return NewLenChars(length, StdChars)
+}
+
+func NewLenChars(length int, chars []byte) string {
+	if length == 0 {
+		return ""
+	}
+	clen := len(chars)
+	if clen < 2 || clen > 256 {
+		panic("Wrong charset length for NewLenChars()")
+	}
+	maxrb := 255 - (256 % clen)
+	b := make([]byte, length)
+	r := make([]byte, length+(length/4)) // storage for random bytes.
+	i := 0
+	for {
+		if _, err := rand.Read(r); err != nil {
+			panic("Error reading random bytes: " + err.Error())
+		}
+		for _, rb := range r {
+			c := int(rb)
+			if c > maxrb {
+				continue // Skip this number to avoid modulo bias.
+			}
+			b[i] = chars[c%clen]
+			i++
+			if i == length {
+				return string(b)
+			}
+		}
+	}
 }
