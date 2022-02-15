@@ -84,6 +84,7 @@ func AssembleShareDetail(detail *repo.ShareDetailPO) *stub.GetShareDetailRsp {
 		SaveNum:    detail.SaveNum,
 		DocSize:    detail.DocSize,
 		FileNum:    detail.FileNum,
+		UniFileId:  detail.UniFileID,
 	}
 }
 

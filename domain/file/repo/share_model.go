@@ -5,6 +5,7 @@ type ShareDetailPO struct {
 	Password    string `redis:"password" json:"password,omitempty"`
 	DocID       string `redis:"docId" json:"docId,omitempty"`
 	DocName     string `redis:"docName" json:"docName,omitempty"`
+	UniFileID   string `redis:"uniFileId" json:"uniFileId"`
 	DocSize     int64  `redis:"docSize" json:"docSize,omitempty"`
 	DocType     string `redis:"docType" json:"docType,omitempty"`
 	IsDir       int32  `redis:"isDir" json:"isDir,omitempty"`     // 1 folder, 2 file

@@ -28,6 +28,7 @@ func (dao *ShareDao) CreateShareToken(ctx context.Context, token string, po *Sha
 	if err := p.HMSet(ctx, token,
 		"uploader", po.Uploader,
 		"password", po.Password,
+		"uniFileId", po.UniFileID,
 		"docId", po.DocID,
 		"docName", po.DocName,
 		"docSize", po.DocSize,

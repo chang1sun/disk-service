@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
@@ -400,7 +399,6 @@ func DownloadHandler(w http.ResponseWriter, r *http.Request, pathParams map[stri
 		return
 	}
 	fileID := r.Form.Get("uniFileId")
-	fileName := r.Form.Get("fileName")
 	f, err := frepo.GetUniFileStoreDao().GetDownloadStream(r.Context(), fileID)
 	defer f.Close()
 	if err != nil {
@@ -408,17 +406,17 @@ func DownloadHandler(w http.ResponseWriter, r *http.Request, pathParams map[stri
 		return
 	}
 	w.Header().Set("Content-Type", f.GetFile().Metadata.Lookup("type").String())
-	w.Header().Set("Content-Disposition", "attachment; filename=\""+fileName+"\"")
-	// _, err = io.Copy(w, f)
-	b, err := ioutil.ReadAll(f)
+	// w.Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=%v", strconv.Quote(fileName)))
+	_, err = io.Copy(w, f)
+	// b, err := ioutil.ReadAll(f)
 	if err != nil {
 		util.ErrorResp(errcode.OsOperationErrCode, errcode.OsOperationErrMsg, err, &w)
 		return
 	}
-	_, err = w.Write(b)
-	if err != nil {
-		log.Println(err)
-	}
+	// _, err = w.Write(b)
+	// if err != nil {
+	// 	log.Println(err)
+	// }
 }
 
 func buildUploadUserFilePO(uid string, name string, userID string, meta *frepo.UniFileMetaPO) *frepo.UserFilePO {

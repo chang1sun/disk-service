@@ -350,6 +350,7 @@ message GetShareDetailRsp {
     string doc_type = 9;
     int32 is_dir = 10; // 1 folder, 2 file
     int32 file_num = 11;
+    string uni_file_id = 12;
 }
 
 message GetShareRecordsReq {

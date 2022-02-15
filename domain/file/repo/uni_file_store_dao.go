@@ -77,7 +77,7 @@ func (dao *UniFileStoreDao) UploadFile(ctx context.Context, fileName string, f i
 	if err != nil {
 		return "", err
 	}
-	return id.String(), nil
+	return id.Hex(), nil
 }
 
 func (dao *UniFileStoreDao) GetDownloadStream(ctx context.Context, id string) (*gridfs.DownloadStream, error) {
