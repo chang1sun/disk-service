@@ -200,3 +200,14 @@ func createSaveShareRecord(ctx context.Context, userID, token string, share *rep
 	}
 	return nil
 }
+
+func GetShareGlimpse(ctx context.Context, token string) (string, string, error) {
+	po, err := repo.GetShareDao().GetShareDetail(ctx, token)
+	if err != nil {
+		return "", "", status.Errorf(errcode.DatabaseOperationErrCode, errcode.DatabaseOperationErrMsg, err)
+	}
+	if po == nil {
+		return "", "", status.Error(errcode.NoSuchShareCode, errcode.NoSuchShareMsg)
+	}
+	return po.Uploader, po.DocName, nil
+}

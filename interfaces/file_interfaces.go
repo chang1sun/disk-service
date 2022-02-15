@@ -217,3 +217,16 @@ func (s *fileServerImpl) GetClassifiedDocs(ctx context.Context,
 	rsp.List = assembler.AssemblClassifiedDocList(list)
 	return rsp, nil
 }
+
+func (s *fileServerImpl) GetShareGlimpse(ctx context.Context,
+	req *stub.GetShareGlimpseReq) (*stub.GetShareGlimpseRsp, error) {
+	rsp := &stub.GetShareGlimpseRsp{}
+	uploader, docName, err := service.GetShareGlimpse(ctx, req.Token)
+	if err != nil {
+		util.LogErr(err, "GetShareGlimpse")
+		return rsp, err
+	}
+	rsp.Uploader = uploader
+	rsp.DocName = docName
+	return rsp, nil
+}
