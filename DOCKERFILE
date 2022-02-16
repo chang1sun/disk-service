@@ -1,0 +1,26 @@
+FROM golang:1.17-alpine
+
+# Install git.
+# Git is required for fetching the dependencies.
+RUN apk add --no-cache git bash curl ca-certificates gcc g++
+
+WORKDIR /code
+COPY . .
+
+# $GOPATH/bin添加到环境变量中
+ENV PATH $GOPATH/bin:$PATH
+ENV GO111MODULE = ON
+ENV GOPROXY="https://goproxy.cn,direct"
+
+# Fetch dependencies
+RUN go mod tidy
+
+# Build the binary. for grpc gateway
+RUN go build
+
+RUN pwd
+RUN echo $GOPATH
+
+EXPOSE 8001
+# Run the binary.
+ENTRYPOINT ["disk-service"]
