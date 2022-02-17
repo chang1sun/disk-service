@@ -126,6 +126,7 @@ func InitBase() error {
 	conn, err := util.GetGormConn(config.GetConfig().Mysql.User, config.GetConfig().Mysql.Password,
 		config.GetConfig().Mysql.Addr, config.GetConfig().Mysql.Database)
 	if err != nil {
+		log.Println(config.GetConfig().Mysql.Addr)
 		return err
 	}
 	mongoDB, err := util.GetMongodbConn(config.GetConfig().MongoDB.Addr, config.GetConfig().MongoDB.Database)
