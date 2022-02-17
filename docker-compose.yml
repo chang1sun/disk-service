@@ -8,11 +8,18 @@ services:
     stdin_open: true                     # 打开标准输入，可以接受外部输入
     tty: true
     restart: always                      # 指定容器退出后的重启策略为始终重启
+    depends_on: 
+      - mysql
+      - redis
+      - mongodb
 
   mysql:
     image: "mysql:latest"
+    platform: linux/amd64
     environment:
       - TZ=${TZ}
+      - MYSQL_USER=${MYSQL_USER}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
       - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}    # 设置 Mysql root 用户密码
       - MYSQL_DATABASE=${MYSQL_DATABASE}
     volumes:

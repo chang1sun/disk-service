@@ -10,7 +10,7 @@ auth_secret_key: amisecret?
 pw_salt: "*12#3"
 
 mysql:
-  user: "root"
+  user: "chang"
   password: "sc058918"
   addr: "mysql:3306"
   db_name: "netdisk"
