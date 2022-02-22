@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"encoding/json"
+	"log"
 	"time"
 
 	arepo "github.com/changpro/disk-service/domain/auth/repo"
@@ -81,6 +82,11 @@ func GetShareDetail(ctx context.Context, token, password string) (*repo.ShareDet
 	if po.Password != password {
 		return nil, status.Error(errcode.WrongSharePasswordCode, errcode.WrongSharePasswordMsg)
 	}
+	go func() {
+		if err := repo.GetShareDao().IncrViewNum(ctx, token); err != nil {
+			log.Println("incr view num failed, err msg: ", err)
+		}
+	}()
 	return po, nil
 }
 
@@ -115,6 +121,11 @@ func RetrieveShareFromToken(ctx context.Context, userID, token, path string) err
 	if err := CheckPath(ctx, userID, path); err != nil {
 		return err
 	}
+	go func() {
+		if err := repo.GetShareDao().IncrSaveNum(ctx, token); err != nil {
+			log.Println("incr save num failed, err msg: ", err)
+		}
+	}()
 	po, err := repo.GetShareDao().GetShareDetail(ctx, token)
 	if err != nil {
 		return status.Errorf(errcode.DatabaseOperationErrCode, errcode.DatabaseOperationErrMsg, err)
