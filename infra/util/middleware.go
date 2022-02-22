@@ -40,7 +40,11 @@ func AuthMiddleware(h http.Handler) http.Handler {
 			h.ServeHTTP(w, r)
 			return
 		}
-		if strings.Contains(r.URL.String(), "sign-in") {
+		u := r.URL.String()
+		if strings.Contains(u, "sign-in") ||
+			strings.Contains(u, "sign-up") ||
+			strings.Contains(u, "modify-pw") ||
+			strings.Contains(u, "file/download") {
 			h.ServeHTTP(w, r)
 			return
 		}

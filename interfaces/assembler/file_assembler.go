@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/changpro/disk-service/domain/file/repo"
+	"github.com/changpro/disk-service/domain/file/service"
 	"github.com/changpro/disk-service/infra/constants"
 	"github.com/changpro/disk-service/infra/errcode"
 	"github.com/changpro/disk-service/stub"
@@ -66,6 +67,7 @@ func AssembleShareRecordList(records []*repo.ShareRecordPO) []*stub.ShareRecord 
 			ExpireTime: record.ExpireTime.UnixMilli(),
 			Token:      record.Token,
 			Type:       record.Type,
+			Status:     record.Status,
 		})
 	}
 	return list
@@ -136,4 +138,20 @@ func AssemblClassifiedDocList(list []*repo.UserFilePO) []*stub.ClassifiedDoc {
 		})
 	}
 	return res
+}
+
+func AssemblShareTree(root *service.ShareTreeNode) *stub.ShareFolderTreeNode {
+	node := &stub.ShareFolderTreeNode{
+		DocId:     root.DocID,
+		DocName:   root.DocName,
+		UniFileId: root.UniFileID,
+		DocSize:   root.DocSize,
+		IsDir:     root.IsDir,
+	}
+	var children []*stub.ShareFolderTreeNode
+	for _, sub := range root.Children {
+		children = append(children, AssemblShareTree(sub))
+	}
+	node.Children = children
+	return node
 }

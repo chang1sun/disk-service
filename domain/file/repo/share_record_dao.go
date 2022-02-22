@@ -52,3 +52,13 @@ func (dao *ShareRecordDao) QueryRecordList(ctx context.Context, query *RecordQue
 	}
 	return list, count, nil
 }
+
+func (dao *ShareRecordDao) DeleteShareRecord(ctx context.Context, token string) error {
+	if err := dao.Database.WithContext(ctx).Model(&ShareRecordPO{}).
+		Where("token = ?", token).Updates(&ShareRecordPO{
+		Status: 2,
+	}).Error; err != nil {
+		return err
+	}
+	return nil
+}

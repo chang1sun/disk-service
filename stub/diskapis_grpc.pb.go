@@ -23,6 +23,7 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type FileServiceClient interface {
+	// deprecate
 	UploadFile(ctx context.Context, in *UploadFileReq, opts ...grpc.CallOption) (*UploadFileRsp, error)
 	GetDirsAndFiles(ctx context.Context, in *GetDirsAndFilesReq, opts ...grpc.CallOption) (*GetDirsAndFilesRsp, error)
 	GetFileDetail(ctx context.Context, in *GetFileDetailReq, opts ...grpc.CallOption) (*GetFileDetailRsp, error)
@@ -42,6 +43,8 @@ type FileServiceClient interface {
 	GetShareDetail(ctx context.Context, in *GetShareDetailReq, opts ...grpc.CallOption) (*GetShareDetailRsp, error)
 	GetClassifiedDocs(ctx context.Context, in *GetClassifiedDocsReq, opts ...grpc.CallOption) (*GetClassifiedDocsRsp, error)
 	GetShareGlimpse(ctx context.Context, in *GetShareGlimpseReq, opts ...grpc.CallOption) (*GetShareGlimpseRsp, error)
+	GetShareFolderTree(ctx context.Context, in *GetShareFolderTreeReq, opts ...grpc.CallOption) (*GetShareFolderTreeRsp, error)
+	DeleteShare(ctx context.Context, in *DeleteShareReq, opts ...grpc.CallOption) (*emptypb.Empty, error)
 }
 
 type fileServiceClient struct {
@@ -223,10 +226,29 @@ func (c *fileServiceClient) GetShareGlimpse(ctx context.Context, in *GetShareGli
 	return out, nil
 }
 
+func (c *fileServiceClient) GetShareFolderTree(ctx context.Context, in *GetShareFolderTreeReq, opts ...grpc.CallOption) (*GetShareFolderTreeRsp, error) {
+	out := new(GetShareFolderTreeRsp)
+	err := c.cc.Invoke(ctx, "/FileService/GetShareFolderTree", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *fileServiceClient) DeleteShare(ctx context.Context, in *DeleteShareReq, opts ...grpc.CallOption) (*emptypb.Empty, error) {
+	out := new(emptypb.Empty)
+	err := c.cc.Invoke(ctx, "/FileService/DeleteShare", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // FileServiceServer is the server API for FileService service.
 // All implementations should embed UnimplementedFileServiceServer
 // for forward compatibility
 type FileServiceServer interface {
+	// deprecate
 	UploadFile(context.Context, *UploadFileReq) (*UploadFileRsp, error)
 	GetDirsAndFiles(context.Context, *GetDirsAndFilesReq) (*GetDirsAndFilesRsp, error)
 	GetFileDetail(context.Context, *GetFileDetailReq) (*GetFileDetailRsp, error)
@@ -246,6 +268,8 @@ type FileServiceServer interface {
 	GetShareDetail(context.Context, *GetShareDetailReq) (*GetShareDetailRsp, error)
 	GetClassifiedDocs(context.Context, *GetClassifiedDocsReq) (*GetClassifiedDocsRsp, error)
 	GetShareGlimpse(context.Context, *GetShareGlimpseReq) (*GetShareGlimpseRsp, error)
+	GetShareFolderTree(context.Context, *GetShareFolderTreeReq) (*GetShareFolderTreeRsp, error)
+	DeleteShare(context.Context, *DeleteShareReq) (*emptypb.Empty, error)
 }
 
 // UnimplementedFileServiceServer should be embedded to have forward compatible implementations.
@@ -308,6 +332,12 @@ func (UnimplementedFileServiceServer) GetClassifiedDocs(context.Context, *GetCla
 }
 func (UnimplementedFileServiceServer) GetShareGlimpse(context.Context, *GetShareGlimpseReq) (*GetShareGlimpseRsp, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetShareGlimpse not implemented")
+}
+func (UnimplementedFileServiceServer) GetShareFolderTree(context.Context, *GetShareFolderTreeReq) (*GetShareFolderTreeRsp, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetShareFolderTree not implemented")
+}
+func (UnimplementedFileServiceServer) DeleteShare(context.Context, *DeleteShareReq) (*emptypb.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeleteShare not implemented")
 }
 
 // UnsafeFileServiceServer may be embedded to opt out of forward compatibility for this service.
@@ -663,6 +693,42 @@ func _FileService_GetShareGlimpse_Handler(srv interface{}, ctx context.Context, 
 	return interceptor(ctx, in, info, handler)
 }
 
+func _FileService_GetShareFolderTree_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetShareFolderTreeReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(FileServiceServer).GetShareFolderTree(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/FileService/GetShareFolderTree",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(FileServiceServer).GetShareFolderTree(ctx, req.(*GetShareFolderTreeReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _FileService_DeleteShare_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeleteShareReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(FileServiceServer).DeleteShare(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/FileService/DeleteShare",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(FileServiceServer).DeleteShare(ctx, req.(*DeleteShareReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // FileService_ServiceDesc is the grpc.ServiceDesc for FileService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -745,6 +811,14 @@ var FileService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetShareGlimpse",
 			Handler:    _FileService_GetShareGlimpse_Handler,
+		},
+		{
+			MethodName: "GetShareFolderTree",
+			Handler:    _FileService_GetShareFolderTree_Handler,
+		},
+		{
+			MethodName: "DeleteShare",
+			Handler:    _FileService_DeleteShare_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

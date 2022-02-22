@@ -59,6 +59,9 @@ func (dao *ShareDao) GetShareDetail(ctx context.Context, token string) (*ShareDe
 	if err != nil {
 		return nil, err
 	}
+	if po.DocID == "" {
+		return nil, nil
+	}
 	return &po, nil
 }
 
@@ -74,6 +77,13 @@ func (dao *ShareDao) IncrSaveNum(ctx context.Context, token string) error {
 	err := dao.Database.HIncrBy(ctx, token, "saveNum", 1).Err()
 	if err != nil {
 		return err
+	}
+	return nil
+}
+
+func (dao *ShareDao) DeleteShare(ctx context.Context, token string) error {
+	if res := dao.Database.Del(ctx, token); res.Err() != nil {
+		return res.Err()
 	}
 	return nil
 }

@@ -405,7 +405,7 @@ func DownloadHandler(w http.ResponseWriter, r *http.Request, pathParams map[stri
 		util.ErrorResp(errcode.DatabaseOperationErrCode, errcode.DatabaseOperationErrMsg, err, &w)
 		return
 	}
-	w.Header().Set("Content-Type", f.GetFile().Metadata.Lookup("type").String())
+	w.Header().Set("Content-Type", "application/octet-stream")
 	// w.Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=%v", strconv.Quote(fileName)))
 	_, err = io.Copy(w, f)
 	// b, err := ioutil.ReadAll(f)

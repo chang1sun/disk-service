@@ -11,6 +11,7 @@ type ShareRecordPO struct {
 	ExpireTime time.Time `gorm:"column:expire_time;type:timestamp;not null"`
 	CreateTime time.Time `gorm:"column:create_time;type:timestamp;not null"`
 	Type       int32     `gorm:"column:type;type:tinyint(1);not null"`
+	Status     int32     `gorm:"column:status;type:tinyint(1);not null"` // 1 enable, 2 has been deleted
 }
 
 func (ShareRecordPO) TableName() string {

@@ -230,3 +230,25 @@ func (s *fileServerImpl) GetShareGlimpse(ctx context.Context,
 	rsp.DocName = docName
 	return rsp, nil
 }
+
+func (s *fileServerImpl) GetShareFolderTree(ctx context.Context,
+	req *stub.GetShareFolderTreeReq) (*stub.GetShareFolderTreeRsp, error) {
+	rsp := &stub.GetShareFolderTreeRsp{}
+	root, err := service.GetShareFolderTree(ctx, req.Uploader, req.DocId)
+	if err != nil {
+		util.LogErr(err, "GetShareFolderTree")
+		return rsp, err
+	}
+	rsp.Root = assembler.AssemblShareTree(root)
+	return rsp, nil
+}
+
+func (s *fileServerImpl) DeleteShare(ctx context.Context,
+	req *stub.DeleteShareReq) (*emptypb.Empty, error) {
+	rsp := &emptypb.Empty{}
+	if err := service.DeleteShare(ctx, req.Token); err != nil {
+		util.LogErr(err, "DeleteShare")
+		return rsp, err
+	}
+	return rsp, nil
+}

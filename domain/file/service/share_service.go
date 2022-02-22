@@ -19,6 +19,15 @@ const (
 	RecordTypeSave  = 2
 )
 
+type ShareTreeNode struct {
+	DocID     string
+	UniFileID string
+	DocSize   int64
+	DocName   string
+	IsDir     int32
+	Children  []*ShareTreeNode
+}
+
 func CreateShare(ctx context.Context, dto *repo.CreateShareDTO) (string, string, error) {
 	doc, err := GetFileDetail(ctx, dto.UserID, dto.DocID)
 	if err != nil {
@@ -210,4 +219,72 @@ func GetShareGlimpse(ctx context.Context, token string) (string, string, error) 
 		return "", "", status.Error(errcode.NoSuchShareCode, errcode.NoSuchShareMsg)
 	}
 	return po.Uploader, po.DocName, nil
+}
+
+func GetShareFolderTree(ctx context.Context, uploader string, docID string) (*ShareTreeNode, error) {
+	pos, err := repo.GetUserFileDao().QueryDocByIDs(ctx, []string{docID})
+	if err != nil {
+		return nil, status.Errorf(errcode.DatabaseOperationErrCode, errcode.DatabaseOperationErrMsg, err)
+	}
+	if len(pos) < 1 {
+		return nil, status.Error(errcode.FindNoFileInServerCode, errcode.FindNoFileInServerMsg)
+	}
+	po := pos[0]
+	children, err := getSubDocForTreeNode(ctx, po.Path+po.Name+"/", uploader)
+	if err != nil {
+		return nil, status.Errorf(errcode.DatabaseOperationErrCode, errcode.DatabaseOperationErrMsg, err)
+	}
+	return &ShareTreeNode{
+		DocID:    po.ID,
+		DocName:  po.Name,
+		IsDir:    1,
+		Children: children,
+	}, nil
+}
+
+func getSubDocForTreeNode(ctx context.Context, path string, uploader string) ([]*ShareTreeNode, error) {
+	var nodes []*ShareTreeNode
+	pos, err := repo.GetUserFileDao().QueryDirByPath(ctx, uploader, path, true)
+	if err != nil {
+		return nil, status.Errorf(errcode.DatabaseOperationErrCode, errcode.DatabaseOperationErrMsg, err)
+	}
+	if len(pos) == 0 {
+		return nil, nil
+	}
+	// recursively call
+	for _, po := range pos {
+		// case file, break out
+		if po.IsDir == 2 {
+			nodes = append(nodes, &ShareTreeNode{
+				DocID:     po.ID,
+				DocName:   po.Name,
+				UniFileID: po.UniFileID,
+				DocSize:   po.FileSize,
+				IsDir:     2,
+			})
+			continue
+		}
+		// case folder
+		subNodes, err := getSubDocForTreeNode(ctx, po.Path+po.Name+"/", uploader)
+		if err != nil {
+			return nil, status.Errorf(errcode.DatabaseOperationErrCode, errcode.DatabaseOperationErrMsg, err)
+		}
+		nodes = append(nodes, &ShareTreeNode{
+			DocID:    po.ID,
+			DocName:  po.Name,
+			IsDir:    1,
+			Children: subNodes,
+		})
+	}
+	return nodes, nil
+}
+
+func DeleteShare(ctx context.Context, token string) error {
+	if err := repo.GetShareDao().DeleteShare(ctx, token); err != nil {
+		return err
+	}
+	if err := repo.GetShareRecordDao().DeleteShareRecord(ctx, token); err != nil {
+		return err
+	}
+	return nil
 }
