@@ -50,3 +50,16 @@ services:
     ports:
       - "${MONGO_PORT}:27017"
     restart: always
+
+  nginx:
+    image: "nginx:latest"
+    environment:
+      - TZ=${TZ}
+    volumes:
+      - "${NGINX_CONF_PATH}/nginx.conf:/etc/nginx/nginx.conf"
+    ports:
+      - "80:80"
+    restart: always
+    depends_on:
+      - golang
+
