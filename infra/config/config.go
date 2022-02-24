@@ -30,7 +30,6 @@ type Config struct {
 		User     string `yaml:"user"`
 		Password string `yaml:"password"`
 	}
-	AuthAddr string `yaml:"auth_addr"`
 }
 
 func GetConfig() *Config {

@@ -12,18 +12,16 @@ pw_salt: "*12#3"
 mysql:
   user: "root"
   password: "sc058918"
-  addr: "localhost:3306"
+  addr: "mysql:3306"
   db_name: "netdisk"
 
 mongo:
-  addr: "mongodb://localhost:27017"
+  addr: "mongodb://mongodb:27017"
   db_name: "netdisk"
 
 redis:
-  addr: "localhost:6379"
+  addr: "redis:6379"
   db_share: 0
   db_upload: 1
   user:
   password:
-
-auth_addr: "127.0.0.1:8000"
