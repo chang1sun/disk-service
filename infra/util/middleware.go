@@ -13,23 +13,7 @@ type Claim struct {
 	jwt.StandardClaims
 }
 
-// handle cors
-func cros(h http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if strings.HasPrefix(r.Header.Get("Origin"), "http://localhost") {
-			w.Header().Set("Access-Control-Allow-Origin", r.Header.Get("Origin"))
-			w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PATCH, DELETE")
-			w.Header().Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, Authorization, ResponseType")
-		}
-		if r.Method == "OPTIONS" {
-			h.ServeHTTP(w, r)
-			return
-		}
-		h.ServeHTTP(w, r)
-	})
-}
-
-func AuthMiddleware(h http.Handler) http.Handler {
+func AddMiddleware(h http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if strings.HasPrefix(r.Header.Get("Origin"), "http://localhost") {
 			w.Header().Set("Access-Control-Allow-Origin", r.Header.Get("Origin"))

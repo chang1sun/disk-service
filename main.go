@@ -81,7 +81,7 @@ func main() {
 
 	gwServer := &http.Server{
 		Addr:    ":8001",
-		Handler: util.AuthMiddleware(gwmux),
+		Handler: util.AddMiddleware(gwmux),
 	}
 
 	log.Println("Serving gRPC-Gateway on localhost:8001")

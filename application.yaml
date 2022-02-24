@@ -9,6 +9,12 @@ auth_secret_key: amisecret?
 # salt val for password cryption
 pw_salt: "*12#3"
 
+# origins who is allowed to send request
+request_origins:
+  - localhost
+  - www.easydisk.top
+  - easydisk.top
+
 mysql:
   user: "root"
   password: "sc058918"
