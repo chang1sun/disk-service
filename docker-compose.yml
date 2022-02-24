@@ -52,11 +52,10 @@ services:
     restart: always
 
   nginx:
-    image: "nginx:latest"
+    build: ./nginx
     environment:
       - TZ=${TZ}
     volumes:
-      - "./conf:/etc/nginx/conf.d"
       - "${VIEW_PATH}:/dist"
     ports:
       - "80:80"
