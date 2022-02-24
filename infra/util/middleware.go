@@ -15,8 +15,10 @@ type Claim struct {
 
 func AddMiddleware(h http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if strings.HasPrefix(r.Header.Get("Origin"), "http://localhost") {
-			w.Header().Set("Access-Control-Allow-Origin", r.Header.Get("Origin"))
+		origin := r.Header.Get("Origin")
+		if strings.Contains(origin, config.GetConfig().RequestOrigin) ||
+			strings.Contains(origin, "localhost") {
+			w.Header().Set("Access-Control-Allow-Origin", origin)
 			w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PATCH, DELETE")
 			w.Header().Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, Authorization, ResponseType")
 		}

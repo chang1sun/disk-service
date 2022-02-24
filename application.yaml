@@ -10,9 +10,7 @@ auth_secret_key: amisecret?
 pw_salt: "*12#3"
 
 # origins who is allowed to send request
-request_origins:
-  - localhost
-  - www.easydisk.top
+request_origin:
   - easydisk.top
 
 mysql:

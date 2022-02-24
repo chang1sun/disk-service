@@ -13,6 +13,7 @@ type Config struct {
 	InitUserStorageSize int64  `yaml:"init_user_storage_size"`
 	AuthKey             string `yaml:"auth_secret_key"`
 	PwSalt              string `yaml:"pw_salt"`
+	RequestOrigin string `yaml:"request_origin"`
 	Mysql               struct {
 		User     string `yaml:"user"`
 		Password string `yaml:"password"`
