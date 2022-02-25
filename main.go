@@ -85,8 +85,8 @@ func main() {
 	}
 
 	log.Println("Serving gRPC-Gateway on localhost:8001")
-	// err = gwServer.ListenAndServeTLS("crt/service.pem", "crt/service.key")
-	err = gwServer.ListenAndServe()
+	// err = gwServer.ListenAndServe()
+	err = gwServer.ListenAndServeTLS(config.GetConfig().TLS.Crt, config.GetConfig().TLS.Key)
 	if err != nil {
 		log.Fatalln(err)
 		panic(err)

@@ -12,6 +12,11 @@ pw_salt: "*12#3"
 # origins who is allowed to send request
 request_origin: easydisk.top
 
+# tls
+tls:
+  key: /tls/www.easydisk.top.key
+  crt: /tls/www.easydisk.top_bundle.crt
+
 mysql:
   user: "chang"
   password: "mysql123456"
