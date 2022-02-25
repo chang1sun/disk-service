@@ -6,6 +6,8 @@ services:
       - "8000:8000"
       - "8001:8001"
     stdin_open: true                     # 打开标准输入，可以接受外部输入
+    volumes:
+      - "${TLS_PATH}:/tls"
     tty: true
     restart: always                      # 指定容器退出后的重启策略为始终重启
     depends_on: 
