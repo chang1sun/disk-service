@@ -2,7 +2,7 @@ FROM golang:1.17-alpine as build
 
 # Install git.
 # Git is required for fetching the dependencies.
-# RUN apk add --no-cache bash ca-certificates
+RUN apk add --no-cache bash ca-certificates
 
 WORKDIR /go/src
 
