@@ -12,139 +12,139 @@ service FileService {
     // deprecate
     rpc UploadFile(UploadFileReq) returns (UploadFileRsp) {
         option (google.api.http) = {
-            post: "/v1/files/quick-upload"
+            post: "/api/v1/files/quick-upload"
             body: "*"
         };
     }
 
     rpc GetDirsAndFiles(GetDirsAndFilesReq) returns (GetDirsAndFilesRsp) {
         option (google.api.http) = {
-            get: "/v1/{user_id}/files"
+            get: "/api/v1/{user_id}/files"
         };
     }
 
     rpc GetFileDetail (GetFileDetailReq) returns (GetFileDetailRsp) {
         option (google.api.http) = {
-            get: "/v1/{user_id}/files/{file_name}"
+            get: "/api/v1/{user_id}/files/{file_name}"
         };
     }
 
     rpc MakeNewFolder (MakeNewFolderReq) returns (MakeNewFolderRsp) {
         option (google.api.http) = {
-            post: "/v1/files/mkdir"
+            post: "/api/v1/files/mkdir"
             body: "*"
         };
     }
 
     rpc SetHiddenDoc (SetHiddenDocReq) returns (google.protobuf.Empty) {
         option (google.api.http) = {
-            post: "/v1/files/set-hidden"
+            post: "/api/v1/files/set-hidden"
             body: "*"
         };
     }
 
     rpc MoveToRecycleBin (MoveToRecycleBinReq) returns (google.protobuf.Empty) {
         option (google.api.http) = {
-            post: "/v1/files/recycle"
+            post: "/api/v1/files/recycle"
             body: "*"
         };
     }
 
     rpc RecoverDocs (RecoverDocsReq) returns (google.protobuf.Empty) {
         option (google.api.http) = {
-            post: "/v1/files/recover"
+            post: "/api/v1/files/recover"
             body: "*"
         };
     }
 
     rpc GetRecycleBinList (GetRecycleBinListReq) returns (GetRecycleBinListRsp) {
         option (google.api.http) = {
-            get: "/v1/{user_id}/files/recycle-bin"
+            get: "/api/v1/{user_id}/files/recycle-bin"
         };
     }
 
     rpc SoftDelete (SoftDeleteReq) returns (google.protobuf.Empty) {
         option (google.api.http) = {
-            post: "/v1/files/delete"
+            post: "/api/v1/files/delete"
             body: "*"
         };
     }
 
     rpc HardDelete (HardDeleteReq) returns (google.protobuf.Empty) {
         option (google.api.http) = {
-            post: "/v1/files/hard-delete"
+            post: "/api/v1/files/hard-delete"
             body: "*"
         };
     }
 
     rpc Rename (RenameReq) returns (google.protobuf.Empty) {
         option (google.api.http) = {
-            post: "/v1/files/rename"
+            post: "/api/v1/files/rename"
             body: "*"
         };
     }
 
     rpc MoveToPath (MoveToPathReq) returns (google.protobuf.Empty) {
         option (google.api.http) = {
-            post: "/v1/files/move"
+            post: "/api/v1/files/move"
             body: "*"
         };
     }
 
     rpc CopyToPath (CopyToPathReq) returns (google.protobuf.Empty) {
         option (google.api.http) = {
-            post: "/v1/files/copy"
+            post: "/api/v1/files/copy"
             body: "*"
         };
     }
 
     rpc CreateShare (CreateShareReq) returns (CreateShareRsp) {
         option (google.api.http) = {
-            post: "/v1/files/create-share"
+            post: "/api/v1/files/create-share"
             body: "*"
         };
     }
 
     rpc RetrieveShareToPath (RetrieveShareToPathReq) returns (google.protobuf.Empty) {
         option (google.api.http) = {
-            post: "/v1/files/save-from-share"
+            post: "/api/v1/files/save-from-share"
             body: "*"
         };
     }
 
     rpc GetShareRecords (GetShareRecordsReq) returns (GetShareRecordsRsp) {
         option (google.api.http) = {
-            get: "/v1/{user_id}/files/share-records"
+            get: "/api/v1/{user_id}/files/share-records"
         };
     }
 
     rpc GetShareDetail (GetShareDetailReq) returns (GetShareDetailRsp) {
         option (google.api.http) = {
-            get: "/v1/files/share/{token}"
+            get: "/api/v1/files/share/{token}"
         };
     }
 
     rpc GetClassifiedDocs (GetClassifiedDocsReq) returns (GetClassifiedDocsRsp) {
         option (google.api.http) = {
-            get: "/v1/{user_id}/files/classified"
+            get: "/api/v1/{user_id}/files/classified"
         };
     }
 
     rpc GetShareGlimpse (GetShareGlimpseReq) returns (GetShareGlimpseRsp) {
         option (google.api.http) = {
-            get: "/v1/share/{token}/glimpse"
+            get: "/api/v1/share/{token}/glimpse"
         };
     }
 
     rpc GetShareFolderTree (GetShareFolderTreeReq) returns (GetShareFolderTreeRsp) {
         option (google.api.http) = {
-            get: "/v1/share/tree"
+            get: "/api/v1/share/tree"
         };
     }
     
     rpc DeleteShare (DeleteShareReq) returns (google.protobuf.Empty) {
         option (google.api.http) = {
-            post: "/v1/share/delete"
+            post: "/api/v1/share/delete"
             body: "*"
         };
     }
@@ -154,34 +154,34 @@ service AuthService {
     
     rpc RegisterNewUser(RegisterNewUserReq) returns (google.protobuf.Empty) {
         option (google.api.http) = {
-            post: "/v1/auth/sign-up"
+            post: "/api/v1/auth/sign-up"
             body: "*"
         };
     }
 
     rpc SignIn(SignInReq) returns (SignInRsp) {
         option (google.api.http) = {
-            post: "/v1/auth/sign-in"
+            post: "/api/v1/auth/sign-in"
             body: "*"
         };
     }
 
     rpc ModifyPassword(ModifyPasswordReq) returns (google.protobuf.Empty) {
         option (google.api.http) = {
-            post: "/v1/auth/modify-pw"
+            post: "/api/v1/auth/modify-pw"
             body: "*"
         };
     }
 
     rpc GetUserProfile(GetUserProfileReq) returns (GetUserProfileRsp) {
         option (google.api.http) = {
-            get: "/v1/{user_id}/profile"
+            get: "/api/v1/{user_id}/profile"
         };
     }
 
     rpc ModifyUserProfile(ModifyUserProfileReq) returns (google.protobuf.Empty) {
         option (google.api.http) = {
-            post: "/v1/{user_id}/profile/modify"
+            post: "/api/v1/{user_id}/profile/modify"
             body: "*"
         };
     }

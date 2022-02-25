@@ -1,6 +1,7 @@
 package util
 
 import (
+	"log"
 	"net/http"
 	"strings"
 
@@ -16,6 +17,7 @@ type Claim struct {
 func AddMiddleware(h http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		origin := r.Header.Get("Origin")
+		log.Println("request origin is " + origin)
 		if strings.Contains(origin, config.GetConfig().RequestOrigin) ||
 			strings.Contains(origin, "localhost") {
 			w.Header().Set("Access-Control-Allow-Origin", origin)
