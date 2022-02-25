@@ -9,21 +9,21 @@ auth_secret_key: amisecret?
 # salt val for password cryption
 pw_salt: "*12#3"
 
-# origins who is allowed to send request
-request_origin: easydisk.top
-
 mysql:
   user: "chang"
   password: "mysql123456"
-  addr: "mysql:3306"
+  # addr: "mysql:3306"
+  addr: "localhost:3306"
   db_name: "netdisk"
 
 mongo:
-  addr: "mongodb://mongodb:27017"
+  # addr: "mongodb://mongodb:27017"
+  addr: "mongodb://localhost:27017"
   db_name: "netdisk"
 
 redis:
-  addr: "redis:6379"
+  # addr: "redis:6379"
+  addr: "localhost:6379"
   db_share: 0
   db_upload: 1
   user:
