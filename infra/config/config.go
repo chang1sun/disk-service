@@ -17,7 +17,7 @@ type Config struct {
 		Key string `yaml:"key"`
 		Crt string `yaml:"crt"`
 	} `yaml:"tls"`
-	Mysql               struct {
+	Mysql struct {
 		User     string `yaml:"user"`
 		Password string `yaml:"password"`
 		Database string `yaml:"db_name"`
