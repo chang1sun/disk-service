@@ -57,7 +57,7 @@ services:
       - TZ=${TZ}
     volumes:
       - "${VIEW_PATH}:/dist"
-      - "${TLS_PERM}:/etc/nginx/perm"
+      - "${TLS_PATH}:/etc/nginx/perm"
     ports:
       - "80:80"
       - "443:443"
