@@ -13,8 +13,8 @@ pw_salt: "*12#3"
 request_origin: easydisk.top
 
 mysql:
-  user: "root"
-  password: "sc058918"
+  user: "chang"
+  password: "123456"
   addr: "mysql:3306"
   db_name: "netdisk"
 
