@@ -67,3 +67,10 @@ services:
     depends_on:
       - golang
 
+  preview:
+    image: "keking/kkfileview:v2.2.2"
+    ports:
+      - "${PREVIEW_PORT}:8012"
+    restart: always
+    depends_on:
+      - golang
