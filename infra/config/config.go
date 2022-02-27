@@ -42,7 +42,7 @@ func GetConfig() *Config {
 
 func InitConfig() error {
 	config = &Config{}
-	yamlFile, err := ioutil.ReadFile("application.yaml")
+	yamlFile, err := ioutil.ReadFile("conf/application.yaml")
 	if err != nil {
 		return err
 	}
