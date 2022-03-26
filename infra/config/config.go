@@ -2,6 +2,7 @@ package config
 
 import (
 	"io/ioutil"
+	"os"
 
 	"gopkg.in/yaml.v2"
 )
@@ -42,7 +43,20 @@ func GetConfig() *Config {
 
 func InitConfig() error {
 	config = &Config{}
-	yamlFile, err := ioutil.ReadFile("conf/application.yaml")
+	var confPath string
+	if os.Getenv("RUN_MODE") == "pro" {
+		confPath = "conf/pro.conf.yaml"
+	} else {
+		confPath = "conf/dev.conf.yaml"
+	}
+	if err := readYaml(confPath, config); err != nil {
+		return err
+	}
+	return nil
+}
+
+func readYaml(file string, config *Config) error {
+	yamlFile, err := ioutil.ReadFile(file)
 	if err != nil {
 		return err
 	}
