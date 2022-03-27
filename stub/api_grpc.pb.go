@@ -2,7 +2,7 @@
 // versions:
 // - protoc-gen-go-grpc v1.2.0
 // - protoc             (unknown)
-// source: diskapis.proto
+// source: api.proto
 
 package stub
 
@@ -45,6 +45,7 @@ type FileServiceClient interface {
 	GetShareGlimpse(ctx context.Context, in *GetShareGlimpseReq, opts ...grpc.CallOption) (*GetShareGlimpseRsp, error)
 	GetShareFolderTree(ctx context.Context, in *GetShareFolderTreeReq, opts ...grpc.CallOption) (*GetShareFolderTreeRsp, error)
 	DeleteShare(ctx context.Context, in *DeleteShareReq, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	GetShareByUploader(ctx context.Context, in *GetShareByUploaderReq, opts ...grpc.CallOption) (*GetShareDetailRsp, error)
 }
 
 type fileServiceClient struct {
@@ -244,6 +245,15 @@ func (c *fileServiceClient) DeleteShare(ctx context.Context, in *DeleteShareReq,
 	return out, nil
 }
 
+func (c *fileServiceClient) GetShareByUploader(ctx context.Context, in *GetShareByUploaderReq, opts ...grpc.CallOption) (*GetShareDetailRsp, error) {
+	out := new(GetShareDetailRsp)
+	err := c.cc.Invoke(ctx, "/FileService/GetShareByUploader", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // FileServiceServer is the server API for FileService service.
 // All implementations should embed UnimplementedFileServiceServer
 // for forward compatibility
@@ -270,6 +280,7 @@ type FileServiceServer interface {
 	GetShareGlimpse(context.Context, *GetShareGlimpseReq) (*GetShareGlimpseRsp, error)
 	GetShareFolderTree(context.Context, *GetShareFolderTreeReq) (*GetShareFolderTreeRsp, error)
 	DeleteShare(context.Context, *DeleteShareReq) (*emptypb.Empty, error)
+	GetShareByUploader(context.Context, *GetShareByUploaderReq) (*GetShareDetailRsp, error)
 }
 
 // UnimplementedFileServiceServer should be embedded to have forward compatible implementations.
@@ -338,6 +349,9 @@ func (UnimplementedFileServiceServer) GetShareFolderTree(context.Context, *GetSh
 }
 func (UnimplementedFileServiceServer) DeleteShare(context.Context, *DeleteShareReq) (*emptypb.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeleteShare not implemented")
+}
+func (UnimplementedFileServiceServer) GetShareByUploader(context.Context, *GetShareByUploaderReq) (*GetShareDetailRsp, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetShareByUploader not implemented")
 }
 
 // UnsafeFileServiceServer may be embedded to opt out of forward compatibility for this service.
@@ -729,6 +743,24 @@ func _FileService_DeleteShare_Handler(srv interface{}, ctx context.Context, dec 
 	return interceptor(ctx, in, info, handler)
 }
 
+func _FileService_GetShareByUploader_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetShareByUploaderReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(FileServiceServer).GetShareByUploader(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/FileService/GetShareByUploader",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(FileServiceServer).GetShareByUploader(ctx, req.(*GetShareByUploaderReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // FileService_ServiceDesc is the grpc.ServiceDesc for FileService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -820,9 +852,13 @@ var FileService_ServiceDesc = grpc.ServiceDesc{
 			MethodName: "DeleteShare",
 			Handler:    _FileService_DeleteShare_Handler,
 		},
+		{
+			MethodName: "GetShareByUploader",
+			Handler:    _FileService_GetShareByUploader_Handler,
+		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "diskapis.proto",
+	Metadata: "api.proto",
 }
 
 // AuthServiceClient is the client API for AuthService service.
@@ -1086,5 +1122,5 @@ var AuthService_ServiceDesc = grpc.ServiceDesc{
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "diskapis.proto",
+	Metadata: "api.proto",
 }

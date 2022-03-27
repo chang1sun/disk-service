@@ -76,6 +76,7 @@ func AssembleShareRecordList(records []*repo.ShareRecordPO) []*stub.ShareRecord 
 func AssembleShareDetail(detail *repo.ShareDetailPO) *stub.GetShareDetailRsp {
 	return &stub.GetShareDetailRsp{
 		Uploader:   detail.Uploader,
+		Password:   detail.Password,
 		DocId:      detail.DocID,
 		DocName:    detail.DocName,
 		DocType:    detail.DocType,

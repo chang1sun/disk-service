@@ -83,10 +83,24 @@ func GetShareDetail(ctx context.Context, token, password string) (*repo.ShareDet
 		return nil, status.Error(errcode.WrongSharePasswordCode, errcode.WrongSharePasswordMsg)
 	}
 	go func() {
-		if err := repo.GetShareDao().IncrViewNum(ctx, token); err != nil {
+		if err := repo.GetShareDao().IncrViewNum(context.Background(), token); err != nil {
 			log.Println("incr view num failed, err msg: ", err)
 		}
 	}()
+	return po, nil
+}
+
+func GetShareByUploader(ctx context.Context, token, userID string) (*repo.ShareDetailPO, error) {
+	po, err := repo.GetShareDao().GetShareDetail(ctx, token)
+	if err != nil {
+		return nil, status.Errorf(errcode.DatabaseOperationErrCode, errcode.DatabaseOperationErrMsg, err)
+	}
+	if po == nil {
+		return nil, status.Error(errcode.NoSuchShareCode, errcode.NoSuchShareMsg)
+	}
+	if po.Uploader != userID {
+		return nil, status.Error(errcode.NoSuchShareCode, errcode.NoSuchShareMsg)
+	}
 	return po, nil
 }
 
@@ -122,7 +136,7 @@ func RetrieveShareFromToken(ctx context.Context, userID, token, path string) err
 		return err
 	}
 	go func() {
-		if err := repo.GetShareDao().IncrSaveNum(ctx, token); err != nil {
+		if err := repo.GetShareDao().IncrSaveNum(context.Background(), token); err != nil {
 			log.Println("incr save num failed, err msg: ", err)
 		}
 	}()
@@ -204,8 +218,16 @@ func saveDocsForSaver(ctx context.Context, pos []*repo.UserFilePO, userID, newPa
 }
 
 func createSaveShareRecord(ctx context.Context, userID, token string, share *repo.ShareDetailPO) error {
-	loc, _ := time.LoadLocation(constants.TimeZoneLocation)
-	createTime, _ := time.ParseInLocation(constants.StandardTimeFormat, share.CreateTime, loc)
+	loc, err := time.LoadLocation(constants.TimeZoneLocation)
+	if err != nil {
+		log.Println("load location err: ", err)
+		return err
+	}
+	createTime, err := time.ParseInLocation(constants.StandardTimeFormat, share.CreateTime, loc)
+	if err != nil {
+		log.Printf("[debug] share.CreateTime is %v, create time is %v, err is %v", share.CreateTime, createTime, err)
+		return err
+	}
 	record := &repo.ShareRecordPO{
 		UserID:     userID,
 		DocID:      share.DocID,

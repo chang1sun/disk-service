@@ -148,6 +148,12 @@ service FileService {
             body: "*"
         };
     }
+
+    rpc GetShareByUploader(GetShareByUploaderReq) returns (GetShareDetailRsp) {
+        option (google.api.http) = {
+            get: "/api/v1/share/{token}/manage"
+        };
+    }
 }
 
 service AuthService {
@@ -365,6 +371,7 @@ message GetShareDetailRsp {
     int32 is_dir = 10; // 1 folder, 2 file
     int32 file_num = 11;
     string uni_file_id = 12;
+    string password = 13;
 }
 
 message GetShareRecordsReq {
@@ -466,4 +473,9 @@ message ShareFolderTreeNode {
 
 message DeleteShareReq {
     string token = 1;
+}
+
+message GetShareByUploaderReq {
+    string user_id = 1;
+    string token = 2;
 }

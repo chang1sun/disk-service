@@ -5,6 +5,7 @@ import (
 	"log"
 	"net"
 	"net/http"
+	"os"
 
 	"github.com/changpro/disk-service/application"
 	arepo "github.com/changpro/disk-service/domain/auth/repo"
@@ -85,11 +86,10 @@ func main() {
 	}
 
 	log.Println("Serving gRPC-Gateway on localhost:8001")
-	// err = gwServer.ListenAndServe()
-	err = gwServer.ListenAndServeTLS(config.GetConfig().TLS.Crt, config.GetConfig().TLS.Key)
-	if err != nil {
-		log.Fatalln(err)
-		panic(err)
+	if os.Getenv("RUN_MODE") == "prod" {
+		log.Fatalln(gwServer.ListenAndServeTLS(config.GetConfig().TLS.Crt, config.GetConfig().TLS.Key))
+	} else {
+		log.Fatalln(gwServer.ListenAndServe())
 	}
 }
 

@@ -631,6 +631,9 @@ func HardDelete(ctx context.Context, id string) error {
 }
 
 func CheckPath(ctx context.Context, userID, path string) error {
+	if path == "/" {
+		return nil
+	}
 	ok, err := repo.GetUserFileDao().IsPathExist(ctx, userID, path)
 	if err != nil {
 		return status.Errorf(errcode.DatabaseOperationErrCode, errcode.DatabaseOperationErrMsg, err)

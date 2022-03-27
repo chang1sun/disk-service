@@ -15,18 +15,16 @@ type Claim struct {
 
 func AddMiddleware(h http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		// origin := r.Header.Get("Origin")
-		// log.Println("request origin is " + origin)
-		// if strings.Contains(origin, config.GetConfig().RequestOrigin) ||
-		// 	strings.Contains(origin, "localhost") {
-		// 	w.Header().Set("Access-Control-Allow-Origin", origin)
-		// 	w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PATCH, DELETE")
-		// 	w.Header().Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, Authorization, ResponseType")
-		// }
-		// if r.Method == "OPTIONS" {
-		// 	h.ServeHTTP(w, r)
-		// 	return
-		// }
+		origin := r.Header.Get("Origin")
+		if strings.Contains(origin, "localhost") {
+			w.Header().Set("Access-Control-Allow-Origin", origin)
+			w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PATCH, DELETE")
+			w.Header().Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, Authorization, ResponseType")
+		}
+		if r.Method == "OPTIONS" {
+			h.ServeHTTP(w, r)
+			return
+		}
 		u := r.URL.String()
 		if strings.Contains(u, "sign-in") ||
 			strings.Contains(u, "sign-up") ||

@@ -252,3 +252,14 @@ func (s *fileServerImpl) DeleteShare(ctx context.Context,
 	}
 	return rsp, nil
 }
+
+func (s *fileServerImpl) GetShareByUploader(ctx context.Context,
+	req *stub.GetShareByUploaderReq) (*stub.GetShareDetailRsp, error) {
+	rsp := &stub.GetShareDetailRsp{}
+	detail, err := service.GetShareByUploader(ctx, req.Token, req.UserId)
+	if err != nil {
+		util.LogErr(err, "GetShareByUploader")
+		return rsp, err
+	}
+	return assembler.AssembleShareDetail(detail), nil
+}

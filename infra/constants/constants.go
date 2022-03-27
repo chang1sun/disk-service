@@ -2,7 +2,7 @@ package constants
 
 const StandardTimeFormat = "2006-01-02 15:04:05"
 
-const TimeZoneLocation = "Asia/Beijing"
+const TimeZoneLocation = "Local"
 
 // file display attribute (hide or not)
 const (
