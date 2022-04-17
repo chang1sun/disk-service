@@ -2,6 +2,7 @@ package config
 
 import (
 	"fmt"
+	"log"
 	"os"
 
 	"gopkg.in/yaml.v2"
@@ -45,8 +46,10 @@ func InitConfig() error {
 	config = &Config{}
 	var confPath string
 	if os.Getenv("RUN_MODE") == "prod" {
+		log.Println("loading configuration in production enviroment...")
 		confPath = "conf/prod.conf.yaml"
 	} else {
+		log.Println("loading configuration in development enviroment...")
 		confPath = "conf/dev.conf.yaml"
 	}
 	if err := readYaml(confPath, config); err != nil {

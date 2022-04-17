@@ -10,9 +10,9 @@ COPY . .
 
 # $GOPATH/bin添加到环境变量中
 ENV PATH $GOPATH/bin:$PATH
-RUN export GO111MODULE=on
+ENV GO111MODULE=on
 ENV GOPROXY="https://goproxy.cn,direct"
-RUN export RUN_MODE=prod
+ENV RUN_MODE="prod"
 
 # Fetch dependencies
 RUN go mod download
