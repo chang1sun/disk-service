@@ -30,45 +30,45 @@ type ShareTreeNode struct {
 }
 
 func CreateShare(ctx context.Context, dto *repo.CreateShareDTO) (string, string, error) {
-	doc, err := GetFileDetail(ctx, dto.UserID, dto.DocID)
-	if err != nil {
-		return "", "", err
-	}
-	if doc == nil {
-		return "", "", status.Error(errcode.FindNoFileInServerCode, errcode.FindNoFileInServerMsg)
-	}
-	// cal size and file num
-	size, fileNum, err := GetDirSizeAndSubFilesNum(ctx, doc)
-	if err != nil {
-		return "", "", err
-	}
-	// wrap into po
-	po := &repo.ShareDetailPO{
-		Uploader:    doc.UserID,
-		Password:    util.NewLenRandomString(4), // 4 bytes rand
-		DocID:       doc.ID,
-		DocName:     doc.Name,
-		DocSize:     size,
-		DocType:     doc.FileType,
-		IsDir:       doc.IsDir,
-		FileNum:     fileNum,
-		ExpireHours: dto.ExpireHour,
-	}
-	data, err := json.Marshal(po)
-	if err != nil {
-		return "", "", status.Errorf(errcode.JsonMarshalErrCode, errcode.JsonMarshalErrMsg, err)
-	}
-	token := util.GetMd5FromJson(data)
-	// write in redis
-	err = repo.GetShareDao().CreateShareToken(ctx, token, po)
-	if err != nil {
-		return "", "", status.Errorf(errcode.DatabaseOperationErrCode, errcode.DatabaseOperationErrMsg, err)
-	}
-	// create a record
-	if err = createPostShareRecord(ctx, dto.UserID, token, po); err != nil {
-		return "", "", err
-	}
-	return token, po.Password, nil
+doc, err := GetFileDetail(ctx, dto.UserID, dto.DocID)
+if err != nil {
+	return "", "", err
+}
+if doc == nil {
+	return "", "", status.Error(errcode.FindNoFileInServerCode, errcode.FindNoFileInServerMsg)
+}
+// cal size and file num
+size, fileNum, err := GetDirSizeAndSubFilesNum(ctx, doc)
+if err != nil {
+	return "", "", err
+}
+// wrap into po
+po := &repo.ShareDetailPO{
+	Uploader:    doc.UserID,
+	Password:    util.NewLenRandomString(4), // 4 bytes rand
+	DocID:       doc.ID,
+	DocName:     doc.Name,
+	DocSize:     size,
+	DocType:     doc.FileType,
+	IsDir:       doc.IsDir,
+	FileNum:     fileNum,
+	ExpireHours: dto.ExpireHour,
+}
+data, err := json.Marshal(po)
+if err != nil {
+	return "", "", status.Errorf(errcode.JsonMarshalErrCode, errcode.JsonMarshalErrMsg, err)
+}
+token := util.GetMd5FromJson(data)
+// write in redis
+err = repo.GetShareDao().CreateShareToken(ctx, token, po)
+if err != nil {
+	return "", "", status.Errorf(errcode.DatabaseOperationErrCode, errcode.DatabaseOperationErrMsg, err)
+}
+// create a record
+if err = createPostShareRecord(ctx, dto.UserID, token, po); err != nil {
+	return "", "", err
+}
+return token, po.Password, nil
 }
 
 func GetShareDetail(ctx context.Context, token, password string) (*repo.ShareDetailPO, error) {

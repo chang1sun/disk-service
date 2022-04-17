@@ -200,34 +200,34 @@ func CopyToPath(ctx context.Context, userID string, ids []string, path string, o
 }
 
 func copyToPathByPOs(ctx context.Context, pos []*repo.UserFilePO, path string, overwrite int32) error {
-	// if it is a folder, then trigger recursively call
-	for _, po := range pos {
-		if po.IsDir == isDir {
-			// recursively look up sub folder or files and update them first
-			subPOs, err := repo.GetUserFileDao().QueryDirByPath(ctx, po.UserID, po.Path+po.Name+"/", true)
+// if it is a folder, then trigger recursively call
+for _, po := range pos {
+	if po.IsDir == isDir {
+		// recursively look up sub folder or files and update them first
+		subPOs, err := repo.GetUserFileDao().QueryDirByPath(ctx, po.UserID, po.Path+po.Name+"/", true)
+		if err != nil {
+			return err
+		}
+		if len(subPOs) > 0 {
+			err = copyToPathByPOs(ctx, subPOs, path+po.Name+"/", overwrite)
 			if err != nil {
 				return err
 			}
-			if len(subPOs) > 0 {
-				err = copyToPathByPOs(ctx, subPOs, path+po.Name+"/", overwrite)
-				if err != nil {
-					return err
-				}
-			}
 		}
 	}
+}
 
-	for _, po := range pos {
-		po.Path = path
-		po.CreateAt = time.Now()
-		po.UpdateAt = time.Now()
-		po.ID = ""
-	}
-	err := addDocsToPath(ctx, pos, overwrite)
-	if err != nil {
-		return err
-	}
-	return nil
+for _, po := range pos {
+	po.Path = path
+	po.CreateAt = time.Now()
+	po.UpdateAt = time.Now()
+	po.ID = ""
+}
+err := addDocsToPath(ctx, pos, overwrite)
+if err != nil {
+	return err
+}
+return nil
 }
 
 func replaceToPath(ctx context.Context, po *repo.UserFilePO) (string, error) {
