@@ -12,6 +12,7 @@ COPY . .
 ENV PATH $GOPATH/bin:$PATH
 RUN export GO111MODULE=on
 ENV GOPROXY="https://goproxy.cn,direct"
+RUN export RUN_MODE=prod
 
 # Fetch dependencies
 RUN go mod download
