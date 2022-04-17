@@ -96,22 +96,22 @@ func main() {
 // aim to handle file transfer request which cannot be implemented by grpc-gateway
 func AddCustomRoute(mux *runtime.ServeMux) error {
 	// single small file uplaod
-	err := mux.HandlePath("POST", "/v1/file/upload", application.FileUploadHandler)
+	err := mux.HandlePath("POST", "/api/v1/file/upload", application.FileUploadHandler)
 	if err != nil {
 		return err
 	}
 	// multipart uploader
-	err = mux.HandlePath("POST", "/v1/file/mp-upload", application.MPFileUploadHandler)
+	err = mux.HandlePath("POST", "/api/v1/file/mp-upload", application.MPFileUploadHandler)
 	if err != nil {
 		return err
 	}
 	// multipart uploader test
-	err = mux.HandlePath("POST", "/v1/file/mp-upload-test", application.MPFileUploadTestHandler)
+	err = mux.HandlePath("POST", "/api/v1/file/mp-upload-test", application.MPFileUploadTestHandler)
 	if err != nil {
 		return err
 	}
 	// download file
-	err = mux.HandlePath("GET", "/v1/file/download", application.DownloadHandler)
+	err = mux.HandlePath("GET", "/api/v1/file/download", application.DownloadHandler)
 	if err != nil {
 		return err
 	}
