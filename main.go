@@ -39,7 +39,7 @@ func main() {
 	stub.RegisterAuthServiceServer(s, interfaces.NewAuthServer())
 	stub.RegisterFileServiceServer(s, interfaces.NewFileServer())
 	// Serve gRPC Server
-	log.Println("Serving gRPC on localhost:8000")
+	log.Println("Serving gRPC on :8000")
 	go func() {
 		err := s.Serve(lis)
 		if err != nil {
@@ -84,11 +84,11 @@ func main() {
 		Addr:    ":8001",
 		Handler: util.AddMiddleware(gwmux),
 	}
-
-	log.Println("Serving gRPC-Gateway on localhost:8001")
 	if os.Getenv("RUN_MODE") == "prod" {
+		log.Println("Serving gRPC-Gateway on https://easydisk.top:8001")
 		log.Fatalln(gwServer.ListenAndServeTLS(config.GetConfig().TLS.Crt, config.GetConfig().TLS.Key))
 	} else {
+		log.Println("Serving gRPC-Gateway on http://localhost:8001")
 		log.Fatalln(gwServer.ListenAndServe())
 	}
 }
