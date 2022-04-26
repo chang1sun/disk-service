@@ -1,7 +1,9 @@
 package config
 
 import (
-	"io/ioutil"
+	"fmt"
+	"log"
+	"os"
 
 	"gopkg.in/yaml.v2"
 )
@@ -42,9 +44,24 @@ func GetConfig() *Config {
 
 func InitConfig() error {
 	config = &Config{}
-	yamlFile, err := ioutil.ReadFile("conf/application.yaml")
-	if err != nil {
+	var confPath string
+	if os.Getenv("RUN_MODE") == "prod" {
+		log.Println("loading configuration in production enviroment...")
+		confPath = "conf/prod.conf.yaml"
+	} else {
+		log.Println("loading configuration in development enviroment...")
+		confPath = "conf/dev.conf.yaml"
+	}
+	if err := readYaml(confPath, config); err != nil {
 		return err
+	}
+	return nil
+}
+
+func readYaml(file string, config *Config) error {
+	yamlFile, err := os.ReadFile(file)
+	if err != nil {
+		return fmt.Errorf("cannot find conf file, err: %w", err)
 	}
 	err = yaml.Unmarshal(yamlFile, config)
 	if err != nil {

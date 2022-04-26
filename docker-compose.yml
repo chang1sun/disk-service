@@ -37,9 +37,9 @@ services:
     environment:
       - TZ=${TZ}
     volumes:
-      - ${DATA_PATH}/redis:/data                 # 引用 .env 配置中 DATA_PATH_HOST 变量，将宿主机上存放 Redis 数据的目录挂载到容器中 /data 目录
+      - ${DATA_PATH}/redis:/data  # 引用 .env 配置中 DATA_PATH_HOST 变量，将宿主机上存放 Redis 数据的目录挂载到容器中 /data 目录
     ports:
-      - "${REDIS_PORT}:6379"                          # 设置容器6379端口映射指定宿主机端口
+      - "${REDIS_PORT}:6379"      # 设置容器6379端口映射指定宿主机端口
     restart: always
   
   mongodb:

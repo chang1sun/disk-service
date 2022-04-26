@@ -5,6 +5,7 @@ import (
 	"log"
 	"net"
 	"net/http"
+	"os"
 
 	"github.com/changpro/disk-service/application"
 	arepo "github.com/changpro/disk-service/domain/auth/repo"
@@ -38,7 +39,7 @@ func main() {
 	stub.RegisterAuthServiceServer(s, interfaces.NewAuthServer())
 	stub.RegisterFileServiceServer(s, interfaces.NewFileServer())
 	// Serve gRPC Server
-	log.Println("Serving gRPC on localhost:8000")
+	log.Println("Serving gRPC on :8000")
 	go func() {
 		err := s.Serve(lis)
 		if err != nil {
@@ -83,35 +84,34 @@ func main() {
 		Addr:    ":8001",
 		Handler: util.AddMiddleware(gwmux),
 	}
-
-	log.Println("Serving gRPC-Gateway on localhost:8001")
-	// err = gwServer.ListenAndServe()
-	err = gwServer.ListenAndServeTLS(config.GetConfig().TLS.Crt, config.GetConfig().TLS.Key)
-	if err != nil {
-		log.Fatalln(err)
-		panic(err)
+	if os.Getenv("RUN_MODE") == "prod" {
+		log.Println("Serving gRPC-Gateway on https://easydisk.top:8001")
+		log.Fatalln(gwServer.ListenAndServeTLS(config.GetConfig().TLS.Crt, config.GetConfig().TLS.Key))
+	} else {
+		log.Println("Serving gRPC-Gateway on http://localhost:8001")
+		log.Fatalln(gwServer.ListenAndServe())
 	}
 }
 
 // aim to handle file transfer request which cannot be implemented by grpc-gateway
 func AddCustomRoute(mux *runtime.ServeMux) error {
 	// single small file uplaod
-	err := mux.HandlePath("POST", "/v1/file/upload", application.FileUploadHandler)
+	err := mux.HandlePath("POST", "/api/v1/file/upload", application.FileUploadHandler)
 	if err != nil {
 		return err
 	}
 	// multipart uploader
-	err = mux.HandlePath("POST", "/v1/file/mp-upload", application.MPFileUploadHandler)
+	err = mux.HandlePath("POST", "/api/v1/file/mp-upload", application.MPFileUploadHandler)
 	if err != nil {
 		return err
 	}
 	// multipart uploader test
-	err = mux.HandlePath("POST", "/v1/file/mp-upload-test", application.MPFileUploadTestHandler)
+	err = mux.HandlePath("POST", "/api/v1/file/mp-upload-test", application.MPFileUploadTestHandler)
 	if err != nil {
 		return err
 	}
 	// download file
-	err = mux.HandlePath("GET", "/v1/file/download", application.DownloadHandler)
+	err = mux.HandlePath("GET", "/api/v1/file/download", application.DownloadHandler)
 	if err != nil {
 		return err
 	}
